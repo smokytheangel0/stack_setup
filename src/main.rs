@@ -1,6 +1,7 @@
 use std::env;
 
 fn check_dirs() -> i8 {
+    //this works in Mac, Linux and Windows
     let mut outBOX: i8 = 0;
     let path = env::current_dir().ok().unwrap();
     let initialDirectory = path.to_str().unwrap();
@@ -64,10 +65,9 @@ mod tests {
     use super::*;
 
     #[test]
-    ///in the end this should perform all the moving steps,
-    ///in order to assert that the error message only appears when
-    ///the binary is not in the Downloads folder, just like you normally do manually
     fn check_dirs_error_msg(){
+        //this works in Mac, Windows and Linux
+
         assert_eq!(check_dirs(), 1);
 
         if cfg!(windows){
