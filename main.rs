@@ -64,27 +64,12 @@ mod tests {
     use super::*;
 
     #[test]
-    ///in the end this should perform all the moving steps,
-    ///in order to assert that the error message only appears when
-    ///the binary is not in the Downloads folder, just like you normally do manually
     fn check_dirs_error_msg(){
-        assert_eq!(check_dirs(), 1);
-
-        if cfg!(windows){
-            let path = env::home_dir().unwrap();
-            let mut downloadsDirectory = path.to_str().unwrap().to_owned();
-            downloadsDirectory += "\\Downloads";
-            env::set_current_dir(&downloadsDirectory);
-        }
-
-        if cfg!(unix){
-            let path = env::home_dir().unwrap();
-            let mut downloadsDirectory = path.to_str().unwrap().to_owned();
-            downloadsDirectory += "/Downloads";
-            env::set_current_dir(&downloadsDirectory);
-        }
-
+        ///in the end this should perform all the moving steps,
+        ///in order to assert that the error message only appears when
+        ///the binary is not in the Downloads folder, just like you normally do manually
         assert_eq!(check_dirs(), 0);
+
     }
 
     #[test]
