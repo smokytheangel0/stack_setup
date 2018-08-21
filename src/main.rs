@@ -1,11 +1,26 @@
+//using snake_case for boxes as well as functions
+//contradicts our attempted python and dart practice
+#![allow(non_snake_case)]
+//this fails on UpperHALF case,
+//otherwise it is a good warning
+#![allow(non_camel_case_types)]
+//this is here simply because we unwrap
+//and drop the errors each time we get one
+//and all the green squiggles
+//are very distracting
+#![allow(unused_must_use)]
+
 use std::env;
 
 fn check_dirs() -> i8 {
     //this works in Mac, Linux and Windows
-    let mut outBOX: i8 = 0;
+    let mut outBOX = 0;
+
     let path = env::current_dir().ok().unwrap();
     let initialDirectory = path.to_str().unwrap();
+
     let errorBOX = String::from("This program you've just run does not appear to be in the Downloads folder, please try running it again with it in the Downloads folder");
+    
     if !initialDirectory.contains("Downloads") {
         println!("{}", errorBOX);
         outBOX += 1;
@@ -95,7 +110,7 @@ mod tests {
 
     #[test]
     fn wait_till_complete_error_msg(){
-        ///this should test for slow user follow up, no user follow up, correct platform string format, crdownload, partial, part etc
+        ///this should test for slow user follow up, no user follow up, correct platform string, crdownload, partial, part etc
         assert_eq!(wait_till_complete(), "the android studio installation has still not been started, but everything else is complete, please try running the program again to view the webpage and select the link with (PLATFORM HERE) in it")
     }
 
