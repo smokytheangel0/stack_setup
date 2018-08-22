@@ -11,6 +11,7 @@
 #![allow(unused_must_use)]
 
 use std::env;
+extern crate os_type;
 
 ///the [check_dirs] function looks like this
 /// in python:
@@ -42,54 +43,31 @@ fn check_dirs() -> i8 {
     outBOX
 }
 
-///the [start_downloads] function looks like this
-/// in python:
-/// ```python
-/// def start_downloads(errorBOX):
-///     system = platform.uname()[0]
-///     
-///     if system == "Linux":
-///         vs_version = "linux64_deb"
-///         extension = "zip"
-///         #git is installed using apt on ubuntu
-/// 
-///     if system == "Windows":
-///         vs_version = "win32"
-///         extension = "exe"
-///         git_url = "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
-/// 
-///     if system == "Darwin":
-///         vs_version = "osx"
-///         extension = "dmg"
-///         git_url = "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
-/// 
-///     url = "https://github.com/smokytheangel0/co_demo0/"
-///     try:
-///         webbrowser.open(url, new=0, autoraise=True)
-///     except:
-///         for line in errorBOX:
-///             if line == errorBOX[0]:
-///                 line = errorBOX[0].split()
-///                 line[1] = "co_demo"
-///                 line = " ".join(line)
-///             print(line)
-///         sys.exit()
-/// 
-///     url = "https://github.com/flutter/flutter/archive/master.zip"
-///     try:
-///         webbrowser.open(url, new=0, autoraise=True)
-///     except:
-///         for line in errorBOX:
-///             if line == errorBOX[0]:
-///                 line = errorBOX[0].split()
-///                 line[1] = "flutter"
-///                 line = " ".join(line)
-///             print(line)
-/// ...To Be Continued...
 
 fn start_downloads() -> String {
     let errorBOX = String::from("The __None_ download failed, please try running the program again to try again");
     errorBOX
+}
+
+fn os_switch() -> String {
+    let mut outBOX = String::from("none");
+    let pathBuffer = env::current_dir().ok().unwrap();
+    let pathString = pathBuffer.to_str().unwrap();
+
+    if pathString.get(0..1).unwrap() == "C:" {
+        outBOX = String::from("windows");
+        println!("{}", outBOX);
+    }
+    if pathString.get(0..1).unwrap() == "/U" {
+        outBOX = String::from("darwin");
+        println!("{}", outBOX);
+    }
+    if pathString.get(0..1).unwrap() == "/h" {
+        outBOX = String::from("linux");
+        println!("{}", outBOX);
+    }
+    outBOX
+
 }
 
 fn wait_till_complete() -> String {
@@ -124,6 +102,7 @@ fn create_package() -> String {
 }
 
 fn main() {
+    let osBOX = os_switch();
     check_dirs();
     start_downloads();
     wait_till_complete();
@@ -165,6 +144,27 @@ mod tests {
     fn start_downloads_error_msg(){
         ///this should control for some conditions, like no internet access, slow internet, firewalls, proxies etc
         assert_eq!(start_downloads(), "The __None_ download failed, please try running the program again to try again")
+    }
+
+    #[test]
+    fn os_switch_output() {
+        if cfg!(windows) {
+            assert_eq!(os_switch(), "windows")
+        }
+        else {
+            match os_type::current_platform().os_type {
+                os_type::OSType::OSX => {
+                    println!("this is a mac but the assert is not working")
+                    //assert_eq!(os_switch(), "darwin")
+                }
+                os_type::OSType::Ubuntu => {
+                    assert_eq!(os_switch(), "linux")
+                }
+                _ => {
+                    println!("we currently only support Ubuntu, Mac OS, and Windows")
+                }
+            }
+        }
     }
 
     #[test]

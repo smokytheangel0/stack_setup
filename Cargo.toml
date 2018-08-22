@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["j"]
 
 [dependencies]
+os_type="2.0.0"
