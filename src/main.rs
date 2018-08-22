@@ -11,6 +11,7 @@
 #![allow(unused_must_use)]
 
 use std::env;
+extern crate webbrowser;
 
 ///the [check_dirs] function looks like this
 /// in python:
@@ -21,11 +22,6 @@ use std::env;
 ///     if "Downloads" not in initial_directory:
 ///         print(errorBOX)
 ///         sys.exit()
-/// ```
-/// in dart:
-/// ```dart
-/// // to be implemented!
-/// ```
 fn check_dirs() -> i8 {
     //this works in Mac, Linux and Windows
     let mut outBOX = 0;
@@ -43,30 +39,39 @@ fn check_dirs() -> i8 {
 }
 
 
-fn start_downloads() -> String {
-    let mut osBOX: String = "none".into();
-    let mut vsVersion: String = "none".into();
-    let mut extension: String = "none".into();;
-    let mut gitURL: String = "none".into();;
-
+fn start_downloads(fileBOX: &str) -> String {
     if cfg!(windows){
-        osBOX = "windows".into();
-        vsVersion = "win32".into();
-        extension = "exe".into();
-        gitURL = String::from("https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
+        let osBOX = "windows".to_string();
+        let vsVersion = "win32".to_string();
+        let extension = "exe".to_string();
+        let gitURL = String::from("https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe");
     }
     else if cfg!(macos){
-        osBOX = "darwin".into();
-        vsVersion = "osx".into();
-        extension = "dmg".into();
-        gitURL = String::from("https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
+        let osBOX = "darwin".to_string();
+        let vsVersion = "osx".to_string();
+        let extension = "dmg".to_string();
+        let gitURL = String::from("https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect");
     }
     else if cfg!(linux){
-        osBOX = "linux".into();
-        vsVersion = "linux64_deb".into();
-        extension = "zip".into();
+        let osBOX = "linux".to_string();
+        let vsVersion = "linux64_deb".to_string();
+        let extension = "zip".to_string();
     }
+    if fileBOX == "co_demo" {
 
+    }
+    else if fileBOX == "flutter" {
+
+    }
+    else if fileBOX == "android" {
+
+    }
+    else if fileBOX == "vsCode" {
+
+    }
+    else if fileBOX == "git" {
+        
+    }
     let errorBOX = String::from("The __None_ download failed, please try running the program again to try again");
     errorBOX
 }
