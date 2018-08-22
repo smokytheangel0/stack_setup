@@ -151,19 +151,11 @@ mod tests {
         if cfg!(windows) {
             assert_eq!(os_switch(), "windows")
         }
-        else {
-            match os_type::current_platform().os_type {
-                os_type::OSType::OSX => {
-                    println!("this is a mac but the assert is not working")
-                    //assert_eq!(os_switch(), "darwin")
-                }
-                os_type::OSType::Ubuntu => {
-                    assert_eq!(os_switch(), "linux")
-                }
-                _ => {
-                    println!("we currently only support Ubuntu, Mac OS, and Windows")
-                }
-            }
+        if cfg!(linux) {
+            assert_eq!(os_switch(), "linux")
+        }
+        if cfg!(macos) {
+            assert_eq!(os_switch(), "macos")
         }
     }
 
