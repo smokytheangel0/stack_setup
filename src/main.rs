@@ -11,7 +11,6 @@
 #![allow(unused_must_use)]
 
 use std::env;
-extern crate os_type;
 
 ///the [check_dirs] function looks like this
 /// in python:
@@ -45,29 +44,31 @@ fn check_dirs() -> i8 {
 
 
 fn start_downloads() -> String {
+    let mut osBOX: String = "none".into();
+    let mut vsVersion: String = "none".into();
+    let mut extension: String = "none".into();;
+    let mut gitURL: String = "none".into();;
+
+    if cfg!(windows){
+        osBOX = "windows".into();
+        vsVersion = "win32".into();
+        extension = "exe".into();
+        gitURL = String::from("https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
+    }
+    else if cfg!(macos){
+        osBOX = "darwin".into();
+        vsVersion = "osx".into();
+        extension = "dmg".into();
+        gitURL = String::from("https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
+    }
+    else if cfg!(linux){
+        osBOX = "linux".into();
+        vsVersion = "linux64_deb".into();
+        extension = "zip".into();
+    }
+
     let errorBOX = String::from("The __None_ download failed, please try running the program again to try again");
     errorBOX
-}
-
-fn os_switch() -> String {
-    let mut outBOX = String::from("none");
-    let pathBuffer = env::current_dir().ok().unwrap();
-    let pathString = pathBuffer.to_str().unwrap();
-
-    if pathString.get(0..1).unwrap() == "C:" {
-        outBOX = String::from("windows");
-        println!("{}", outBOX);
-    }
-    if pathString.get(0..1).unwrap() == "/U" {
-        outBOX = String::from("darwin");
-        println!("{}", outBOX);
-    }
-    if pathString.get(0..1).unwrap() == "/h" {
-        outBOX = String::from("linux");
-        println!("{}", outBOX);
-    }
-    outBOX
-
 }
 
 fn wait_till_complete() -> String {
@@ -102,7 +103,6 @@ fn create_package() -> String {
 }
 
 fn main() {
-    let osBOX = os_switch();
     check_dirs();
     start_downloads();
     wait_till_complete();
@@ -142,21 +142,8 @@ mod tests {
 
     #[test]
     fn start_downloads_error_msg(){
-        ///this should control for some conditions, like no internet access, slow internet, firewalls, proxies etc
+        //this should control for some conditions, like no internet access, slow internet, firewalls, proxies etc
         assert_eq!(start_downloads(), "The __None_ download failed, please try running the program again to try again")
-    }
-
-    #[test]
-    fn os_switch_output() {
-        if cfg!(windows) {
-            assert_eq!(os_switch(), "windows")
-        }
-        if cfg!(linux) {
-            assert_eq!(os_switch(), "linux")
-        }
-        if cfg!(macos) {
-            assert_eq!(os_switch(), "macos")
-        }
     }
 
     #[test]
