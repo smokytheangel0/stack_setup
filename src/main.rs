@@ -68,6 +68,7 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
         "none".to_string()
     ];
 
+//each of these os switches default to mac even on win and linux...
     let vsVersion: String = {
         if cfg!(target_os = "windows") {
             "win32".into()
@@ -80,7 +81,6 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
         }
     };
     testLIST[0] = vsVersion.clone();
-    //this one is working inconsistently
     let gitURL: &str = {
         if cfg!(target_os = "windows") {
             "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
@@ -116,7 +116,9 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
 
     } else if fileBOX == "git" && cfg!(target_os = "linux") {
         println!("please enter your password to install git !>");
-        Command::new("sudo apt")
+//this fails on linux builds with 'sudo apt' as input, try like this
+        Command::new("sudo")
+                    .arg("apt")
                     .arg("install")
                     .arg("git")
                     .output()
