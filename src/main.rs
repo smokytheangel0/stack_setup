@@ -224,11 +224,11 @@ mod tests {
     #[test]
     fn start_downloads_vs_switch() {
         let fileBOX = "flutter".to_string();
-        if !cfg!(target_os = "mac os") {
+        if cfg!(target_os = "mac os") {
             assert_eq!(start_downloads(&fileBOX)[0], "osx")
-        }else if !cfg!(target_os = "windows") {
+        }else if cfg!(target_os = "windows") {
             assert_eq!(start_downloads(&fileBOX)[0], "win32")
-        }else if !cfg!(target_os = "linux") {
+        }else if cfg!(target_os = "linux") {
             assert_eq!(start_downloads(&fileBOX)[0], "linux64_deb")
         } else {
             assert_eq!(start_downloads(&fileBOX)[0], "we currently only support Mac OS, Windows 10, and Linux")
@@ -238,9 +238,9 @@ mod tests {
     #[test]
     fn start_downloads_git_switch() {
         let fileBOX = "flutter".to_string();
-        if !cfg!(target_os = "mac os")  {
+        if cfg!(target_os = "mac os")  {
             assert_eq!(start_downloads(&fileBOX)[1], "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
-        } else if !cfg!(target_os = "windows") {
+        } else if cfg!(target_os = "windows") {
             assert_eq!(start_downloads(&fileBOX)[1], "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
         } else {
             assert_eq!(start_downloads(&fileBOX)[1], "browser install currently only supports Mac OS, Windows 10")
