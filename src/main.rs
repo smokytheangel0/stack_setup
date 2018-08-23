@@ -12,6 +12,7 @@
 
 use std::env;
 extern crate webbrowser;
+use std::process::Command;
 
 ///the [check_dirs] function looks like this
 /// in python:
@@ -26,6 +27,7 @@ fn check_dirs() -> i8 {
     //this works in Mac, Linux and Windows
     let mut outBOX = 0;
 
+    //might definitely be a better way to do this
     let pathBuffer = env::current_dir().ok().unwrap();
     let pathString = pathBuffer.to_str().unwrap();
 
@@ -41,41 +43,73 @@ fn check_dirs() -> i8 {
 
 
 fn start_downloads(fileBOX: &String) -> String {
+    let osBOX: String = "none".into();
+    //this gets all the way to the concat as none
+    //something is wrong with the cfg!()
+    let vsVersion: String = "none".into();
+    let errorBOX: String = "none".into();
+
     if cfg!(windows){
         let osBOX = "windows".to_string();
         let vsVersion = "win32".to_string();
-        let extension = "exe".to_string();
         let gitURL = String::from("https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe");
-    }
-    else if cfg!(macos){
+    } else if cfg!(macos){
         let osBOX = "darwin".to_string();
         let vsVersion = "osx".to_string();
-        let extension = "dmg".to_string();
         let gitURL = String::from("https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect");
-    }
-    else if cfg!(linux){
+    } else if cfg!(linux){
         let osBOX = "linux".to_string();
         let vsVersion = "linux64_deb".to_string();
-        let extension = "zip".to_string();
+    } else {
+        panic!("we currently support only Mac OS, Windows, and Ubuntu");
     }
+
     if fileBOX == "co_demo" {
-        println!("downloading co demo");
-    }
-    else if fileBOX == "flutter" {
+        webbrowser::open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
+                    .expect("there was an error opening the co_demo web page in your browser");
+        println!("downloading co demo");        
+        return errorBOX;
+
+    } else if fileBOX == "flutter" {
+        webbrowser::open("https://github.com/flutter/flutter/archive/master.zip")
+                    .expect("there was an error opening the flutter web page in your browser");
         println!("downloading flutter sdk");
-    }
-    else if fileBOX == "android" {
+        return errorBOX;
+
+    } else if fileBOX == "vsCode" {
+        let vsURL: String = format!("https://code.visualstudio.com/docs/?dv={}", &vsVersion); 
+        let vsURL: &str = &vsURL[..];
+        webbrowser::open(&vsURL)
+                    .expect("there was an error opening the vs Code web page in your browser");
+        println!("downloading vsCode");
+        let errorBOX = vsURL.to_string();
+        return errorBOX;
+
+    } else if fileBOX == "git" && osBOX != "linux" {
+        webbrowser::open("")
+                    .expect("there was an error opening git in your browser");
+        println!("downloading git");
+        return errorBOX;
+
+    } else if fileBOX == "git" && osBOX == "linux" {
+        println!("please enter your password to install git !>");
+        Command::new("sudo apt")
+                    .arg("install")
+                    .arg("git")
+                    .output()
+                    .expect("failed to execute process");
+        return errorBOX;
+    } else if fileBOX == "android" {
+        webbrowser::open("https://developer.android.com/studio/#downloads")
+                    .expect("there was an error opening the android studio web page in your browser");
         println!("downloading android studio");
+        return errorBOX;
+    } else {
+        let errorBOX: String = "the switch branches have all been avoided !!!".into();
+        return errorBOX;
+        //panic!(&errorBOX);
     }
-    else if fileBOX == "vsCode" {
-        println!("downloading vsCode")
-    }
-    else if fileBOX == "git" {
-        println!("downloading git")
-        
-    }
-    let errorBOX = String::from("The __None_ download failed, please try running the program again to try again");
-    errorBOX
+    
 }
 
 fn wait_till_complete() -> String {
@@ -146,6 +180,8 @@ mod tests {
 
         assert_eq!(check_dirs(), 1);
 
+        //still very proud of my first test, and glad
+        //types are explicit
         if cfg!(windows){
             let path = env::home_dir().unwrap();
             let mut downloadsDirectory = path.to_str().unwrap().to_owned();
@@ -164,9 +200,26 @@ mod tests {
     }
 
     #[test]
-    fn start_downloads_error_msg(){
+    /*fn start_downloads_error_msg(){
         //this should control for some conditions, like no internet access, slow internet, firewalls, proxies etc
-        //assert_eq!(start_downloads(), "The __None_ download failed, please try running the program again to try again")
+        let fileLIST = ["co_demo".to_string(), 
+                        "flutter".to_string(),
+                        "android".to_string(),
+                        "vsCode".to_string(),
+                        "git".to_string()];
+
+        for index in 0..fileLIST.len() {
+            unsafe {
+                let fileBOX = fileLIST.get_unchecked(index).to_string();
+                assert_eq!(start_downloads(&fileBOX), "none");
+            }
+        }
+    }*/
+    #[test]
+    fn start_downloads_vs_url() {
+        let fileBOX = "vsCode".to_string();
+        let outBOX = start_downloads(&fileBOX);
+        println!("{}", outBOX);
     }
 
     #[test]
