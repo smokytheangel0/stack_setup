@@ -10,6 +10,15 @@
 //are very distracting
 #![allow(unused_must_use)]
 
+///TODO
+/// RE: LINUX BROWSER COMPATIBILITY
+/// use a grep a ps command on linux to see if
+/// the browser is already running and then ask
+/// the user to start their browser if its not
+/// 
+/// RE: DOWNLOADS ERROR MESSAGE TEST
+/// 
+
 use std::env;
 extern crate webbrowser;
 use std::process::Command;
@@ -42,7 +51,7 @@ fn check_dirs() -> i8 {
 }
 
 
-fn start_downloads(fileBOX: &String) -> String {
+fn start_downloads(fileBOX: &String) -> Vec<String> {
     //this works in mac and windows
     //linux is going to be tricky,
     //it will not open a new tab each time
@@ -52,8 +61,12 @@ fn start_downloads(fileBOX: &String) -> String {
     //with a browser window already opened by the user (important), 
     //then the functionality is == to mac/win
 
-    let osBOX: String = "none".into();
     let errorBOX: String = "none".into();
+    let mut errorLIST = vec![
+        "none".to_string(),
+        "none".to_string(),
+        "none".to_string()
+    ];
 
     let vsVersion: String = {
         if cfg!(target_os = "windows") {
@@ -63,9 +76,10 @@ fn start_downloads(fileBOX: &String) -> String {
         } else if cfg!(target_os = "linux") {
             "linux64_deb".into()
         } else {
-            "none".into()
+            "browser install currently only supports Mac OS, Windows 10".into()
         }
     };
+    errorLIST[0] = vsVersion.clone();
     //this one is working inconsistently
     let gitURL: &str = {
         if cfg!(target_os = "windows") {
@@ -73,31 +87,32 @@ fn start_downloads(fileBOX: &String) -> String {
         } else if cfg!(target_os = "macos") {
             "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
         } else {
-            "none"
+            "we currently only support Mac OS, Windows 10, and Linux"
         }
     };
+    errorLIST[1] = String::from(gitURL);
     
     if fileBOX == "co_demo" {
         webbrowser::open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
                     .expect("there was an error opening the co_demo web page in your browser");
-        return errorBOX;
+        return errorLIST;
 
     } else if fileBOX == "flutter" {
         webbrowser::open("https://github.com/flutter/flutter/archive/master.zip")
                     .expect("there was an error opening the flutter web page in your browser");
-        return errorBOX;
+        return errorLIST;
 
     } else if fileBOX == "vsCode" {
         let vsURL: String = format!("https://code.visualstudio.com/docs/?dv={}", vsVersion); 
         let vsURL: &str = &vsURL[..];
         webbrowser::open(&vsURL)
                     .expect("there was an error opening the vs Code web page in your browser");
-        return errorBOX;
+        return errorLIST;
 
-    } else if fileBOX == "git" && osBOX != "linux" {
+    } else if fileBOX == "git" && !cfg!(target_os = "linux") {
         webbrowser::open(gitURL)
                     .expect("there was an error opening git in your browser");
-        return errorBOX;
+        return errorLIST;
 
     } else if fileBOX == "git" && cfg!(target_os = "linux") {
         println!("please enter your password to install git !>");
@@ -106,14 +121,14 @@ fn start_downloads(fileBOX: &String) -> String {
                     .arg("git")
                     .output()
                     .expect("failed to execute process");
-        return errorBOX;
+        return errorLIST;
     } else if fileBOX == "android" {
         webbrowser::open("https://developer.android.com/studio/#downloads")
                     .expect("there was an error opening the android studio web page in your browser");
-        return errorBOX;
+        return errorLIST;
     } else {
-        let errorBOX: String = "the switch branches have all been avoided !!!".into();
-        return errorBOX;
+        errorLIST[2] = "the switch branches have all been avoided !!!".to_string();
+        return errorLIST;
         //panic!(&errorBOX);
     }
     
@@ -205,7 +220,33 @@ mod tests {
     }
 
     #[test]
-    fn start_downloads_error_msg(){
+    fn start_downloads_vs_switch() {
+        let fileBOX = "flutter".to_string();
+        if !cfg!(target_os = "mac os") {
+            assert_eq!(start_downloads(&fileBOX)[0], "osx")
+        }else if !cfg!(target_os = "windows") {
+            assert_eq!(start_downloads(&fileBOX)[0], "win32")
+        }else if !cfg!(target_os = "linux") {
+            assert_eq!(start_downloads(&fileBOX)[0], "linux64_deb")
+        } else {
+            assert_eq!(start_downloads(&fileBOX)[0], "we currently only support Mac OS, Windows 10, and Linux")
+        }
+    }
+
+    #[test]
+    fn start_downloads_git_switch() {
+        let fileBOX = "flutter".to_string();
+        if !cfg!(target_os = "mac os")  {
+            assert_eq!(start_downloads(&fileBOX)[1], "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
+        } else if !cfg!(target_os = "windows") {
+            assert_eq!(start_downloads(&fileBOX)[1], "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
+        } else {
+            assert_eq!(start_downloads(&fileBOX)[1], "browser install currently only supports Mac OS, Windows 10")
+        }
+    }
+
+    #[test]
+    fn start_downloads_thread_switch(){
         //this should control for some conditions, like no internet access, slow internet, firewalls, proxies etc
         let fileLIST = ["co_demo".to_string(), 
                         "flutter".to_string(),
@@ -216,7 +257,7 @@ mod tests {
         for index in 0..fileLIST.len() {
             unsafe {
                 let fileBOX = fileLIST.get_unchecked(index).to_string();
-                assert_eq!(start_downloads(&fileBOX), "none");
+                assert_eq!(start_downloads(&fileBOX)[2], "none");
             }
         }
     }
