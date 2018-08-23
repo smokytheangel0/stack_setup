@@ -49,19 +49,21 @@ fn start_downloads(fileBOX: &String) -> String {
     let vsVersion: String = "none".into();
     let errorBOX: String = "none".into();
 
-    if cfg!(windows){
+    if cfg!(target_os = "windows") {
         let osBOX = "windows".to_string();
         let vsVersion = "win32".to_string();
         let gitURL = String::from("https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe");
-    } else if cfg!(macos){
+    } else if cfg!(target_os = "macos"){
         let osBOX = "darwin".to_string();
         let vsVersion = "osx".to_string();
         let gitURL = String::from("https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect");
-    } else if cfg!(linux){
+    } else if cfg!(target_os = "linux"){
         let osBOX = "linux".to_string();
         let vsVersion = "linux64_deb".to_string();
     } else {
+        //before when using the incorrect cfg shortcuts, this used to fire
         panic!("we currently support only Mac OS, Windows, and Ubuntu");
+        //so now we need to figure out why none of the sorted boxes are being used
     }
 
     if fileBOX == "co_demo" {
