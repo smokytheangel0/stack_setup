@@ -43,9 +43,13 @@ fn check_dirs() -> i8 {
 
 
 fn start_downloads(fileBOX: &String) -> String {
+    //this works in mac and windows
+    //linux is going to be tricky,
+    //it will not open a new tab each time
+    //and wont open a new window until the old one
+    //is closed, on moz, prompts pop up to save or run, need to hint save
+
     let osBOX: String = "none".into();
-    //this gets all the way to the concat as none
-    //something is wrong with the cfg!()
     let errorBOX: String = "none".into();
 
     let vsVersion: String = {
