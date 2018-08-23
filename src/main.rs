@@ -120,8 +120,12 @@ fn main() {
     for index in 0..fileLIST.len() {
         //havent been using rust for more than a couple days, and I've already written unsafe code!!
         unsafe {
+            //the reasoning why i used this was simply mimicry of the
+            //python idiom, i bet there is probably an idiomatic
+            //way to express a for loop iterating over a vec of strings
             let fileBOX = fileLIST.get_unchecked(index).to_string();
             start_downloads(&fileBOX);
+            //but i definitely could not find it
         }
     }
     wait_till_complete();
