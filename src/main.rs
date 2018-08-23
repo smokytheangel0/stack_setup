@@ -49,6 +49,9 @@ fn start_downloads(fileBOX: &String) -> String {
     //and wont open a new window until the old one
     //is closed, on moz, prompts pop up to save or run, need to hint save
 
+    //with a browser window already opened by the user (important), 
+    //then the functionality is == to mac/win
+
     let osBOX: String = "none".into();
     let errorBOX: String = "none".into();
 
@@ -149,22 +152,19 @@ fn create_package() -> String {
 
 fn main() {
     check_dirs();
+    //the order that start_downloads runs through this input
+    //changes based on whether we are stepping, build debug or release
+    //release provides the expected functionality so far each time
     let fileLIST = ["co_demo".to_string(), 
                     "flutter".to_string(),
                     "vsCode".to_string(),
                     "git".to_string(),
-                    //still not opening this last
                     "android".to_string()];
 
     for index in 0..fileLIST.len() {
-        //havent been using rust for more than a couple days, and I've already written unsafe code!!
         unsafe {
-            //the reasoning why i used this was simply mimicry of the
-            //python idiom, i bet there is probably an idiomatic
-            //way to express a for loop iterating over a vec of strings
             let fileBOX = fileLIST.get_unchecked(index).to_string();
             start_downloads(&fileBOX);
-            //but i definitely could not find it
         }
     }
     wait_till_complete();
