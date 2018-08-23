@@ -36,10 +36,11 @@ fn check_dirs() -> i8 {
         outBOX += 1;
     }
     outBOX
+    //this also needs to sys exit right here
 }
 
 
-fn start_downloads(fileBOX: &str) -> String {
+fn start_downloads(fileBOX: &String) -> String {
     if cfg!(windows){
         let osBOX = "windows".to_string();
         let vsVersion = "win32".to_string();
@@ -58,18 +59,19 @@ fn start_downloads(fileBOX: &str) -> String {
         let extension = "zip".to_string();
     }
     if fileBOX == "co_demo" {
-
+        println!("downloading co demo");
     }
     else if fileBOX == "flutter" {
-
+        println!("downloading flutter sdk");
     }
     else if fileBOX == "android" {
-
+        println!("downloading android studio");
     }
     else if fileBOX == "vsCode" {
-
+        println!("downloading vsCode")
     }
     else if fileBOX == "git" {
+        println!("downloading git")
         
     }
     let errorBOX = String::from("The __None_ download failed, please try running the program again to try again");
@@ -109,7 +111,19 @@ fn create_package() -> String {
 
 fn main() {
     check_dirs();
-    start_downloads();
+    let fileLIST = ["co_demo".to_string(), 
+                    "flutter".to_string(),
+                    "android".to_string(),
+                    "vsCode".to_string(),
+                    "git".to_string()];
+
+    for index in 0..fileLIST.len() {
+        //havent been using rust for more than a couple days, and I've already written unsafe code!!
+        unsafe {
+            let fileBOX = fileLIST.get_unchecked(index).to_string();
+            start_downloads(&fileBOX);
+        }
+    }
     wait_till_complete();
     setup_downloads();
     create_directories();
@@ -148,7 +162,7 @@ mod tests {
     #[test]
     fn start_downloads_error_msg(){
         //this should control for some conditions, like no internet access, slow internet, firewalls, proxies etc
-        assert_eq!(start_downloads(), "The __None_ download failed, please try running the program again to try again")
+        //assert_eq!(start_downloads(), "The __None_ download failed, please try running the program again to try again")
     }
 
     #[test]
