@@ -46,54 +46,53 @@ fn start_downloads(fileBOX: &String) -> String {
     let osBOX: String = "none".into();
     //this gets all the way to the concat as none
     //something is wrong with the cfg!()
-    let vsVersion: String = "none".into();
     let errorBOX: String = "none".into();
 
-    if cfg!(target_os = "windows") {
-        let osBOX = "windows".to_string();
-        let vsVersion = "win32".to_string();
-        let gitURL = String::from("https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe");
-    } else if cfg!(target_os = "macos"){
-        let osBOX = "darwin".to_string();
-        let vsVersion = "osx".to_string();
-        let gitURL = String::from("https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect");
-    } else if cfg!(target_os = "linux"){
-        let osBOX = "linux".to_string();
-        let vsVersion = "linux64_deb".to_string();
-    } else {
-        //before when using the incorrect cfg shortcuts, this used to fire
-        panic!("we currently support only Mac OS, Windows, and Ubuntu");
-        //so now we need to figure out why none of the sorted boxes are being used
-    }
-
+    let vsVersion: String = {
+        if cfg!(target_os = "windows") {
+            "win32".into()
+        } else if cfg!(target_os = "macos") {
+            "osx".into()
+        } else if cfg!(target_os = "linux") {
+            "linux64_deb".into()
+        } else {
+            "none".into()
+        }
+    };
+    //this one is working inconsistently
+    let gitURL: &str = {
+        if cfg!(target_os = "windows") {
+            "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
+        } else if cfg!(target_os = "macos") {
+            "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+        } else {
+            "none"
+        }
+    };
+    
     if fileBOX == "co_demo" {
         webbrowser::open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
                     .expect("there was an error opening the co_demo web page in your browser");
-        println!("downloading co demo");        
         return errorBOX;
 
     } else if fileBOX == "flutter" {
         webbrowser::open("https://github.com/flutter/flutter/archive/master.zip")
                     .expect("there was an error opening the flutter web page in your browser");
-        println!("downloading flutter sdk");
         return errorBOX;
 
     } else if fileBOX == "vsCode" {
-        let vsURL: String = format!("https://code.visualstudio.com/docs/?dv={}", &vsVersion); 
+        let vsURL: String = format!("https://code.visualstudio.com/docs/?dv={}", vsVersion); 
         let vsURL: &str = &vsURL[..];
         webbrowser::open(&vsURL)
                     .expect("there was an error opening the vs Code web page in your browser");
-        println!("downloading vsCode");
-        let errorBOX = vsURL.to_string();
         return errorBOX;
 
     } else if fileBOX == "git" && osBOX != "linux" {
-        webbrowser::open("")
+        webbrowser::open(gitURL)
                     .expect("there was an error opening git in your browser");
-        println!("downloading git");
         return errorBOX;
 
-    } else if fileBOX == "git" && osBOX == "linux" {
+    } else if fileBOX == "git" && cfg!(target_os = "linux") {
         println!("please enter your password to install git !>");
         Command::new("sudo apt")
                     .arg("install")
@@ -104,7 +103,6 @@ fn start_downloads(fileBOX: &String) -> String {
     } else if fileBOX == "android" {
         webbrowser::open("https://developer.android.com/studio/#downloads")
                     .expect("there was an error opening the android studio web page in your browser");
-        println!("downloading android studio");
         return errorBOX;
     } else {
         let errorBOX: String = "the switch branches have all been avoided !!!".into();
@@ -149,9 +147,10 @@ fn main() {
     check_dirs();
     let fileLIST = ["co_demo".to_string(), 
                     "flutter".to_string(),
-                    "android".to_string(),
                     "vsCode".to_string(),
-                    "git".to_string()];
+                    "git".to_string(),
+                    //still not opening this last
+                    "android".to_string()];
 
     for index in 0..fileLIST.len() {
         //havent been using rust for more than a couple days, and I've already written unsafe code!!
@@ -202,7 +201,7 @@ mod tests {
     }
 
     #[test]
-    /*fn start_downloads_error_msg(){
+    fn start_downloads_error_msg(){
         //this should control for some conditions, like no internet access, slow internet, firewalls, proxies etc
         let fileLIST = ["co_demo".to_string(), 
                         "flutter".to_string(),
@@ -216,12 +215,6 @@ mod tests {
                 assert_eq!(start_downloads(&fileBOX), "none");
             }
         }
-    }*/
-    #[test]
-    fn start_downloads_vs_url() {
-        let fileBOX = "vsCode".to_string();
-        let outBOX = start_downloads(&fileBOX);
-        println!("{}", outBOX);
     }
 
     #[test]
