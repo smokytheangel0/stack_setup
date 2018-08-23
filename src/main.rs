@@ -62,7 +62,7 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
     //then the functionality is == to mac/win
 
     let errorBOX: String = "none".into();
-    let mut errorLIST = vec![
+    let mut testLIST = vec![
         "none".to_string(),
         "none".to_string(),
         "none".to_string()
@@ -79,7 +79,7 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
             "browser install currently only supports Mac OS, Windows 10".into()
         }
     };
-    errorLIST[0] = vsVersion.clone();
+    testLIST[0] = vsVersion.clone();
     //this one is working inconsistently
     let gitURL: &str = {
         if cfg!(target_os = "windows") {
@@ -90,29 +90,29 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
             "we currently only support Mac OS, Windows 10, and Linux"
         }
     };
-    errorLIST[1] = String::from(gitURL);
+    testLIST[1] = String::from(gitURL);
     
     if fileBOX == "co_demo" {
         webbrowser::open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
                     .expect("there was an error opening the co_demo web page in your browser");
-        return errorLIST;
+        return testLIST;
 
     } else if fileBOX == "flutter" {
         webbrowser::open("https://github.com/flutter/flutter/archive/master.zip")
                     .expect("there was an error opening the flutter web page in your browser");
-        return errorLIST;
+        return testLIST;
 
     } else if fileBOX == "vsCode" {
         let vsURL: String = format!("https://code.visualstudio.com/docs/?dv={}", vsVersion); 
         let vsURL: &str = &vsURL[..];
         webbrowser::open(&vsURL)
                     .expect("there was an error opening the vs Code web page in your browser");
-        return errorLIST;
+        return testLIST;
 
     } else if fileBOX == "git" && !cfg!(target_os = "linux") {
         webbrowser::open(gitURL)
                     .expect("there was an error opening git in your browser");
-        return errorLIST;
+        return testLIST;
 
     } else if fileBOX == "git" && cfg!(target_os = "linux") {
         println!("please enter your password to install git !>");
@@ -121,14 +121,14 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
                     .arg("git")
                     .output()
                     .expect("failed to execute process");
-        return errorLIST;
+        return testLIST;
     } else if fileBOX == "android" {
         webbrowser::open("https://developer.android.com/studio/#downloads")
                     .expect("there was an error opening the android studio web page in your browser");
-        return errorLIST;
+        return testLIST;
     } else {
-        errorLIST[2] = "the switch branches have all been avoided !!!".to_string();
-        return errorLIST;
+        testLIST[2] = "the switch branches have all been avoided !!!".to_string();
+        return testLIST;
         //panic!(&errorBOX);
     }
     
