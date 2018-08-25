@@ -52,15 +52,11 @@ fn check_dirs() -> i8 {
 }
 
 
-fn start_downloads(fileBOX: &String) -> Vec<String> {
-    //this works in mac and windows
-    //linux is going to be tricky,
-    //it will not open a new tab each time
-    //and wont open a new window until the old one
-    //is closed, on moz, prompts pop up to save or run, need to hint save
+fn start_downloads(fileBOX: &String) -> Vec<String> {  
+    //tests pass in linux, mac and windows
 
-    //with a browser window already opened by the user (important), 
-    //then the functionality is == to mac/win
+    //linux browser functionality strange unless user
+    //already has a browser window open
 
     let errorBOX: String = "none".into();
     let mut testLIST = vec![
@@ -70,7 +66,6 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
         "none".to_string()
     ];
 
-//each of these os switches default to mac even on win and linux...
     let vsVersion: String = {
         if cfg!(target_os = "windows") {
             "win32".into()
@@ -119,8 +114,6 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
 
     } else if fileBOX == "git" && cfg!(target_os = "linux") {
         println!("please enter your password to install git !>");
-//this fails on linux builds, we may want to try a non standard library
-//no error like this seem to be common online
         let output = Command::new("sudo")
             .arg("apt").arg("install").arg("git")
             .output().unwrap_or_else(|e| {
@@ -236,6 +229,7 @@ mod tests {
 
     #[test]
     fn start_downloads_vs_switch() {
+        //this works in linux, mac and windows
         let fileBOX = "flutter".to_string();
         if cfg!(target_os = "macos") {
             assert_eq!(start_downloads(&fileBOX)[0], "osx")
@@ -250,6 +244,7 @@ mod tests {
 
     #[test]
     fn start_downloads_git_switch() {
+        //this works in linux, mac and windows
         let fileBOX = "flutter".to_string();
         if cfg!(target_os = "macos")  {
             assert_eq!(start_downloads(&fileBOX)[1], "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
@@ -262,6 +257,7 @@ mod tests {
 
     #[test]
     fn start_downloads_thread_switch(){
+        //this works in linux, mac and windows
         //this should control for some conditions, like no internet access, slow internet, firewalls, proxies etc
         let fileLIST = ["co_demo".to_string(), 
                         "flutter".to_string(),
@@ -276,14 +272,8 @@ mod tests {
             }
         }
     }
-    #[test]
-    fn start_downloads_linux_apt(){
-        if cfg!(target_os = "linux"){
-            let fileBOX = "git".to_string();
-            assert_eq!(start_downloads(&fileBOX)[3], "0");
 
-        }
-    }
+    // start_downloads_linux_apt is at the bottom cos it brings up the sudo prompt
 
     #[test]
     fn wait_till_complete_error_msg(){
@@ -315,4 +305,15 @@ mod tests {
     fn create_package_error_msg(){
         assert_eq!(create_package(), "")
     }
+
+    #[test]
+    fn start_downloads_linux_apt(){
+        //this works in linux, mac and windows ;)
+        if cfg!(target_os = "linux"){
+            let fileBOX = "git".to_string();
+            assert_eq!(start_downloads(&fileBOX)[3], "0");
+
+        }
+    }
+
 }
