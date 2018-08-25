@@ -5,3 +5,4 @@ authors = ["j"]
 
 [dependencies]
 webbrowser = "0.3.1"
+shell = "0.3.2"

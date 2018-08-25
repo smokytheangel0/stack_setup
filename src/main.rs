@@ -21,6 +21,7 @@
 
 use std::env;
 extern crate webbrowser;
+//might try google crate 'shell' instead
 use std::process::Command;
 
 ///the [check_dirs] function looks like this
@@ -65,6 +66,7 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
     let mut testLIST = vec![
         "none".to_string(),
         "none".to_string(),
+        "none".to_string(),
         "none".to_string()
     ];
 
@@ -81,6 +83,7 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
         }
     };
     testLIST[0] = vsVersion.clone();
+    
     let gitURL: &str = {
         if cfg!(target_os = "windows") {
             "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
@@ -116,18 +119,28 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
 
     } else if fileBOX == "git" && cfg!(target_os = "linux") {
         println!("please enter your password to install git !>");
-//this fails on linux builds with 'sudo apt' as input, try like this
-        Command::new("sudo")
-                    .arg("apt")
-                    .arg("install")
-                    .arg("git")
-                    .output()
-                    .expect("failed to execute process");
+//this fails on linux builds, we may want to try a non standard library
+//no error like this seem to be common online
+        let output = Command::new("sudo")
+            .arg("apt").arg("install").arg("git")
+            .output().unwrap_or_else(|e| {
+                panic!("failed to execute process: {}", e)
+        });
+
+        if output.status.success() {
+            let errorBOX = String::from_utf8_lossy(&output.stdout).into_owned();
+            testLIST[3] = errorBOX;
+        } else {
+            let errorBOX = String::from_utf8_lossy(&output.stderr).into_owned();
+            testLIST[3] = errorBOX;
+        }
         return testLIST;
+
     } else if fileBOX == "android" {
         webbrowser::open("https://developer.android.com/studio/#downloads")
                     .expect("there was an error opening the android studio web page in your browser");
         return testLIST;
+
     } else {
         testLIST[2] = "the switch branches have all been avoided !!!".to_string();
         return testLIST;
@@ -224,7 +237,7 @@ mod tests {
     #[test]
     fn start_downloads_vs_switch() {
         let fileBOX = "flutter".to_string();
-        if cfg!(target_os = "mac os") {
+        if cfg!(target_os = "macos") {
             assert_eq!(start_downloads(&fileBOX)[0], "osx")
         }else if cfg!(target_os = "windows") {
             assert_eq!(start_downloads(&fileBOX)[0], "win32")
@@ -238,7 +251,7 @@ mod tests {
     #[test]
     fn start_downloads_git_switch() {
         let fileBOX = "flutter".to_string();
-        if cfg!(target_os = "mac os")  {
+        if cfg!(target_os = "macos")  {
             assert_eq!(start_downloads(&fileBOX)[1], "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
         } else if cfg!(target_os = "windows") {
             assert_eq!(start_downloads(&fileBOX)[1], "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
@@ -261,6 +274,14 @@ mod tests {
                 let fileBOX = fileLIST.get_unchecked(index).to_string();
                 assert_eq!(start_downloads(&fileBOX)[2], "none");
             }
+        }
+    }
+    #[test]
+    fn start_downloads_linux_apt(){
+        if cfg!(target_os = "linux"){
+            let fileBOX = "git".to_string();
+            assert_eq!(start_downloads(&fileBOX)[3], "0");
+
         }
     }
 
