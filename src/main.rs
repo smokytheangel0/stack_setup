@@ -33,6 +33,7 @@ use std::process::Command;
 ///     if "Downloads" not in initial_directory:
 ///         print(errorBOX)
 ///         sys.exit()
+/// ```
 fn check_dirs() -> i8 {
     //this works in Mac, Linux and Windows
     let mut outBOX = 0;
@@ -51,14 +52,71 @@ fn check_dirs() -> i8 {
     //this also needs to sys exit right here
 }
 
-
-fn start_downloads(fileBOX: &String) -> Vec<String> {  
+///the [start_downloads] function probably looks like this
+/// in python:
+/// ```python
+/// def start_downloads(fileBOX):
+///     testLIST = [
+///                 None,
+///                 None,
+///                 None,
+///                 None
+///                ]
+///     if platform.uname()[0] == "Windows":
+///         vsVersion = "win32"
+///         gitURL = "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
+///     elif platform.uname()[0] == "Linux":
+///         vsVersion = "linux64_deb"
+///         gitURL = "browser install currently only support Mac OS and Windows 10"
+///     elif platform.uname()[0] == "Darwin":
+///         vsVersion = "osx"
+///         gitURL = "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+///     else:
+///         vsVersion = "we currently only support Mac OS, Windows 10, and Linux"
+///     testLIST[0] = vsVersion
+///     testLIST[1] = gitURL
+///
+///     if fileBOX == "co_demo":
+///         try:
+///             webbrowser.open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
+///         except:
+///             print("there was an error opening the co_demo web page in your browser")
+///     elif fileBOX == "flutter":
+///         try:
+///             webbrowser.open("https://github.com/flutter/flutter/archive/master.zip")
+///         except:
+///             print("there was an error opening the flutter web page in your browser")
+///     elif fileBOX == "vsCode":
+///         try:
+///             webbrowser.open("https://code.visualstudio.com/docs/?dv={}"+vsVersion)
+///         except:
+///             print("there was an error opening the vs Code web page in your browser")
+///     elif fileBOX == "git" and platform.uname[0] not "Linux":
+///         try:
+///             webbrowser.open(gitURL)
+///         except:
+///             print("there was an error opening git in your browser")
+///     elif fileBOX == "git" and platform.uname[0] == "Linux":
+///         try:
+///             print("your computer will ask for your password to install git")
+///             os.system("sudo apt install git")
+///         except:
+///             print("there was an error installing git with apt")
+///     elif fileBOX == "android":
+///         try:
+///             webbrowser.open("https://developer.android.com/studio/#downloads")
+///         except:
+///             print("there was an error opening android studio in your web browser")
+///     else:
+///         testLIST[2] = "the switch branches have all been avoided"
+///         print(testLIST[2])
+/// ```
+fn start_downloads(fileBOX: &str) -> Vec<String> {  
     //tests pass in linux, mac and windows
 
     //linux browser functionality strange unless user
     //already has a browser window open
 
-    let errorBOX: String = "none".into();
     let mut testLIST = vec![
         "none".to_string(),
         "none".to_string(),
@@ -74,7 +132,7 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
         } else if cfg!(target_os = "linux") {
             "linux64_deb".into()
         } else {
-            "browser install currently only supports Mac OS, Windows 10".into()
+            "we currently only support Mac OS, Windows 10, and Linux".into()
         }
     };
     testLIST[0] = vsVersion.clone();
@@ -85,7 +143,7 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
         } else if cfg!(target_os = "macos") {
             "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
         } else {
-            "we currently only support Mac OS, Windows 10, and Linux"
+            "browser install currently only support Mac OS and Windows 10"
         }
     };
     testLIST[1] = String::from(gitURL);
@@ -137,7 +195,6 @@ fn start_downloads(fileBOX: &String) -> Vec<String> {
     } else {
         testLIST[2] = "the switch branches have all been avoided !!!".to_string();
         return testLIST;
-        //panic!(&errorBOX);
     }
     
 }
