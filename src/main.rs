@@ -10,6 +10,10 @@
 //are very distracting
 #![allow(unused_must_use)]
 
+
+//should turn this off once main is back together
+#![allow(dead_code)]
+
 ///TODO
 /// RE: LINUX BROWSER COMPATIBILITY
 /// use a grep a ps command on linux to see if
@@ -18,33 +22,41 @@
 /// 
 /// RE: DOWNLOADS ERROR MESSAGE TEST
 /// 
-
 use std::env;
 extern crate webbrowser;
-//might try google crate 'shell' instead
 use std::process::Command;
+use std::fs;
+
 
 ///the [check_dirs] function looks like this
 /// in python:
 /// ```python
-/// def check_dirs(errorBOX):
+/// [replace all 'is not' with '!=']
+/// [replace all 'is' with '==']
+/// import os
+/// import sys
+/// #outBOX is int
+/// def check_dirs():
+///     outBOX = 0
 ///     pathBOX = os.getcwd()
 /// 
-///     if "Downloads" not in initial_directory:
-///         print(errorBOX)
-///         sys.exit()
+///     if "Downloads" not in pathBOX:
+///         outBOX += 1
+///         print("This program you've just run does not appear to be in the Downloads folder, please try running it again with it in the Downloads folder")
+///         return outBOX
 /// ```
+/// 
 fn check_dirs() -> i8 {
     //this works in Mac, Linux and Windows
     let mut outBOX = 0;
 
     //might definitely be a better way to do this
     let pathBuffer = env::current_dir().ok().unwrap();
-    let pathString = pathBuffer.to_str().unwrap();
+    let pathBOX = pathBuffer.to_str().unwrap();
 
     let errorBOX = String::from("This program you've just run does not appear to be in the Downloads folder, please try running it again with it in the Downloads folder");
     
-    if pathString.contains("Downloads") == false {
+    if pathBOX.contains("Downloads") == false {
         println!("{}", errorBOX);
         outBOX += 1;
     }
@@ -52,9 +64,16 @@ fn check_dirs() -> i8 {
     //this also needs to sys exit right here
 }
 
+
 ///the [start_downloads] function probably looks like this
-/// in python:
 /// ```python
+/// [replace all 'is not' with '!=']
+/// [replace all 'is' with '==']
+/// import os
+/// import sys
+/// import platform
+/// import webbrowser
+/// #outBOX is [4]
 /// def start_downloads(fileBOX):
 ///     testLIST = [
 ///                 None,
@@ -62,13 +81,14 @@ fn check_dirs() -> i8 {
 ///                 None,
 ///                 None
 ///                ]
-///     if platform.uname()[0] == "Windows":
+///
+///     if platform.uname()[0] is "Windows":
 ///         vsVersion = "win32"
 ///         gitURL = "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
-///     elif platform.uname()[0] == "Linux":
+///     elif platform.uname()[0] is "Linux":
 ///         vsVersion = "linux64_deb"
 ///         gitURL = "browser install currently only support Mac OS and Windows 10"
-///     elif platform.uname()[0] == "Darwin":
+///     elif platform.uname()[0] is "Darwin":
 ///         vsVersion = "osx"
 ///         gitURL = "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
 ///     else:
@@ -76,33 +96,33 @@ fn check_dirs() -> i8 {
 ///     testLIST[0] = vsVersion
 ///     testLIST[1] = gitURL
 ///
-///     if fileBOX == "co_demo":
+///     if fileBOX is "co_demo0-":
 ///         try:
 ///             webbrowser.open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
 ///         except:
 ///             print("there was an error opening the co_demo web page in your browser")
-///     elif fileBOX == "flutter":
+///     elif fileBOX is "flutter-":
 ///         try:
 ///             webbrowser.open("https://github.com/flutter/flutter/archive/master.zip")
 ///         except:
 ///             print("there was an error opening the flutter web page in your browser")
-///     elif fileBOX == "vsCode":
+///     elif fileBOX is "VSCode-":
 ///         try:
 ///             webbrowser.open("https://code.visualstudio.com/docs/?dv={}"+vsVersion)
 ///         except:
 ///             print("there was an error opening the vs Code web page in your browser")
-///     elif fileBOX == "git" and platform.uname[0] not "Linux":
+///     elif fileBOX is "git-" and platform.uname()[0] is not "Linux":
 ///         try:
 ///             webbrowser.open(gitURL)
 ///         except:
 ///             print("there was an error opening git in your browser")
-///     elif fileBOX == "git" and platform.uname[0] == "Linux":
+///     elif fileBOX is "git-" and platform.uname()[0] is "Linux":
 ///         try:
 ///             print("your computer will ask for your password to install git")
 ///             os.system("sudo apt install git")
 ///         except:
 ///             print("there was an error installing git with apt")
-///     elif fileBOX == "android":
+///     elif fileBOX is "android-":
 ///         try:
 ///             webbrowser.open("https://developer.android.com/studio/#downloads")
 ///         except:
@@ -110,7 +130,7 @@ fn check_dirs() -> i8 {
 ///     else:
 ///         testLIST[2] = "the switch branches have all been avoided"
 ///         print(testLIST[2])
-/// ```
+///```
 fn start_downloads(fileBOX: &str) -> Vec<String> {  
     //tests pass in linux, mac and windows
 
@@ -124,18 +144,18 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         "none".to_string()
     ];
 
-    let vsVersion: String = {
+    let vsVersion: &str = {
         if cfg!(target_os = "windows") {
-            "win32".into()
+            "win32"
         } else if cfg!(target_os = "macos") {
-            "osx".into()
+            "osx"
         } else if cfg!(target_os = "linux") {
-            "linux64_deb".into()
+            "linux64_deb"
         } else {
-            "we currently only support Mac OS, Windows 10, and Linux".into()
+            "we currently only support Mac OS, Windows 10, and Linux"
         }
     };
-    testLIST[0] = vsVersion.clone();
+    testLIST[0] = String::from(vsVersion);
     
     let gitURL: &str = {
         if cfg!(target_os = "windows") {
@@ -143,34 +163,34 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         } else if cfg!(target_os = "macos") {
             "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
         } else {
-            "browser install currently only support Mac OS and Windows 10"
+            "git browser install currently only support Mac OS and Windows 10"
         }
     };
     testLIST[1] = String::from(gitURL);
     
-    if fileBOX == "co_demo" {
+    if fileBOX == "co_demo0-" {
         webbrowser::open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
                     .expect("there was an error opening the co_demo web page in your browser");
         return testLIST;
 
-    } else if fileBOX == "flutter" {
+    } else if fileBOX == "flutter-" {
         webbrowser::open("https://github.com/flutter/flutter/archive/master.zip")
                     .expect("there was an error opening the flutter web page in your browser");
         return testLIST;
 
-    } else if fileBOX == "vsCode" {
+    } else if fileBOX == "VSCode-" {
         let vsURL: String = format!("https://code.visualstudio.com/docs/?dv={}", vsVersion); 
         let vsURL: &str = &vsURL[..];
         webbrowser::open(&vsURL)
                     .expect("there was an error opening the vs Code web page in your browser");
         return testLIST;
 
-    } else if fileBOX == "git" && !cfg!(target_os = "linux") {
+    } else if fileBOX == "git-" && !cfg!(target_os = "linux") {
         webbrowser::open(gitURL)
                     .expect("there was an error opening git in your browser");
         return testLIST;
 
-    } else if fileBOX == "git" && cfg!(target_os = "linux") {
+    } else if fileBOX == "git-" && cfg!(target_os = "linux") {
         println!("please enter your password to install git !>");
         let output = Command::new("sudo")
             .arg("apt").arg("install").arg("git")
@@ -187,7 +207,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         }
         return testLIST;
 
-    } else if fileBOX == "android" {
+    } else if fileBOX == "android-" {
         webbrowser::open("https://developer.android.com/studio/#downloads")
                     .expect("there was an error opening the android studio web page in your browser");
         return testLIST;
@@ -199,9 +219,97 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
     
 }
 
-fn wait_till_complete() -> String {
-    let errorBOX = String::from("the android studio installation has still not been started, but everything else is complete, please try running the program again to view the webpage and select the link with (PLATFORM HERE) in it");
-    errorBOX
+
+///this is what the [is_complete] function is likely to be
+///```python
+/// [replace all 'is not' with '!=']
+/// [replace all 'is' with '==']
+/// def is_complete(fileBOX):
+///     filesInDownloads = os.listdir('.')
+///     for downloadNAME in filesInDownloads:
+///         if fileBOX in downloadNAME or "crdownload" in downloadNAME:
+///             if 'part' in downloadNAME:
+///                 outBOX = False
+///             elif 'partial'in downloadNAME:
+///                 outBOX = False
+///             elif 'crdownload' in downloadNAME:
+///                 outBOX = False
+///             else:
+///                 outBOX = True
+///             break
+///         else:
+///             outBOX = None
+///     if outBOX is False:
+///         print(fileBOX[:-1]+" is still transfering...")
+///     elif outBOX is None:
+///         print(fileBOX[:-1]+" still has not been started...")
+///     return outBOX
+/// ```
+fn is_complete(fileBOX: &str) -> String {
+    //this sets the path to the downloads folder no matter what
+    let downloadsPATH: String = {
+        if cfg!(windows){
+            let path = env::home_dir().unwrap();
+            let mut downloadsPATH = path.to_str().unwrap().to_owned();
+            downloadsPATH += "\\Downloads";
+            env::set_current_dir(&downloadsPATH);
+            downloadsPATH
+        }else if cfg!(unix){
+            let path = env::home_dir().unwrap();
+            let mut downloadsPATH = path.to_str().unwrap().to_owned();
+            downloadsPATH += "/Downloads";
+            env::set_current_dir(&downloadsPATH);
+            downloadsPATH
+        } else {
+            "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
+        }
+    };    
+
+    //this responds with an error which is why we didnt
+    //but the unwrap() should panic...
+    //despite that it actually unpacks into the proper string
+    //down below...
+    let filesInDownloads = fs::read_dir(&downloadsPATH).unwrap();
+
+    //how many unwraps can one rapper stack if
+    //one rapper could stack unwraps delicately
+    for downloadBOX in filesInDownloads {
+        //i think there is only one iteration attempt,
+        //which may mean we havent set the directory correctly
+        let downloadNAME = &downloadBOX.unwrap()
+                                        .file_name()
+                                        .into_string()
+                                        .unwrap();
+
+        let found: String = {
+            //seems like i should transfer ownership of the downloadNAME rather than borrow a from the ether string
+            if &fileBOX == downloadNAME || "crdownload".to_string() == downloadNAME.to_owned() {
+
+                if "part".to_string() == downloadNAME.to_owned() {
+                    "False".to_string()
+                } else if "partial".to_string() == downloadNAME.to_owned() {
+                    "False".to_string()
+                } else if "crdownload".to_string() == downloadNAME.to_owned() {
+                    "False".to_string()
+                } else {
+                    "True".to_string()
+                }
+
+            } else {
+                "None".to_string()
+            }
+        };
+        if found == "None".to_string() {
+            continue
+        } else {
+            break
+        }
+    
+    }
+    //this is what we want to do
+    //no word on how to do it yet...
+    found
+    
 }
 
 fn setup_downloads() -> String {
@@ -235,19 +343,35 @@ fn main() {
     //the order that start_downloads runs through this input
     //changes based on whether we are stepping, build debug or release
     //release provides the expected functionality so far each time
-    let fileLIST = ["co_demo".to_string(), 
-                    "flutter".to_string(),
-                    "vsCode".to_string(),
-                    "git".to_string(),
-                    "android".to_string()];
+    let fileLIST = [
+                    "git-".to_string(),
+                    "co_demo0-".to_string(), 
+                    "flutter-".to_string(),
+                    "VSCode-".to_string(),
+                    "android-".to_string()
+                ];
 
+    //this probably doesnt make sense anymore,
+    //we couldnt get the internals of the [is_complete]
+    //function working, so its a moot point
+    /*
     for index in 0..fileLIST.len() {
         unsafe {
             let fileBOX = fileLIST.get_unchecked(index).to_string();
-            start_downloads(&fileBOX);
+            loop {
+                let answerBOX = is_complete(&fileBOX);
+                if answerBOX == "None".to_string() {
+                    start_downloads(&fileBOX);
+                } else if answerBOX == "False".to_string() {
+                    continue
+                } else if answerBOX == "True".to_string() {
+                    break
+                }
+            }
         }
     }
-    wait_till_complete();
+    */
+
     setup_downloads();
     create_directories();
     set_path();
@@ -269,16 +393,16 @@ mod tests {
         //types are explicit
         if cfg!(windows){
             let path = env::home_dir().unwrap();
-            let mut downloadsDirectory = path.to_str().unwrap().to_owned();
-            downloadsDirectory += "\\Downloads";
-            env::set_current_dir(&downloadsDirectory);
-        }
-
-        if cfg!(unix){
+            let mut downloadsPATH = path.to_str().unwrap().to_owned();
+            downloadsPATH += "\\Downloads";
+            env::set_current_dir(&downloadsPATH);
+        } else if cfg!(unix){
             let path = env::home_dir().unwrap();
-            let mut downloadsDirectory = path.to_str().unwrap().to_owned();
-            downloadsDirectory += "/Downloads";
-            env::set_current_dir(&downloadsDirectory);
+            let mut downloadsPATH = path.to_str().unwrap().to_owned();
+            downloadsPATH += "/Downloads";
+            env::set_current_dir(&downloadsPATH);
+        }else{
+            panic!("we currently only support Windows 10, Mac OS and Linux");
         }
 
         assert_eq!(check_dirs(), 0);
@@ -312,15 +436,21 @@ mod tests {
         }
     }
 
+    /*
     #[test]
+    //THIS TEST SHOULD NOT BE RUN EVERYTIME
+    //IT OPENS FIVE TABS IN THE BROWSER
+    //AND STARTS FIVE DOWNLOADS
     fn start_downloads_thread_switch(){
         //this works in linux, mac and windows
         //this should control for some conditions, like no internet access, slow internet, firewalls, proxies etc
-        let fileLIST = ["co_demo".to_string(), 
-                        "flutter".to_string(),
-                        "android".to_string(),
-                        "vsCode".to_string(),
-                        "git".to_string()];
+        let fileLIST = [                        
+                        "git-".to_string(),
+                        "co_demo0-".to_string(), 
+                        "flutter-".to_string(),
+                        "VSCode-".to_string(),
+                        "android-".to_string()
+                    ];
 
         for index in 0..fileLIST.len() {
             unsafe {
@@ -329,13 +459,20 @@ mod tests {
             }
         }
     }
+    */
 
     // start_downloads_linux_apt is at the bottom cos it brings up the sudo prompt
 
     #[test]
-    fn wait_till_complete_error_msg(){
-        ///this should test for slow user follow up, no user follow up, correct platform string, crdownload, partial, part etc
-        assert_eq!(wait_till_complete(), "the android studio installation has still not been started, but everything else is complete, please try running the program again to view the webpage and select the link with (PLATFORM HERE) in it")
+    fn is_complete_loop_switch(){
+        //this should test for slow user follow up, no user follow up, correct platform string, crdownload, partial, part etc
+
+        //for now we can test the two download folders in test_data/ for Nones, Falses, and Trues
+        
+        let fileBOX = "co_demo0-".to_string();
+        //if this fails that means the downloads folder
+        //has contents from previous testing
+        assert_eq!(is_complete(&fileBOX), "None")
     }
 
     #[test]
