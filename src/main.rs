@@ -8,11 +8,7 @@
 //and drop the errors each time we get one
 //and all the green squiggles
 //are very distracting
-#![allow(unused_must_use)]
 
-
-//should turn this off once main is back together
-#![allow(dead_code)]
 
 ///TODO
 /// RE: LINUX BROWSER COMPATIBILITY
