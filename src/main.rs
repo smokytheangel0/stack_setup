@@ -26,7 +26,7 @@ use std::env;
 extern crate webbrowser;
 use std::process::Command;
 use std::fs;
-
+use std::fs::ReadDir;
 
 ///the [check_dirs] function looks like this
 /// in python:
@@ -73,7 +73,7 @@ fn check_dirs() -> i8 {
 /// import sys
 /// import platform
 /// import webbrowser
-/// #outBOX is [4]
+/// #outBOX is vec[4] named testLIST
 /// def start_downloads(fileBOX):
 ///     testLIST = [
 ///                 None,
@@ -129,7 +129,8 @@ fn check_dirs() -> i8 {
 ///             print("there was an error opening android studio in your web browser")
 ///     else:
 ///         testLIST[2] = "the switch branches have all been avoided"
-///         print(testLIST[2])
+///
+///     return testLIST
 ///```
 fn start_downloads(fileBOX: &str) -> Vec<String> {  
     //tests pass in linux, mac and windows
@@ -224,7 +225,8 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 ///```python
 /// [replace all 'is not' with '!=']
 /// [replace all 'is' with '==']
-/// def is_complete(fileBOX):
+/// #outBOX is String
+/// def is_complete(fileBOX, completeNUM):
 ///     filesInDownloads = os.listdir('.')
 ///     for downloadNAME in filesInDownloads:
 ///         if fileBOX in downloadNAME or "crdownload" in downloadNAME:
@@ -245,71 +247,109 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 ///         print(fileBOX[:-1]+" still has not been started...")
 ///     return outBOX
 /// ```
-fn is_complete(fileBOX: &str) -> String {
-    //this sets the path to the downloads folder no matter what
+fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
+    //this sets the path to the downloads folder
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str().unwrap().to_owned();
             downloadsPATH += "\\Downloads";
-            env::set_current_dir(&downloadsPATH);
             downloadsPATH
         }else if cfg!(unix){
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str().unwrap().to_owned();
             downloadsPATH += "/Downloads";
-            env::set_current_dir(&downloadsPATH);
             downloadsPATH
         } else {
             "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
         }
-    };    
+    }; 
 
+    //this sets the path to the test_data directory
+    let testPATH: String = {
+ 
+        if cfg!(windows){
+            let path = env::home_dir().unwrap();
+            let mut testPATH = path.to_str().unwrap().to_owned();
+            if completeNUM == 5 {
+                testPATH += "\\Desktop\\share\\test_data\\five_complete";
+            } else {
+                testPATH += "\\Desktop\\share\\test_data\\three_complete";
+            }
+            testPATH
+        }else if cfg!(unix){
+            let path = env::home_dir().unwrap();
+            let mut testPATH = path.to_str().unwrap().to_owned();
+            if completeNUM == 5 {
+                testPATH += "/Desktop/share/test_data/five_complete";
+            } else {
+                testPATH += "/Desktop/share/test_data/three_complete";
+            }
+            testPATH
+        } else {
+            "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
+        }
+    };    
+   
     //this responds with an error which is why we didnt
     //but the unwrap() should panic...
     //despite that it actually unpacks into the proper string
     //down below...
-    let filesInDownloads = fs::read_dir(&downloadsPATH).unwrap();
+    let filesInDownloads: ReadDir = {
+        if cfg!(test) {
+            fs::read_dir(&testPATH).unwrap()
+        } else {            
+            fs::read_dir(&downloadsPATH).unwrap()
+        }
+    };
 
     //how many unwraps can one rapper stack if
     //one rapper could stack unwraps delicately
+    let outBOX: String = "None".to_string();
     for downloadBOX in filesInDownloads {
-        //i think there is only one iteration attempt,
-        //which may mean we havent set the directory correctly
         let downloadNAME = &downloadBOX.unwrap()
                                         .file_name()
                                         .into_string()
                                         .unwrap();
 
         let found: String = {
-            //seems like i should transfer ownership of the downloadNAME rather than borrow a from the ether string
-            if &fileBOX == downloadNAME || "crdownload".to_string() == downloadNAME.to_owned() {
+            //this was an amazing oversight, that literally took a debugger to see was wrong
+            //'in' || '.contains()' != '==', cos duh
+            if downloadNAME.to_owned().contains(&fileBOX) || downloadNAME.to_owned().contains(&"crdownload"[..]) {
 
-                if "part".to_string() == downloadNAME.to_owned() {
-                    "False".to_string()
-                } else if "partial".to_string() == downloadNAME.to_owned() {
-                    "False".to_string()
-                } else if "crdownload".to_string() == downloadNAME.to_owned() {
-                    "False".to_string()
+                if downloadNAME.to_owned().contains(&"part"[..]) {
+                    return "False".to_string();
+                } else if downloadNAME.to_owned().contains(&"partial"[..]) {
+                    return "False".to_string();
+
+                //we should do something special for crdownload,
+                //it ought to count a int up to one when it sees a cr dl, but
+                //keep going till it exhausts the for loop looking for a match
+                //after the for loop is done with no match, it can check if there was a crdownload
+                //and assume then that the file is in progress and change the None return
+                //to a False
+                } else if downloadNAME.to_owned().contains(&"crdownload"[..]) {
+                    //unconfirmed += 1
+                    //continue
+                    return "False".to_string();
+
                 } else {
-                    "True".to_string()
+                    return "True".to_string();
                 }
-
             } else {
-                "None".to_string()
+                "None".to_string();
             }
+            "None".to_string()
         };
+    
         if found == "None".to_string() {
             continue
         } else {
             break
         }
-    
+        
     }
-    //this is what we want to do
-    //no word on how to do it yet...
-    found
-    
+    return outBOX    
 }
 
 fn setup_downloads() -> String {
@@ -443,7 +483,8 @@ mod tests {
     //AND STARTS FIVE DOWNLOADS
     fn start_downloads_thread_switch(){
         //this works in linux, mac and windows
-        //this should control for some conditions, like no internet access, slow internet, firewalls, proxies etc
+        //this should control for some conditions, 
+        //like no internet access, slow internet, firewalls, proxies etc
         let fileLIST = [                        
                         "git-".to_string(),
                         "co_demo0-".to_string(), 
@@ -464,42 +505,86 @@ mod tests {
     // start_downloads_linux_apt is at the bottom cos it brings up the sudo prompt
 
     #[test]
-    fn is_complete_loop_switch(){
-        //this should test for slow user follow up, no user follow up, correct platform string, crdownload, partial, part etc
+    fn is_complete_offline_switch() {
+        //this should be where we check the test-data folders to ensure
+        //the function gives a good canned result
+        //later we will have an online version
+        //which will try five times or something and clean up
+        let fileLIST = [
+                        "git-".to_string(),
+                        "co_demo0-".to_string(), 
+                        "flutter-".to_string(),
+                        "VSCode-".to_string(),
+                        "android-".to_string()
+                    ];
 
-        //for now we can test the two download folders in test_data/ for Nones, Falses, and Trues
+        let mut testLIST: Vec<String> = [].to_vec();
+        let completeNUM: i16 = 5;
+        for index in 0..fileLIST.len() {
+            unsafe {
+                let fileBOX = fileLIST.get_unchecked(index).to_string();
+                //is_complete(&fileBOX, completeNUM)
+                let outBOX = is_complete(&fileBOX, completeNUM);
+                testLIST.push(outBOX);
+            }
+        }
         
-        let fileBOX = "co_demo0-".to_string();
-        //if this fails that means the downloads folder
-        //has contents from previous testing
-        assert_eq!(is_complete(&fileBOX), "None")
+        assert_eq!(testLIST[0], "True");
+        assert_eq!(testLIST[1], "True");
+        assert_eq!(testLIST[2], "True");
+        assert_eq!(testLIST[3], "True");
+        assert_eq!(testLIST[4], "True");
+        
+
+        let mut testLIST: Vec<String> = [].to_vec();
+        let completeNUM: i16 = 2;
+        for index in 0..fileLIST.len() {
+            unsafe {
+                let fileBOX = fileLIST.get_unchecked(index).to_string();
+                //is_complete(&fileBOX, completeNUM)
+                let outBOX = is_complete(&fileBOX, completeNUM);
+                testLIST.push(outBOX);
+            }
+        }
+
+        //this is the last one, the VScode fails
+        //because it detects the crdownload before it
+        //detects the vscode installer, so it returns false
+        //until all files are done
+        assert_eq!(testLIST[0], "False");
+        assert_eq!(testLIST[1], "True");
+        assert_eq!(testLIST[2], "True");
+        assert_eq!(testLIST[3], "True");
+        assert_eq!(testLIST[4], "False");
+        
     }
 
+    /*
     #[test]
     fn setup_downloads_error_msg(){
-        assert_eq!(setup_downloads(), "")
+
     }
 
     #[test]
     fn create_directories_error_msg(){
-        assert_eq!(create_directories(), "")
+
     }
 
     #[test]
     fn set_path_error_msg(){
-        assert_eq!(set_path(), "")
+
     }
 
     #[test]
     fn show_licences_error_msg(){
-        assert_eq!(show_licences(), "")
+
     }
 
     #[test]
     fn create_package_error_msg(){
-        assert_eq!(create_package(), "")
-    }
 
+    }
+    */
     #[test]
     fn start_downloads_linux_apt(){
         //this works in linux, mac and windows ;)
