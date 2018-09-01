@@ -500,10 +500,8 @@ mod tests {
                     ];
 
         for index in 0..fileLIST.len() {
-            unsafe {
-                let fileBOX = fileLIST.get_unchecked(index).to_string();
+                let fileBOX = fileLIST.get(index).unwrap().to_string();
                 assert_eq!(start_downloads(&fileBOX)[2], "none");
-            }
         }
     }
     */
@@ -527,12 +525,10 @@ mod tests {
         let mut testLIST: Vec<String> = [].to_vec();
         let completeNUM: i16 = 5;
         for index in 0..fileLIST.len() {
-            unsafe {
-                let fileBOX = fileLIST.get_unchecked(index).to_string();
-                //is_complete(&fileBOX, completeNUM)
-                let outBOX = is_complete(&fileBOX, completeNUM);
-                testLIST.push(outBOX);
-            }
+            let fileBOX = fileLIST.get(index).unwrap().to_string();
+            //is_complete(&fileBOX, completeNUM)
+            let outBOX = is_complete(&fileBOX, completeNUM);
+            testLIST.push(outBOX);
         }
         
         assert_eq!(testLIST[0], "True");
@@ -545,12 +541,10 @@ mod tests {
         let mut testLIST: Vec<String> = [].to_vec();
         let completeNUM: i16 = 2;
         for index in 0..fileLIST.len() {
-            unsafe {
-                let fileBOX = fileLIST.get_unchecked(index).to_string();
+                let fileBOX = fileLIST.get(index).unwrap().to_string();
                 //is_complete(&fileBOX, completeNUM)
                 let outBOX = is_complete(&fileBOX, completeNUM);
                 testLIST.push(outBOX);
-            }
         }
 
         //this is the last one, the VScode fails
