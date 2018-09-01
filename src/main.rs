@@ -244,16 +244,22 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 ///     return outBOX
 /// ```
 fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
+    //sets the default value for the output
+    let outBOX: String = "None".to_string();
     //this sets the path to the downloads folder
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = env::home_dir().unwrap();
-            let mut downloadsPATH = path.to_str().unwrap().to_owned();
+            let mut downloadsPATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
             downloadsPATH += "\\Downloads";
             downloadsPATH
         }else if cfg!(unix){
             let path = env::home_dir().unwrap();
-            let mut downloadsPATH = path.to_str().unwrap().to_owned();
+            let mut downloadsPATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
             downloadsPATH += "/Downloads";
             downloadsPATH
         } else {
@@ -266,7 +272,9 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
  
         if cfg!(windows){
             let path = env::home_dir().unwrap();
-            let mut testPATH = path.to_str().unwrap().to_owned();
+            let mut testPATH = path.to_str()
+                                   .unwrap()
+                                   .to_owned();
             if completeNUM == 5 {
                 testPATH += "\\Desktop\\share\\test_data\\five_complete";
             } else {
@@ -275,7 +283,9 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
             testPATH
         }else if cfg!(unix){
             let path = env::home_dir().unwrap();
-            let mut testPATH = path.to_str().unwrap().to_owned();
+            let mut testPATH = path.to_str()
+                                   .unwrap()
+                                   .to_owned();
             if completeNUM == 5 {
                 testPATH += "/Desktop/share/test_data/five_complete";
             } else {
@@ -300,22 +310,22 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
     };
 
     //how many unwraps can one rapper stack if
-    //one rapper could stack unwraps delicately
-    let outBOX: String = "None".to_string();
+    //one rapper could stack unwraps delicately    
     for downloadBOX in filesInDownloads {
-        let downloadNAME = &downloadBOX.unwrap()
+        let downloadNAME: String = downloadBOX.unwrap()
                                         .file_name()
                                         .into_string()
-                                        .unwrap();
+                                        .unwrap()
+                                        .to_owned();
 
         let found: String = {
             //this was an amazing oversight, that literally took a debugger to see was wrong
             //'in' || '.contains()' != '==', cos duh
-            if downloadNAME.to_owned().contains(&fileBOX) || downloadNAME.to_owned().contains(&"crdownload"[..]) {
+            if downloadNAME.contains(&fileBOX) || downloadNAME.contains(&"crdownload"[..]) {
 
-                if downloadNAME.to_owned().contains(&"part"[..]) {
+                if downloadNAME.contains(&"part"[..]) {
                     return "False".to_string();
-                } else if downloadNAME.to_owned().contains(&"partial"[..]) {
+                } else if downloadNAME.contains(&"partial"[..]) {
                     return "False".to_string();
 
                 //we should do something special for crdownload,
@@ -324,7 +334,7 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
                 //after the for loop is done with no match, it can check if there was a crdownload
                 //and assume then that the file is in progress and change the None return
                 //to a False
-                } else if downloadNAME.to_owned().contains(&"crdownload"[..]) {
+                } else if downloadNAME.contains(&"crdownload"[..]) {
                     //unconfirmed += 1
                     //continue
                     return "False".to_string();
