@@ -378,6 +378,7 @@ fn create_package() -> String {
 fn main() {
     check_dirs();
 
+    //need to add starUML to this list
     let fileLIST = [
                     "git-".to_string(),
                     "co_demo0-".to_string(), 
@@ -385,6 +386,9 @@ fn main() {
                     "VSCode-".to_string(),
                     "android-".to_string()
                 ];
+
+    let mut completeLIST: Vec<String> = [].to_vec();
+
 
     //this will now be made once I've made a basic function model
     /*
