@@ -309,9 +309,11 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
         }
     };
 
+    let mut unconfirmed: i16 = 0;
     //how many unwraps can one rapper stack if
-    //one rapper could stack unwraps delicately    
+    //one rapper could stack unwraps delicately
     for downloadBOX in filesInDownloads {
+        
         let downloadNAME: String = downloadBOX.unwrap()
                                         .file_name()
                                         .into_string()
@@ -335,10 +337,8 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
                 //and assume then that the file is in progress and change the None return
                 //to a False
                 } else if downloadNAME.contains(&"crdownload"[..]) {
-                    //unconfirmed += 1
-                    //continue
-                    return "False".to_string();
-
+                    unconfirmed += 1;
+                    continue
                 } else {
                     return "True".to_string();
                 }
@@ -349,13 +349,18 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
         };
     
         if found == "None".to_string() {
+
             continue
         } else {
             break
         }
-        
+    
     }
-    return outBOX    
+    if unconfirmed == 0 {
+        return outBOX    
+    } else {
+        return "False".to_string();
+    }
 }
 
 fn setup_downloads() -> String {
