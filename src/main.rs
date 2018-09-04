@@ -4,10 +4,6 @@
 //this fails on UpperHALF case,
 //otherwise it is a good warning
 #![allow(non_camel_case_types)]
-//this is here simply because we unwrap
-//and drop the errors each time we get one
-//and all the green squiggles
-//are very distracting
 
 
 ///TODO
@@ -223,30 +219,34 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 /// [replace all 'is' with '==']
 /// #outBOX is String
 /// def is_complete(fileBOX, completeNUM):
+///     outBOX = None
 ///     filesInDownloads = os.listdir('.')
+///     unconfirmed = 0
 ///     for downloadNAME in filesInDownloads:
 ///         if fileBOX in downloadNAME or "crdownload" in downloadNAME:
+/// 
 ///             if 'part' in downloadNAME:
 ///                 outBOX = False
 ///             elif 'partial'in downloadNAME:
 ///                 outBOX = False
 ///             elif 'crdownload' in downloadNAME:
-///                 outBOX = False
+///                 unconfirmed += 1
+///                 continue
 ///             else:
 ///                 outBOX = True
 ///             break
+/// 
 ///         else:
 ///             outBOX = None
-///     if outBOX is False:
-///         print(fileBOX[:-1]+" is still transfering...")
-///     elif outBOX is None:
-///         print(fileBOX[:-1]+" still has not been started...")
-///     return outBOX
+/// 
+///     if unconfirmed == 0:
+///         return outBOX
+///     else:
+///         return False
 /// ```
 fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
-    //sets the default value for the output
     let outBOX: String = "None".to_string();
-    //this sets the path to the downloads folder
+
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = env::home_dir().unwrap();
@@ -267,7 +267,6 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
         }
     }; 
 
-    //this sets the path to the test_data directory
     let testPATH: String = {
  
         if cfg!(windows){
@@ -297,10 +296,6 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
         }
     };    
    
-    //this responds with an error which is why we didnt
-    //but the unwrap() should panic...
-    //despite that it actually unpacks into the proper string
-    //down below...
     let filesInDownloads: ReadDir = {
         if cfg!(test) {
             fs::read_dir(&testPATH).unwrap()
@@ -321,27 +316,19 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
                                         .to_owned();
 
         let found: String = {
-            //this was an amazing oversight, that literally took a debugger to see was wrong
-            //'in' || '.contains()' != '==', cos duh
             if downloadNAME.contains(&fileBOX) || downloadNAME.contains(&"crdownload"[..]) {
 
                 if downloadNAME.contains(&"part"[..]) {
                     return "False".to_string();
                 } else if downloadNAME.contains(&"partial"[..]) {
                     return "False".to_string();
-
-                //we should do something special for crdownload,
-                //it ought to count a int up to one when it sees a cr dl, but
-                //keep going till it exhausts the for loop looking for a match
-                //after the for loop is done with no match, it can check if there was a crdownload
-                //and assume then that the file is in progress and change the None return
-                //to a False
                 } else if downloadNAME.contains(&"crdownload"[..]) {
                     unconfirmed += 1;
                     continue
                 } else {
                     return "True".to_string();
                 }
+
             } else {
                 "None".to_string();
             }
@@ -349,13 +336,12 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
         };
     
         if found == "None".to_string() {
-
             continue
         } else {
             break
-        }
-    
+        }    
     }
+
     if unconfirmed == 0 {
         return outBOX    
     } else {
@@ -391,9 +377,7 @@ fn create_package() -> String {
 
 fn main() {
     check_dirs();
-    //the order that start_downloads runs through this input
-    //changes based on whether we are stepping, build debug or release
-    //release provides the expected functionality so far each time
+
     let fileLIST = [
                     "git-".to_string(),
                     "co_demo0-".to_string(), 
@@ -402,9 +386,7 @@ fn main() {
                     "android-".to_string()
                 ];
 
-    //this probably doesnt make sense anymore,
-    //we couldnt get the internals of the [is_complete]
-    //function working, so its a moot point
+    //this will now be made once I've made a basic function model
     /*
     for index in 0..fileLIST.len() {
         unsafe {
@@ -423,11 +405,6 @@ fn main() {
     }
     */
 
-    setup_downloads();
-    create_directories();
-    set_path();
-    show_licences();
-    create_package();
 }
 
 #[cfg(test)]
@@ -515,8 +492,8 @@ mod tests {
 
     #[test]
     fn is_complete_offline_switch() {
-        //this should be where we check the test-data folders to ensure
-        //the function gives a good canned result
+        //the offline test gives a good canned result now
+
         //later we will have an online version
         //which will try five times or something and clean up
         let fileLIST = [
@@ -531,7 +508,6 @@ mod tests {
         let completeNUM: i16 = 5;
         for index in 0..fileLIST.len() {
             let fileBOX = fileLIST.get(index).unwrap().to_string();
-            //is_complete(&fileBOX, completeNUM)
             let outBOX = is_complete(&fileBOX, completeNUM);
             testLIST.push(outBOX);
         }
@@ -547,15 +523,10 @@ mod tests {
         let completeNUM: i16 = 2;
         for index in 0..fileLIST.len() {
                 let fileBOX = fileLIST.get(index).unwrap().to_string();
-                //is_complete(&fileBOX, completeNUM)
                 let outBOX = is_complete(&fileBOX, completeNUM);
                 testLIST.push(outBOX);
         }
 
-        //this is the last one, the VScode fails
-        //because it detects the crdownload before it
-        //detects the vscode installer, so it returns false
-        //until all files are done
         assert_eq!(testLIST[0], "False");
         assert_eq!(testLIST[1], "True");
         assert_eq!(testLIST[2], "True");
