@@ -12,13 +12,19 @@
 /// the browser is already running and then ask
 /// the user to start their browser if its not
 /// 
-/// RE: DOWNLOADS ERROR MESSAGE TEST
-/// 
-use std::env;
-extern crate webbrowser;
-use std::process::Command;
+/// RE: pseudoPYTHON equality
+/// rework is_complete and start_downloads
+/// to include StarUML
+///
 use std::fs;
+use std::env;
 use std::fs::ReadDir;
+use std::{thread, time};
+use std::process::Command;
+use std::collections::HashMap;
+
+extern crate webbrowser;
+
 
 ///the [check_dirs] function looks like this
 /// in python:
@@ -49,11 +55,16 @@ fn check_dirs() -> i8 {
     let errorBOX = String::from("This program you've just run does not appear to be in the Downloads folder, please try running it again with it in the Downloads folder");
     
     if pathBOX.contains("Downloads") == false {
-        println!("{}", errorBOX);
-        outBOX += 1;
+        if cfg!(test){
+            outBOX += 1;
+        } else {
+            //this does not correctly see that we are in
+            //dl folder on mac when we put the binary in there
+            //panic!(errorBOX)
+            println!("{}", errorBOX);
+        }
     }
     outBOX
-    //this also needs to sys exit right here
 }
 
 
@@ -124,6 +135,7 @@ fn check_dirs() -> i8 {
 ///
 ///     return testLIST
 ///```
+/// 
 fn start_downloads(fileBOX: &str) -> Vec<String> {  
     //tests pass in linux, mac and windows
 
@@ -131,6 +143,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
     //already has a browser window open
 
     let mut testLIST = vec![
+        "none".to_string(),
         "none".to_string(),
         "none".to_string(),
         "none".to_string(),
@@ -145,7 +158,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         } else if cfg!(target_os = "linux") {
             "linux64_deb"
         } else {
-            "we currently only support Mac OS, Windows 10, and Linux"
+            "we currently only support Mac OS, Windows 10, and Ubuntu"
         }
     };
     testLIST[0] = String::from(vsVersion);
@@ -160,6 +173,29 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         }
     };
     testLIST[1] = String::from(gitURL);
+
+    
+    let umlVersion: &str = {
+        if cfg!(target_os = "windows") {
+            "StarUML%20Setup%203.0.2.exe"
+        } else if cfg!(target_os = "macos") {
+            "StarUML-3.0.2.dmg"
+        } else if cfg!(target_os = "linux") {
+            "StarUML-3.0.2-x86_64.AppImage"
+        } else {
+            "we currently only support Mac OS, Windows 10 and Ubuntu"
+        }
+    };
+    testLIST[2] = String::from(umlVersion);
+
+    if fileBOX == "StarUML-" {
+        let umlURL: String = format!("http://staruml.io/download/releases/{}", umlVersion);
+        let umlURL: &str = &umlURL[..];
+        webbrowser::open(&umlURL)
+                    .expect("there was an error opening the star uml webpage in your browser");
+        return testLIST;
+    }   
+    
     
     if fileBOX == "co_demo0-" {
         webbrowser::open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
@@ -193,10 +229,10 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 
         if output.status.success() {
             let errorBOX = String::from_utf8_lossy(&output.stdout).into_owned();
-            testLIST[3] = errorBOX;
+            testLIST[4] = errorBOX;
         } else {
             let errorBOX = String::from_utf8_lossy(&output.stderr).into_owned();
-            testLIST[3] = errorBOX;
+            testLIST[4] = errorBOX;
         }
         return testLIST;
 
@@ -206,7 +242,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         return testLIST;
 
     } else {
-        testLIST[2] = "the switch branches have all been avoided !!!".to_string();
+        testLIST[3] = "the switch branches have all been avoided !!!".to_string();
         return testLIST;
     }
     
@@ -218,7 +254,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 /// [replace all 'is not' with '!=']
 /// [replace all 'is' with '==']
 /// #outBOX is String
-/// def is_complete(fileBOX, completeNUM):
+/// def is_complete(fileBOX, testNUM):
 ///     outBOX = None
 ///     filesInDownloads = os.listdir('.')
 ///     unconfirmed = 0
@@ -244,7 +280,8 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 ///     else:
 ///         return False
 /// ```
-fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
+/// 
+fn is_complete(fileBOX: &str, testNUM: i16) -> String {
     let outBOX: String = "None".to_string();
 
     let downloadsPATH: String = {
@@ -274,10 +311,10 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
             let mut testPATH = path.to_str()
                                    .unwrap()
                                    .to_owned();
-            if completeNUM == 5 {
+            if testNUM == 5 {
                 testPATH += "\\Desktop\\share\\test_data\\five_complete";
             } else {
-                testPATH += "\\Desktop\\share\\test_data\\three_complete";
+                testPATH += "\\Desktop\\share\\test_data\\four_complete";
             }
             testPATH
         }else if cfg!(unix){
@@ -285,10 +322,10 @@ fn is_complete(fileBOX: &str, completeNUM: i16) -> String {
             let mut testPATH = path.to_str()
                                    .unwrap()
                                    .to_owned();
-            if completeNUM == 5 {
+            if testNUM == 5 {
                 testPATH += "/Desktop/share/test_data/five_complete";
             } else {
-                testPATH += "/Desktop/share/test_data/three_complete";
+                testPATH += "/Desktop/share/test_data/four_complete";
             }
             testPATH
         } else {
@@ -378,42 +415,86 @@ fn create_package() -> String {
 fn main() {
     check_dirs();
 
-    //need to add starUML to this list
-    let fileLIST = [
-                    "git-".to_string(),
-                    "co_demo0-".to_string(), 
-                    "flutter-".to_string(),
-                    "VSCode-".to_string(),
-                    "android-".to_string()
-                ];
+    let mut fileMAP: HashMap<String, String> = [
+        ("StarUML-".to_string(),  "None".to_string()),
+        ("git-".to_string(),      "None".to_string()),
+        ("co_demo0-".to_string(), "None".to_string()),
+        ("flutter-".to_string(),  "None".to_string()),
+        ("VSCode-".to_string(),   "None".to_string()),
+        ("android-".to_string(),  "None".to_string())    
+    ].iter().cloned().collect();
 
-    let mut completeLIST: Vec<String> = [].to_vec();
+    let testNUM: i16 = 0;
+    for fileBOX in fileMAP.clone().keys() {
+        let answerBOX = is_complete(&fileBOX, testNUM);
+        fileMAP.insert(fileBOX.to_string(), answerBOX);
+    }
 
+    let mut promptNUM: i16 = 0;
 
-    //this will now be made once I've made a basic function model
-    /*
-    for index in 0..fileLIST.len() {
-        unsafe {
-            let fileBOX = fileLIST.get_unchecked(index).to_string();
-            loop {
-                let answerBOX = is_complete(&fileBOX);
-                if answerBOX == "None".to_string() {
-                    start_downloads(&fileBOX);
-                } else if answerBOX == "False".to_string() {
-                    continue
-                } else if answerBOX == "True".to_string() {
-                    break
+    let now = time::Instant::now();
+    let promptTIME = time::Duration::from_secs(150);
+
+    'main: loop {
+        for fileBOX in fileMAP.clone().keys() {
+            if fileMAP[fileBOX] == "None".to_string() {
+                start_downloads(&fileBOX);
+            } else {
+                continue;
+            }
+        }
+
+        let sleepTIME = time::Duration::from_secs(60);
+        thread::sleep(sleepTIME);
+        for fileBOX in fileMAP.clone().keys() {
+            let answerBOX = is_complete(&fileBOX, testNUM);
+            fileMAP.insert(fileBOX.to_string(), answerBOX);
+        }
+
+        let mut completeNUM = 0;
+        for fileBOX in fileMAP.clone().keys() {
+            if fileMAP[fileBOX] == "True".to_string() {
+                completeNUM += 1;
+            } else {
+                continue;
+            }
+        }
+
+        if completeNUM == fileMAP.keys().len() {
+            break 'main;
+
+        } else if now.elapsed() > promptTIME {
+            for fileBOX in fileMAP.clone().keys() {
+                if fileMAP["android-"] == "None".to_string() {
+                    if promptNUM < 1 {
+                        println!("you should check your browser to see if the android-studio download has been started \n you will need to select the blue link that ends in \n .exe if you are a Windows user\n .dmg if you are a Mac user \n and \n linux.zip if you are an Ubuntu user");
+                        promptNUM += 1;
+                    } else {
+                        continue;
+                    }
+                } else if fileMAP[fileBOX] == "None".to_string() {
+                    println!("the {} download has not started despite multiple attempts", fileBOX.to_string())  
                 }
             }
         }
     }
-    */
-
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /*
+    #[test]
+    fn main_(){
+        //this test should include placing the files from test in
+        //downloads and seeing if it completes correctly with or without
+        //any of the items complete
+
+        //actually I dont think I can test main without running the whole thing
+        //so maybe this is material for an integration test
+    }
+    */
 
     #[test]
     fn check_dirs_error_msg(){
@@ -468,6 +549,22 @@ mod tests {
         }
     }
 
+    #[test]
+    fn start_downloads_uml_switch() {
+
+        let fileBOX = "StarUML-".to_string();
+        if cfg!(target_os = "macos")  {
+            assert_eq!(start_downloads(&fileBOX)[2], "StarUML-3.0.2.dmg")
+        } else if cfg!(target_os = "windows") {
+            assert_eq!(start_downloads(&fileBOX)[2], "StarUML%20Setup%203.0.2.exe")
+        } else if cfg!(target_os = "linux") {
+            assert_eq!(start_downloads(&fileBOX)[2], "StarUML-3.0.2-x86_64.AppImage")        
+        } else {
+            assert_eq!(start_downloads(&fileBOX)[2], "browser install currently only supports Mac OS, Windows 10")
+        }
+    }
+
+
     /*
     #[test]
     //THIS TEST SHOULD NOT BE RUN EVERYTIME
@@ -477,7 +574,8 @@ mod tests {
         //this works in linux, mac and windows
         //this should control for some conditions, 
         //like no internet access, slow internet, firewalls, proxies etc
-        let fileLIST = [                        
+        let fileLIST = [
+                        "StarUML-".to_string(),                
                         "git-".to_string(),
                         "co_demo0-".to_string(), 
                         "flutter-".to_string(),
@@ -487,7 +585,7 @@ mod tests {
 
         for index in 0..fileLIST.len() {
                 let fileBOX = fileLIST.get(index).unwrap().to_string();
-                assert_eq!(start_downloads(&fileBOX)[2], "none");
+                assert_eq!(start_downloads(&fileBOX)[3], "none");
         }
     }
     */
@@ -500,42 +598,46 @@ mod tests {
 
         //later we will have an online version
         //which will try five times or something and clean up
-        let fileLIST = [
-                        "git-".to_string(),
-                        "co_demo0-".to_string(), 
-                        "flutter-".to_string(),
-                        "VSCode-".to_string(),
-                        "android-".to_string()
-                    ];
+        //need to add starUML to this list
+        let fileLIST: Vec<String> = vec!(
+                    "StarUML-".to_string(),
+                    "git-".to_string(),
+                    "co_demo0-".to_string(), 
+                    "flutter-".to_string(),
+                    "VSCode-".to_string(),
+                    "android-".to_string()
+                    );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let completeNUM: i16 = 5;
+        let testNUM: i16 = 5;
         for index in 0..fileLIST.len() {
             let fileBOX = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&fileBOX, completeNUM);
+            let outBOX = is_complete(&fileBOX, testNUM);
             testLIST.push(outBOX);
         }
         
-        assert_eq!(testLIST[0], "True");
+        assert_eq!(testLIST[0], "None");
         assert_eq!(testLIST[1], "True");
         assert_eq!(testLIST[2], "True");
         assert_eq!(testLIST[3], "True");
         assert_eq!(testLIST[4], "True");
+        assert_eq!(testLIST[5], "True");
         
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let completeNUM: i16 = 2;
+        let testNUM: i16 = 2;
         for index in 0..fileLIST.len() {
                 let fileBOX = fileLIST.get(index).unwrap().to_string();
-                let outBOX = is_complete(&fileBOX, completeNUM);
+                let outBOX = is_complete(&fileBOX, testNUM);
                 testLIST.push(outBOX);
         }
 
-        assert_eq!(testLIST[0], "False");
-        assert_eq!(testLIST[1], "True");
+        assert_eq!(testLIST[0], "True");
+        assert_eq!(testLIST[1], "False");
         assert_eq!(testLIST[2], "True");
         assert_eq!(testLIST[3], "True");
-        assert_eq!(testLIST[4], "False");
+        assert_eq!(testLIST[4], "True");
+        assert_eq!(testLIST[5], "False");
         
     }
 
