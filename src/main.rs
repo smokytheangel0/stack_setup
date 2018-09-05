@@ -60,7 +60,7 @@ extern crate webbrowser;
 /// ```
 /// 
 fn check_dirs() -> i8 {
-    //this works in Mac, Linux and Windows
+    //this works in Windows
     let mut outBOX = 0;
 
     //might definitely be a better way to do this
@@ -102,45 +102,45 @@ fn check_dirs() -> i8 {
 ///
 ///     if platform.uname()[0] is "Windows":
 ///         vsVersion = "win32"
-///         gitURL = "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
+///         gitURL = "https://github.com/gitfor-windows/git/releases/download/v2.18.0.windows.1/git2.18.0-64-bit.exe"
 ///     elif platform.uname()[0] is "Linux":
 ///         vsVersion = "linux64_deb"
 ///         gitURL = "browser install currently only support Mac OS and Windows 10"
 ///     elif platform.uname()[0] is "Darwin":
 ///         vsVersion = "osx"
-///         gitURL = "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+///         gitURL = "https://sourceforge.net/projects/gitosx-installer/files/git2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
 ///     else:
 ///         vsVersion = "we currently only support Mac OS, Windows 10, and Linux"
 ///     testLIST[0] = vsVersion
 ///     testLIST[1] = gitURL
 ///
-///     if fileBOX is "co_demo0-":
+///     if fileBOX is "co_demo0":
 ///         try:
 ///             webbrowser.open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
 ///         except:
 ///             print("there was an error opening the co_demo web page in your browser")
-///     elif fileBOX is "flutter-":
+///     elif fileBOX is "flutter":
 ///         try:
 ///             webbrowser.open("https://github.com/flutter/flutter/archive/master.zip")
 ///         except:
 ///             print("there was an error opening the flutter web page in your browser")
-///     elif fileBOX is "VSCode-":
+///     elif fileBOX is "VSCode":
 ///         try:
 ///             webbrowser.open("https://code.visualstudio.com/docs/?dv={}"+vsVersion)
 ///         except:
 ///             print("there was an error opening the vs Code web page in your browser")
-///     elif fileBOX is "git-" and platform.uname()[0] is not "Linux":
+///     elif fileBOX is "git" and platform.uname()[0] is not "Linux":
 ///         try:
 ///             webbrowser.open(gitURL)
 ///         except:
 ///             print("there was an error opening git in your browser")
-///     elif fileBOX is "git-" and platform.uname()[0] is "Linux":
+///     elif fileBOX is "git" and platform.uname()[0] is "Linux":
 ///         try:
 ///             print("your computer will ask for your password to install git")
 ///             os.system("sudo apt install git")
 ///         except:
 ///             print("there was an error installing git with apt")
-///     elif fileBOX is "android-":
+///     elif fileBOX is "android":
 ///         try:
 ///             webbrowser.open("https://developer.android.com/studio/#downloads")
 ///         except:
@@ -182,7 +182,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         if cfg!(target_os = "windows") {
             "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
         } else if cfg!(target_os = "macos") {
-            "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+            "https://sourceforge.net/projects/gitosx-installer/files/git2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
         } else {
             "git browser install currently only support Mac OS and Windows 10"
         }
@@ -194,16 +194,16 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         if cfg!(target_os = "windows") {
             "StarUML%20Setup%203.0.2.exe"
         } else if cfg!(target_os = "macos") {
-            "StarUML-3.0.2.dmg"
+            "StarUML3.0.2.dmg"
         } else if cfg!(target_os = "linux") {
-            "StarUML-3.0.2-x86_64.AppImage"
+            "StarUML3.0.2-x86_64.AppImage"
         } else {
             "we currently only support Mac OS, Windows 10 and Ubuntu"
         }
     };
     testLIST[2] = String::from(umlVersion);
 
-    if fileBOX == "StarUML-" {
+    if fileBOX == "StarUML" {
         let umlURL: String = format!("http://staruml.io/download/releases/{}", umlVersion);
         let umlURL: &str = &umlURL[..];
         webbrowser::open(&umlURL)
@@ -212,29 +212,29 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
     }   
     
     
-    if fileBOX == "co_demo0-" {
+    if fileBOX == "co_demo0" {
         webbrowser::open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
                     .expect("there was an error opening the co_demo web page in your browser");
         return testLIST;
 
-    } else if fileBOX == "flutter-" {
+    } else if fileBOX == "flutter" {
         webbrowser::open("https://github.com/flutter/flutter/archive/master.zip")
                     .expect("there was an error opening the flutter web page in your browser");
         return testLIST;
 
-    } else if fileBOX == "VSCode-" {
+    } else if fileBOX == "VSCode" {
         let vsURL: String = format!("https://code.visualstudio.com/docs/?dv={}", vsVersion); 
         let vsURL: &str = &vsURL[..];
         webbrowser::open(&vsURL)
                     .expect("there was an error opening the vs Code web page in your browser");
         return testLIST;
 
-    } else if fileBOX == "git-" && !cfg!(target_os = "linux") {
+    } else if fileBOX == "git" && !cfg!(target_os = "linux") {
         webbrowser::open(gitURL)
                     .expect("there was an error opening git in your browser");
         return testLIST;
 
-    } else if fileBOX == "git-" && cfg!(target_os = "linux") {
+    } else if fileBOX == "git" && cfg!(target_os = "linux") {
         println!("please enter your password to install git !>");
         let output = Command::new("sudo")
             .arg("apt").arg("install").arg("git")
@@ -251,7 +251,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         }
         return testLIST;
 
-    } else if fileBOX == "android-" {
+    } else if fileBOX == "android" {
         webbrowser::open("https://developer.android.com/studio/#downloads")
                     .expect("there was an error opening the android studio web page in your browser");
         return testLIST;
@@ -366,10 +366,17 @@ fn is_complete(fileBOX: &str, testNUM: i16) -> String {
                                         .into_string()
                                         .unwrap()
                                         .to_owned();
+        
+        let alternateBOX: &str = { 
+            if fileBOX == "git".to_string() {
+                "Git"
+            } else {
+                "None"
+            }
+        };
 
         let found: String = {
-            if downloadNAME.contains(&fileBOX) || downloadNAME.contains(&"crdownload"[..]) {
-
+            if downloadNAME.contains(&fileBOX) || downloadNAME.contains(&"crdownload"[..]) || downloadNAME.contains(&alternateBOX[..]) {
                 if downloadNAME.contains(&"part"[..]) {
                     return "False".to_string();
                 } else if downloadNAME.contains(&"partial"[..]) {
@@ -431,21 +438,26 @@ fn main() {
     check_dirs();
 
     let mut fileMAP: HashMap<String, String> = [
-        ("StarUML-".to_string(),  "None".to_string()),
-        ("git-".to_string(),      "None".to_string()),
-        ("co_demo0-".to_string(), "None".to_string()),
-        ("flutter-".to_string(),  "None".to_string()),
-        ("VSCode-".to_string(),   "None".to_string()),
-        ("android-".to_string(),  "None".to_string())    
+        ("StarUML".to_string(),  "None".to_string()),
+        ("git".to_string(),      "None".to_string()),
+        ("co_demo0".to_string(), "None".to_string()),
+        ("flutter".to_string(),  "None".to_string()),
+        ("VSCode".to_string(),   "None".to_string()),
+        ("android".to_string(),  "None".to_string())    
     ].iter().cloned().collect();
 
     let testNUM: i16 = 0;
     for fileBOX in fileMAP.clone().keys() {
         let answerBOX = is_complete(&fileBOX, testNUM);
+
+        if answerBOX == "True".to_string() {
+            println!("{} is already complete!\n", fileBOX)
+        } else {
+            println!("{} has not yet been completed\n", fileBOX)
+        }
+
         fileMAP.insert(fileBOX.to_string(), answerBOX);
     }
-
-    let mut promptNUM: i16 = 0;
 
     let now = time::Instant::now();
     let promptTIME = time::Duration::from_secs(150);
@@ -453,12 +465,23 @@ fn main() {
     'main: loop {
         for fileBOX in fileMAP.clone().keys() {
             if fileMAP[fileBOX] == "None".to_string() {
+                if fileBOX.to_owned() == "android".to_string() {
+                    println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
+                } else {
+                    println!("starting {} download now!\n", fileBOX);
+                }
                 start_downloads(&fileBOX);
             } else {
-                continue;
+                if fileBOX.to_owned() == "android".to_string() {
+                    println!("\nthank you for starting the android download!\n");
+                    continue;
+                } else {
+                    continue;
+                }
             }
         }
 
+        println!("waiting for browser to start downloads...\n");
         let sleepTIME = time::Duration::from_secs(60);
         thread::sleep(sleepTIME);
         for fileBOX in fileMAP.clone().keys() {
@@ -476,23 +499,20 @@ fn main() {
         }
 
         if completeNUM == fileMAP.keys().len() {
+            println!("\n\nall the downloads are complete!/n");
             break 'main;
 
         } else if now.elapsed() > promptTIME {
             for fileBOX in fileMAP.clone().keys() {
-                if fileMAP["android-"] == "None".to_string() {
-                    if promptNUM < 1 {
-                        println!("you should check your browser to see if the android-studio download has been started \n you will need to select the blue link that ends in \n .exe if you are a Windows user\n .dmg if you are a Mac user \n and \n linux.zip if you are an Ubuntu user");
-                        promptNUM += 1;
-                    } else {
-                        continue;
-                    }
-                } else if fileMAP[fileBOX] == "None".to_string() {
-                    println!("the {} download has not started despite multiple attempts", fileBOX.to_string())  
+                if fileMAP[fileBOX] == "None".to_string() {
+                    println!("the {} download has not started despite multiple attempts\n", fileBOX.to_string())  
                 }
             }
         }
     }
+    let sleepTIME = time::Duration::from_secs(60);
+    thread::sleep(sleepTIME);
+
 }
 
 #[cfg(test)]
@@ -556,7 +576,7 @@ mod tests {
         //this works in linux, mac and windows
         let fileBOX = "flutter".to_string();
         if cfg!(target_os = "macos")  {
-            assert_eq!(start_downloads(&fileBOX)[1], "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
+            assert_eq!(start_downloads(&fileBOX)[1], "https://sourceforge.net/projects/gitosx-installer/files/git2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
         } else if cfg!(target_os = "windows") {
             assert_eq!(start_downloads(&fileBOX)[1], "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
         } else {
@@ -566,14 +586,14 @@ mod tests {
 
     #[test]
     fn start_downloads_uml_switch() {
-
-        let fileBOX = "StarUML-".to_string();
+        //this works in mac and windows
+        let fileBOX = "StarUML".to_string();
         if cfg!(target_os = "macos")  {
-            assert_eq!(start_downloads(&fileBOX)[2], "StarUML-3.0.2.dmg")
+            assert_eq!(start_downloads(&fileBOX)[2], "StarUML3.0.2.dmg")
         } else if cfg!(target_os = "windows") {
             assert_eq!(start_downloads(&fileBOX)[2], "StarUML%20Setup%203.0.2.exe")
         } else if cfg!(target_os = "linux") {
-            assert_eq!(start_downloads(&fileBOX)[2], "StarUML-3.0.2-x86_64.AppImage")        
+            assert_eq!(start_downloads(&fileBOX)[2], "StarUML3.0.2-x86_64.AppImage")        
         } else {
             assert_eq!(start_downloads(&fileBOX)[2], "browser install currently only supports Mac OS, Windows 10")
         }
@@ -590,12 +610,12 @@ mod tests {
         //this should control for some conditions, 
         //like no internet access, slow internet, firewalls, proxies etc
         let fileLIST = [
-                        "StarUML-".to_string(),                
-                        "git-".to_string(),
-                        "co_demo0-".to_string(), 
-                        "flutter-".to_string(),
-                        "VSCode-".to_string(),
-                        "android-".to_string()
+                        "StarUML".to_string(),                
+                        "git".to_string(),
+                        "co_demo0".to_string(), 
+                        "flutter".to_string(),
+                        "VSCode".to_string(),
+                        "android".to_string()
                     ];
 
         for index in 0..fileLIST.len() {
@@ -609,18 +629,18 @@ mod tests {
 
     #[test]
     fn is_complete_offline_switch() {
-        //the offline test gives a good canned result now
+        //this works in mac and windows
 
         //later we will have an online version
         //which will try five times or something and clean up
         //need to add starUML to this list
         let fileLIST: Vec<String> = vec!(
-                    "StarUML-".to_string(),
-                    "git-".to_string(),
-                    "co_demo0-".to_string(), 
-                    "flutter-".to_string(),
-                    "VSCode-".to_string(),
-                    "android-".to_string()
+                    "StarUML".to_string(),
+                    "git".to_string(),
+                    "co_demo0".to_string(), 
+                    "flutter".to_string(),
+                    "VSCode".to_string(),
+                    "android".to_string()
                     );
 
         let mut testLIST: Vec<String> = [].to_vec();
