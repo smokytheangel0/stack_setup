@@ -182,7 +182,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         if cfg!(target_os = "windows") {
             "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
         } else if cfg!(target_os = "macos") {
-            "https://sourceforge.net/projects/gitosx-installer/files/git2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+            "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
         } else {
             "git browser install currently only supports Mac OS and Windows 10"
         }
@@ -591,7 +591,7 @@ mod tests {
         //this works in linux, mac and windows
         let fileBOX = "flutter".to_string();
         if cfg!(target_os = "macos")  {
-            assert_eq!(start_downloads(&fileBOX)[1], "https://sourceforge.net/projects/gitosx-installer/files/git2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
+            assert_eq!(start_downloads(&fileBOX)[1], "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
         } else if cfg!(target_os = "windows") {
             assert_eq!(start_downloads(&fileBOX)[1], "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
         } else {
