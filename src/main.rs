@@ -298,7 +298,8 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 /// 
 fn is_complete(fileBOX: &str, testNUM: i16) -> String {
     let outBOX: String = "None".to_string();
-
+//this needs to nest one folder deep to eliminate previous crdownloads
+//causing problems
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = env::home_dir().unwrap();
