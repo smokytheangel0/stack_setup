@@ -485,6 +485,8 @@ fn main() {
                 start_downloads(&fileBOX);
             } else {
                 if fileBOX.to_owned() == "android".to_string() {
+                    //sometimes fileBOX is not none but has not started yet
+                    //always when there is an unrelated crdownload in the folder
                     println!("\nthank you for starting the android download!\n");
                     continue;
                 } else {
