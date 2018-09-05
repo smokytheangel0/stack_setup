@@ -449,7 +449,7 @@ fn create_package() -> String {
 
 fn main() {
     check_dirs();
-
+    //this eventually needs to be ordered with a non std crate
     let mut fileMAP: HashMap<String, String> = [
         ("StarUML".to_string(),  "None".to_string()),
         ("git".to_string(),      "None".to_string()),
@@ -471,7 +471,7 @@ fn main() {
 
         fileMAP.insert(fileBOX.to_string(), answerBOX);
     }
-
+    //needs to give instructions to user before the crazy tab storm
     let now = time::Instant::now();
     let promptTIME = time::Duration::from_secs(150);
 
