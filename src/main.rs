@@ -29,7 +29,8 @@
 /// 
 /// RE: pseudoPYTHON equality
 /// rework is_complete and start_downloads
-/// to include StarUML
+/// to include StarUML and functioning changes
+/// to is_complete
 ///
 use std::fs;
 use std::env;
@@ -450,7 +451,6 @@ fn main() {
     check_dirs();
 
     let mut fileMAP: HashMap<String, String> = [
-        //on linux starUML doesnt download, it opens an xml file
         ("StarUML".to_string(),  "None".to_string()),
         ("git".to_string(),      "None".to_string()),
         ("co_demo0".to_string(), "None".to_string()),
@@ -496,7 +496,7 @@ fn main() {
             }
         }
 
-        //git prompt never shows up even after everything else...
+        //git prompt never shows up even after everything else... on linux
         println!("waiting for browser to start downloads...\n");
         let sleepTIME = time::Duration::from_secs(60);
         thread::sleep(sleepTIME);
@@ -602,7 +602,7 @@ mod tests {
 
     #[test]
     fn start_downloads_uml_switch() {
-        //this works in mac and windows
+        //this works in mac windows and linux
         let fileBOX = "StarUML".to_string();
         if cfg!(target_os = "macos")  {
             assert_eq!(start_downloads(&fileBOX)[2], "StarUML-3.0.2.dmg")
