@@ -299,8 +299,8 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 /// 
 fn is_complete(fileBOX: &str, testNUM: i16) -> String {
     let outBOX: String = "None".to_string();
-//this needs to nest one folder deep to eliminate previous crdownloads
-//causing problems
+    //we arent going to be able to nest, because
+    //we do not control the browser download location
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = env::home_dir().unwrap();
@@ -487,18 +487,12 @@ fn main() {
                 }
                 start_downloads(&fileBOX);
             } else {
-                if fileBOX.to_owned() == "android".to_string() {
-                    //sometimes fileBOX is not none but has not started yet
-                    //always when there is an unrelated crdownload in the folder
-                    println!("\nthank you for starting the android download!\n");
-                    continue;
-                } else {
-                    continue;
-                }
+                continue
             }
         }
 
-        //git prompt never shows up even after everything else... on linux
+        //git prompt never shows up even after everything else...
+        //on budgie, ubuntu studio appears to show the prompt fine
         println!("waiting for browser to start downloads...\n");
         let sleepTIME = time::Duration::from_secs(60);
         thread::sleep(sleepTIME);
