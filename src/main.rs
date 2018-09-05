@@ -476,6 +476,8 @@ fn main() {
     let promptTIME = time::Duration::from_secs(150);
 
     'main: loop {
+        //this needs to see if output from git install was positive
+        //and set map true if it is, cos it loops until you ctr-c it
         for fileBOX in fileMAP.clone().keys() {
             if fileMAP[fileBOX] == "None".to_string() {
                 if fileBOX.to_owned() == "android".to_string() {
