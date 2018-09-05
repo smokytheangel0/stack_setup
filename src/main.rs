@@ -194,7 +194,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         if cfg!(target_os = "windows") {
             "StarUML%20Setup%203.0.2.exe"
         } else if cfg!(target_os = "macos") {
-            "StarUML3.0.2.dmg"
+            "StarUML-3.0.2.dmg"
         } else if cfg!(target_os = "linux") {
             "StarUML-3.0.2-x86_64.AppImage"
         } else {
@@ -602,11 +602,11 @@ mod tests {
         //this works in mac and windows
         let fileBOX = "StarUML".to_string();
         if cfg!(target_os = "macos")  {
-            assert_eq!(start_downloads(&fileBOX)[2], "StarUML3.0.2.dmg")
+            assert_eq!(start_downloads(&fileBOX)[2], "StarUML-3.0.2.dmg")
         } else if cfg!(target_os = "windows") {
             assert_eq!(start_downloads(&fileBOX)[2], "StarUML%20Setup%203.0.2.exe")
         } else if cfg!(target_os = "linux") {
-            assert_eq!(start_downloads(&fileBOX)[2], "StarUML3.0.2-x86_64.AppImage")        
+            assert_eq!(start_downloads(&fileBOX)[2], "StarUML-3.0.2-x86_64.AppImage")        
         } else {
             assert_eq!(start_downloads(&fileBOX)[2], "we currently only support Mac OS, Windows 10, and Ubuntu")
         }
