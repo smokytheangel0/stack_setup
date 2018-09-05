@@ -67,7 +67,7 @@ fn check_dirs() -> i8 {
     let pathBuffer = env::current_dir().ok().unwrap();
     let pathBOX = pathBuffer.to_str().unwrap();
 
-    let errorBOX = String::from("This program you've just run does not appear to be in the Downloads folder, please try running it again with it in the Downloads folder");
+    let errorBOX = String::from("This program you've just run does not appear to be in the Downloads folder, \nplease try running it again with it in the Downloads folder\n");
     
     if pathBOX.contains("Downloads") == false {
         if cfg!(test){
@@ -110,7 +110,7 @@ fn check_dirs() -> i8 {
 ///         vsVersion = "osx"
 ///         gitURL = "https://sourceforge.net/projects/gitosx-installer/files/git2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
 ///     else:
-///         vsVersion = "we currently only support Mac OS, Windows 10, and Linux"
+///         vsVersion = "we currently only support Mac OS, Windows 10, and Ubuntu"
 ///     testLIST[0] = vsVersion
 ///     testLIST[1] = gitURL
 ///
@@ -184,7 +184,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         } else if cfg!(target_os = "macos") {
             "https://sourceforge.net/projects/gitosx-installer/files/git2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
         } else {
-            "git browser install currently only support Mac OS and Windows 10"
+            "git browser install currently only supports Mac OS and Windows 10"
         }
     };
     testLIST[1] = String::from(gitURL);
@@ -196,9 +196,9 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         } else if cfg!(target_os = "macos") {
             "StarUML3.0.2.dmg"
         } else if cfg!(target_os = "linux") {
-            "StarUML3.0.2-x86_64.AppImage"
+            "StarUML-3.0.2-x86_64.AppImage"
         } else {
-            "we currently only support Mac OS, Windows 10 and Ubuntu"
+            "we currently only support Mac OS, Windows 10, and Ubuntu"
         }
     };
     testLIST[2] = String::from(umlVersion);
@@ -367,7 +367,7 @@ fn is_complete(fileBOX: &str, testNUM: i16) -> String {
                                         .unwrap()
                                         .to_owned();
         
-        let alternateBOX: &str = { 
+        let alternateGIT: &str = { 
             if fileBOX == "git".to_string() {
                 "Git"
             } else {
@@ -375,8 +375,19 @@ fn is_complete(fileBOX: &str, testNUM: i16) -> String {
             }
         };
 
+        let alternateCODE: &str = {
+            if fileBOX == "VSCode".to_string() {
+                "code"
+            } else {
+                "None"
+            }
+        };
+
         let found: String = {
-            if downloadNAME.contains(&fileBOX) || downloadNAME.contains(&"crdownload"[..]) || downloadNAME.contains(&alternateBOX[..]) {
+            if downloadNAME.contains(&fileBOX) || 
+            downloadNAME.contains(&"crdownload"[..]) || 
+            downloadNAME.contains(&alternateGIT[..]) ||
+            downloadNAME.contains(&alternateCODE[..]) {
                 if downloadNAME.contains(&"part"[..]) {
                     return "False".to_string();
                 } else if downloadNAME.contains(&"partial"[..]) {
@@ -438,6 +449,7 @@ fn main() {
     check_dirs();
 
     let mut fileMAP: HashMap<String, String> = [
+        //on linux starUML doesnt download, it opens an xml file
         ("StarUML".to_string(),  "None".to_string()),
         ("git".to_string(),      "None".to_string()),
         ("co_demo0".to_string(), "None".to_string()),
@@ -481,6 +493,7 @@ fn main() {
             }
         }
 
+        //git prompt never shows up even after everything else...
         println!("waiting for browser to start downloads...\n");
         let sleepTIME = time::Duration::from_secs(60);
         thread::sleep(sleepTIME);
@@ -550,7 +563,7 @@ mod tests {
             downloadsPATH += "/Downloads";
             env::set_current_dir(&downloadsPATH);
         }else{
-            panic!("we currently only support Windows 10, Mac OS and Linux");
+            panic!("we currently only support Mac OS, Windows 10, and Ubuntu");
         }
 
         assert_eq!(check_dirs(), 0);
@@ -567,7 +580,7 @@ mod tests {
         }else if cfg!(target_os = "linux") {
             assert_eq!(start_downloads(&fileBOX)[0], "linux64_deb")
         } else {
-            assert_eq!(start_downloads(&fileBOX)[0], "we currently only support Mac OS, Windows 10, and Linux")
+            assert_eq!(start_downloads(&fileBOX)[0], "we currently only support Mac OS, Windows 10, and Ubuntu")
         }
     }
 
@@ -580,7 +593,7 @@ mod tests {
         } else if cfg!(target_os = "windows") {
             assert_eq!(start_downloads(&fileBOX)[1], "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
         } else {
-            assert_eq!(start_downloads(&fileBOX)[1], "browser install currently only supports Mac OS, Windows 10")
+            assert_eq!(start_downloads(&fileBOX)[1], "git browser install currently only supports Mac OS and Windows 10")
         }
     }
 
@@ -595,7 +608,7 @@ mod tests {
         } else if cfg!(target_os = "linux") {
             assert_eq!(start_downloads(&fileBOX)[2], "StarUML3.0.2-x86_64.AppImage")        
         } else {
-            assert_eq!(start_downloads(&fileBOX)[2], "browser install currently only supports Mac OS, Windows 10")
+            assert_eq!(start_downloads(&fileBOX)[2], "we currently only support Mac OS, Windows 10, and Ubuntu")
         }
     }
 
