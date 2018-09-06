@@ -37,9 +37,10 @@ use std::env;
 use std::fs::ReadDir;
 use std::{thread, time};
 use std::process::Command;
-use std::collections::HashMap;
 
 extern crate webbrowser;
+extern crate indexmap;
+use indexmap::IndexMap;
 
 
 ///the [check_dirs] function looks like this
@@ -449,8 +450,8 @@ fn create_package() -> String {
 
 fn main() {
     check_dirs();
-    //this eventually needs to be ordered with a non std crate
-    let mut fileMAP: HashMap<String, String> = [
+
+    let mut fileMAP: IndexMap<String, String> = [
         ("StarUML".to_string(),  "None".to_string()),
         ("git".to_string(),      "None".to_string()),
         ("co_demo0".to_string(), "None".to_string()),
@@ -476,8 +477,6 @@ fn main() {
     let promptTIME = time::Duration::from_secs(150);
 
     'main: loop {
-        //this needs to see if output from git install was positive
-        //and set map true if it is, cos it loops until you ctr-c it
         for fileBOX in fileMAP.clone().keys() {
             if fileMAP[fileBOX] == "None".to_string() {
                 if fileBOX.to_owned() == "android".to_string() {
@@ -485,14 +484,15 @@ fn main() {
                 } else {
                     println!("starting {} download now!\n", fileBOX);
                 }
-                start_downloads(&fileBOX);
+                let testLIST = start_downloads(&fileBOX);
+                if testLIST[4] == "0" {
+                    fileMAP.insert("git".to_string(),"True".to_string());
+                }
             } else {
                 continue
             }
         }
 
-        //git prompt never shows up even after everything else...
-        //on budgie, ubuntu studio appears to show the prompt fine
         println!("waiting for browser to start downloads...\n");
         let sleepTIME = time::Duration::from_secs(60);
         thread::sleep(sleepTIME);
