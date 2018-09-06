@@ -237,7 +237,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         return testLIST;
 
     } else if fileBOX == "git" && cfg!(target_os = "linux") {
-        println!("please enter your password to install git !>");
+        println!("if you see [sudo] please click\n and enter your password to install git !>");
         let output = Command::new("sudo")
             .arg("apt").arg("install").arg("git")
             .output().unwrap_or_else(|e| {
@@ -245,7 +245,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         });
 
         if output.status.success() {
-            let errorBOX = String::from_utf8_lossy(&output.stdout).into_owned();
+            let errorBOX = String::from_utf8_lossy(&output.stderr).into_owned();
             testLIST[4] = errorBOX;
         } else {
             let errorBOX = String::from_utf8_lossy(&output.stderr).into_owned();
@@ -485,7 +485,14 @@ fn main() {
                     println!("starting {} download now!\n", fileBOX);
                 }
                 let testLIST = start_downloads(&fileBOX);
-                if testLIST[4] == "0" {
+                
+                println!("waiting for browser to start downloads...\n");
+                let sleepTIME = time::Duration::from_secs(5);
+                thread::sleep(sleepTIME);
+
+                if !testLIST[4].contains("E: Failed") {
+                    println!("it looks like git is installed\n");
+                    //need to see if this is setting the map correctly
                     fileMAP.insert("git".to_string(),"True".to_string());
                 }
             } else {
@@ -493,12 +500,13 @@ fn main() {
             }
         }
 
-        println!("waiting for browser to start downloads...\n");
-        let sleepTIME = time::Duration::from_secs(60);
-        thread::sleep(sleepTIME);
         for fileBOX in fileMAP.clone().keys() {
-            let answerBOX = is_complete(&fileBOX, testNUM);
-            fileMAP.insert(fileBOX.to_string(), answerBOX);
+            if fileBOX.to_owned() == "git" && cfg!(target_os = "linux") {
+                continue
+            } else  {
+                let answerBOX = is_complete(&fileBOX, testNUM);
+                fileMAP.insert(fileBOX.to_string(), answerBOX);
+            }
         }
 
         let mut completeNUM = 0;
@@ -716,10 +724,9 @@ mod tests {
     */
     #[test]
     fn start_downloads_linux_apt(){
-        //this works in linux, mac and windows ;)
         if cfg!(target_os = "linux"){
             let fileBOX = "git".to_string();
-            assert_eq!(start_downloads(&fileBOX)[3], "0");
+            assert_eq!(start_downloads(&fileBOX)[3], "none");
 
         }
     }
