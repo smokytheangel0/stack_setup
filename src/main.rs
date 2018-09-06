@@ -487,11 +487,12 @@ fn main() {
                 let testLIST = start_downloads(&fileBOX);
                 
                 println!("waiting for browser to start downloads...\n");
+                //it looks like this was actually what the linux webbrowser needed
+                //to open new tabs, might have been called too quick back to back
                 let sleepTIME = time::Duration::from_secs(5);
                 thread::sleep(sleepTIME);
 
                 if !testLIST[4].contains("E: Failed") {
-                    println!("it looks like git is installed\n");
                     //need to see if this is setting the map correctly
                     fileMAP.insert("git".to_string(),"True".to_string());
                 }
@@ -519,7 +520,7 @@ fn main() {
         }
 
         if completeNUM == fileMAP.keys().len() {
-            println!("\n\nall the downloads are complete!/n");
+            println!("\n\nall the downloads are complete!\n");
             break 'main;
 
         } else if now.elapsed() > promptTIME {
