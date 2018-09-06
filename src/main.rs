@@ -61,6 +61,7 @@ use indexmap::IndexMap;
 ///         return outBOX
 /// ```
 /// 
+#[no_mangle]
 fn check_dirs() -> i8 {
     //this works in Windows
     let mut outBOX = 0;
@@ -153,6 +154,7 @@ fn check_dirs() -> i8 {
 ///     return testLIST
 ///```
 /// 
+#[no_mangle]
 fn start_downloads(fileBOX: &str) -> Vec<String> {  
     //tests pass in linux, mac and windows
 
@@ -298,6 +300,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 ///         return False
 /// ```
 /// 
+#[no_mangle]
 fn is_complete(fileBOX: &str, testNUM: i16) -> String {
     let outBOX: String = "None".to_string();
     //we arent going to be able to nest, because
