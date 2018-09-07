@@ -31,7 +31,34 @@
 /// rework is_complete and start_downloads
 /// to include StarUML and functioning changes
 /// to is_complete
+/// 
+/// RE: test triggered downloads
+/// create a cleanup function to erase the
+/// previously flutter *2 and now VSCode and git
+/// switch test downloads
 ///
+
+/// IS_COMPLETE NOTES:
+///     ON MAC:
+///         when android studio is complete before script
+///         git downloads twice consistently
+/// 
+///         when co_demo is complete before script it works fine
+/// 
+///         just noticed VSCODE always false positives in the initial check
+///         seems like it matches on a hidden .vscode folder in my mac downloads
+///         this may be due to the linux alias for VSCode which is code
+///         added compliler directives to specify that behaviour is only for linux
+///         this may still impact the linux functionality when there is a similar .vscode object
+///         in order to mitigate this I think we need to match a larger slice of the name on linux
+/// 
+///         we need a longer sleep when android studio is ignored
+///         added also a longer sleep for git, as the double download didnt
+///         occur when debugging, might be related to timing
+/// 
+///         when android studio has already been downloaded
+/// 
+///         double download bug fixed on my mac, need to test on the x102ba
 use std::fs;
 use std::env;
 use std::fs::ReadDir;
@@ -61,7 +88,6 @@ use indexmap::IndexMap;
 ///         return outBOX
 /// ```
 /// 
-#[no_mangle]
 fn check_dirs() -> i8 {
     //this works in Windows
     let mut outBOX = 0;
@@ -95,7 +121,7 @@ fn check_dirs() -> i8 {
 /// import platform
 /// import webbrowser
 /// #outBOX is vec[4] named testLIST
-/// def start_downloads(fileBOX):
+/// def start_downloads(downloadNAME):
 ///     testLIST = [
 ///                 None,
 ///                 None,
@@ -117,33 +143,33 @@ fn check_dirs() -> i8 {
 ///     testLIST[0] = vsVersion
 ///     testLIST[1] = gitURL
 ///
-///     if fileBOX is "co_demo0":
+///     if downloadNAME is "co_demo0":
 ///         try:
 ///             webbrowser.open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
 ///         except:
 ///             print("there was an error opening the co_demo web page in your browser")
-///     elif fileBOX is "flutter":
+///     elif downloadNAME is "flutter":
 ///         try:
 ///             webbrowser.open("https://github.com/flutter/flutter/archive/master.zip")
 ///         except:
 ///             print("there was an error opening the flutter web page in your browser")
-///     elif fileBOX is "VSCode":
+///     elif downloadNAME is "VSCode":
 ///         try:
 ///             webbrowser.open("https://code.visualstudio.com/docs/?dv={}"+vsVersion)
 ///         except:
 ///             print("there was an error opening the vs Code web page in your browser")
-///     elif fileBOX is "git" and platform.uname()[0] is not "Linux":
+///     elif downloadNAME is "git" and platform.uname()[0] is not "Linux":
 ///         try:
 ///             webbrowser.open(gitURL)
 ///         except:
 ///             print("there was an error opening git in your browser")
-///     elif fileBOX is "git" and platform.uname()[0] is "Linux":
+///     elif downloadNAME is "git" and platform.uname()[0] is "Linux":
 ///         try:
 ///             print("your computer will ask for your password to install git")
 ///             os.system("sudo apt install git")
 ///         except:
 ///             print("there was an error installing git with apt")
-///     elif fileBOX is "android":
+///     elif downloadNAME is "android":
 ///         try:
 ///             webbrowser.open("https://developer.android.com/studio/#downloads")
 ///         except:
@@ -154,12 +180,9 @@ fn check_dirs() -> i8 {
 ///     return testLIST
 ///```
 /// 
-#[no_mangle]
-fn start_downloads(fileBOX: &str) -> Vec<String> {  
-    //tests pass in linux, mac and windows
-
-    //linux browser functionality strange unless user
-    //already has a browser window open
+fn start_downloads(downloadNAME: &str) -> Vec<String> {  
+    //this function called from main and the associated tests
+    //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
 
     let mut testLIST = vec![
         "none".to_string(),
@@ -207,7 +230,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
     };
     testLIST[2] = String::from(umlVersion);
 
-    if fileBOX == "StarUML" {
+    if downloadNAME == "StarUML" {
         let umlURL: String = format!("http://staruml.io/download/releases/{}", umlVersion);
         let umlURL: &str = &umlURL[..];
         webbrowser::open(&umlURL)
@@ -216,29 +239,29 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
     }   
     
     
-    if fileBOX == "co_demo0" {
+    if downloadNAME == "co_demo0" {
         webbrowser::open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
                     .expect("there was an error opening the co_demo web page in your browser");
         return testLIST;
 
-    } else if fileBOX == "flutter" {
+    } else if downloadNAME == "flutter" {
         webbrowser::open("https://github.com/flutter/flutter/archive/master.zip")
                     .expect("there was an error opening the flutter web page in your browser");
         return testLIST;
 
-    } else if fileBOX == "VSCode" {
+    } else if downloadNAME == "VSCode" {
         let vsURL: String = format!("https://code.visualstudio.com/docs/?dv={}", vsVersion); 
         let vsURL: &str = &vsURL[..];
         webbrowser::open(&vsURL)
                     .expect("there was an error opening the vs Code web page in your browser");
         return testLIST;
 
-    } else if fileBOX == "git" && !cfg!(target_os = "linux") {
+    } else if downloadNAME == "git" && !cfg!(target_os = "linux") {
         webbrowser::open(gitURL)
                     .expect("there was an error opening git in your browser");
         return testLIST;
 
-    } else if fileBOX == "git" && cfg!(target_os = "linux") {
+    } else if downloadNAME == "git" && cfg!(target_os = "linux") {
         println!("if you see [sudo] please click\n and enter your password to install git !>");
         let output = Command::new("sudo")
             .arg("apt").arg("install").arg("git")
@@ -255,7 +278,7 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
         }
         return testLIST;
 
-    } else if fileBOX == "android" {
+    } else if downloadNAME == "android" {
         webbrowser::open("https://developer.android.com/studio/#downloads")
                     .expect("there was an error opening the android studio web page in your browser");
         return testLIST;
@@ -273,18 +296,18 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 /// [replace all 'is not' with '!=']
 /// [replace all 'is' with '==']
 /// #outBOX is String
-/// def is_complete(fileBOX, testNUM):
+/// def is_complete(downloadNAME, testNUM):
 ///     outBOX = None
 ///     filesInDownloads = os.listdir('.')
 ///     unconfirmed = 0
-///     for downloadNAME in filesInDownloads:
-///         if fileBOX in downloadNAME or "crdownload" in downloadNAME:
+///     for fileNAME in filesInDownloads:
+///         if downloadNAME in fileNAME or "crdownload" in fileNAME:
 /// 
-///             if 'part' in downloadNAME:
+///             if 'part' in fileNAME:
 ///                 outBOX = False
-///             elif 'partial'in downloadNAME:
+///             elif 'partial'in fileNAME:
 ///                 outBOX = False
-///             elif 'crdownload' in downloadNAME:
+///             elif 'crdownload' in fileNAME:
 ///                 unconfirmed += 1
 ///                 continue
 ///             else:
@@ -300,11 +323,12 @@ fn start_downloads(fileBOX: &str) -> Vec<String> {
 ///         return False
 /// ```
 /// 
-#[no_mangle]
-fn is_complete(fileBOX: &str, testNUM: i16) -> String {
+fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
+    //this function called from main and the associated tests
+    //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
+
     let outBOX: String = "None".to_string();
-    //we arent going to be able to nest, because
-    //we do not control the browser download location
+
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = env::home_dir().unwrap();
@@ -325,8 +349,8 @@ fn is_complete(fileBOX: &str, testNUM: i16) -> String {
         }
     }; 
 
-    let testPATH: String = {
- 
+
+    let testPATH: String = { 
         if cfg!(windows){
             let path = env::home_dir().unwrap();
             let mut testPATH = path.to_str()
@@ -362,43 +386,52 @@ fn is_complete(fileBOX: &str, testNUM: i16) -> String {
         }
     };
 
-    let mut unconfirmed: i16 = 0;
-    //how many unwraps can one rapper stack if
-    //one rapper could stack unwraps delicately
-    for downloadBOX in filesInDownloads {
-        
-        let downloadNAME: String = downloadBOX.unwrap()
-                                        .file_name()
-                                        .into_string()
-                                        .unwrap()
-                                        .to_owned();
-        
-        let alternateGIT: &str = { 
-            if fileBOX == "git".to_string() {
+    let alternateGIT: &str = {
+        if cfg!(target_os = "windows") {
+            if downloadNAME == "git".to_string() {
                 "Git"
             } else {
                 "None"
             }
-        };
+        } else {
+            "None"
+        }
+    };
 
-        let alternateCODE: &str = {
-            if fileBOX == "VSCode".to_string() {
+    let alternateCODE: &str = {
+        if cfg!(target_os = "linux") {
+            if downloadNAME == "VSCode".to_string() {
                 "code"
             } else {
                 "None"
             }
-        };
+        } else {
+            "None"
+        }
+    };
+
+    let mut unconfirmed: i16 = 0;
+    //how many unwraps can one rapper stack if
+    //one rapper could stack unwraps delicately
+    for fileNAME in filesInDownloads {
+        
+        let fileNAME: String = fileNAME.unwrap()
+                                        .file_name()
+                                        .into_string()
+                                        .unwrap()
+                                        .to_owned();
 
         let found: String = {
-            if downloadNAME.contains(&fileBOX) || 
-            downloadNAME.contains(&"crdownload"[..]) || 
-            downloadNAME.contains(&alternateGIT[..]) ||
-            downloadNAME.contains(&alternateCODE[..]) {
-                if downloadNAME.contains(&"part"[..]) {
+            if fileNAME.contains(&downloadNAME) || 
+                fileNAME.contains(&"crdownload"[..]) || 
+                fileNAME.contains(&alternateGIT[..]) ||
+                fileNAME.contains(&alternateCODE[..]) 
+            {
+                if fileNAME.contains(&"part"[..]) {
                     return "False".to_string();
-                } else if downloadNAME.contains(&"partial"[..]) {
+                } else if fileNAME.contains(&"partial"[..]) {
                     return "False".to_string();
-                } else if downloadNAME.contains(&"crdownload"[..]) {
+                } else if fileNAME.contains(&"crdownload"[..]) {
                     unconfirmed += 1;
                     continue
                 } else {
@@ -451,10 +484,16 @@ fn create_package() -> String {
     errorBOX
 }
 
+enum DownloadStatus {
+    NotStarted,
+    InProgress,
+    Complete
+}
+
 fn main() {
     check_dirs();
 
-    let mut fileMAP: IndexMap<String, String> = [
+    let mut downloadMAP: IndexMap<String, String> = [
         ("StarUML".to_string(),  "None".to_string()),
         ("git".to_string(),      "None".to_string()),
         ("co_demo0".to_string(), "None".to_string()),
@@ -464,72 +503,78 @@ fn main() {
     ].iter().cloned().collect();
 
     let testNUM: i16 = 0;
-    for fileBOX in fileMAP.clone().keys() {
-        let answerBOX = is_complete(&fileBOX, testNUM);
+    for downloadNAME in downloadMAP.clone().keys() {
+        let answerBOX = is_complete(&downloadNAME, testNUM);
 
         if answerBOX == "True".to_string() {
-            println!("{} is already complete!\n", fileBOX)
+            println!("{} is already complete!\n", downloadNAME)
         } else {
-            println!("{} has not yet been completed\n", fileBOX)
+            println!("{} has not yet been completed\n", downloadNAME)
         }
 
-        fileMAP.insert(fileBOX.to_string(), answerBOX);
+        downloadMAP.insert(downloadNAME.to_string(), answerBOX);
     }
     //needs to give instructions to user before the crazy tab storm
     let now = time::Instant::now();
     let promptTIME = time::Duration::from_secs(150);
 
     'main: loop {
-        for fileBOX in fileMAP.clone().keys() {
-            if fileMAP[fileBOX] == "None".to_string() {
-                if fileBOX.to_owned() == "android".to_string() {
+        for downloadNAME in downloadMAP.clone().keys() {
+            if downloadMAP[downloadNAME] == "None".to_string() {
+                if downloadNAME.to_owned() == "android".to_string() {
                     println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
                 } else {
-                    println!("starting {} download now!\n", fileBOX);
+                    println!("starting {} download now!\n", downloadNAME);
                 }
-                let testLIST = start_downloads(&fileBOX);
+                let testLIST = start_downloads(&downloadNAME);
                 
-                println!("waiting for browser to start downloads...\n");
-                //it looks like this was actually what the linux webbrowser needed
-                //to open new tabs, might have been called too quick back to back
-                let sleepTIME = time::Duration::from_secs(5);
-                thread::sleep(sleepTIME);
+                println!("waiting for browser to download...\n");
+
+                if downloadNAME.to_owned() == "android".to_string() {
+                    let sleepTIME = time::Duration::from_secs(20);
+                    thread::sleep(sleepTIME);
+                } else if downloadNAME.to_owned() == "git".to_string() {
+                    let sleepTIME = time::Duration::from_secs(10);
+                    thread::sleep(sleepTIME);
+                } else {
+                    let sleepTIME = time::Duration::from_secs(5);
+                    thread::sleep(sleepTIME);
+                }
 
                 if !testLIST[4].contains("E: Failed") {
-                    //need to see if this is setting the map correctly
-                    fileMAP.insert("git".to_string(),"True".to_string());
+                    downloadMAP.insert("git".to_string(),"True".to_string());
                 }
             } else {
                 continue
             }
         }
 
-        for fileBOX in fileMAP.clone().keys() {
-            if fileBOX.to_owned() == "git" && cfg!(target_os = "linux") {
+        for downloadNAME in downloadMAP.clone().keys() {
+            if downloadNAME.to_owned() == "git" && cfg!(target_os = "linux") {
                 continue
             } else  {
-                let answerBOX = is_complete(&fileBOX, testNUM);
-                fileMAP.insert(fileBOX.to_string(), answerBOX);
+                let answerBOX = is_complete(&downloadNAME, testNUM);
+                downloadMAP.insert(downloadNAME.to_string(), answerBOX);
             }
         }
 
         let mut completeNUM = 0;
-        for fileBOX in fileMAP.clone().keys() {
-            if fileMAP[fileBOX] == "True".to_string() {
+        for downloadNAME in downloadMAP.clone().keys() {
+            if downloadMAP[downloadNAME] == "True".to_string() {
                 completeNUM += 1;
             } else {
                 continue;
             }
         }
 
-        if completeNUM == fileMAP.keys().len() {
+        if completeNUM == downloadMAP.keys().len() {
             println!("\n\nall the downloads are complete!\n");
             break 'main;
 
         } else if now.elapsed() > promptTIME {
-            for fileBOX in fileMAP.clone().keys() {
-                if fileMAP[fileBOX] == "None".to_string() {
-                    println!("the {} download has not started despite multiple attempts\n", fileBOX.to_string())  
+            for downloadNAME in downloadMAP.clone().keys() {
+                if downloadMAP[downloadNAME] == "None".to_string() {
+                    println!("the {} download has not started despite multiple attempts\n", downloadNAME.to_string())  
                 }
             }
         }
@@ -583,43 +628,45 @@ mod tests {
     #[test]
     fn start_downloads_vs_switch() {
         //this works in linux, mac and windows
-        let fileBOX = "flutter".to_string();
+        let downloadNAME = "VSCode".to_string();
         if cfg!(target_os = "macos") {
-            assert_eq!(start_downloads(&fileBOX)[0], "osx")
+            assert_eq!(start_downloads(&downloadNAME)[0], "osx")
         }else if cfg!(target_os = "windows") {
-            assert_eq!(start_downloads(&fileBOX)[0], "win32")
+            assert_eq!(start_downloads(&downloadNAME)[0], "win32")
         }else if cfg!(target_os = "linux") {
-            assert_eq!(start_downloads(&fileBOX)[0], "linux64_deb")
+            assert_eq!(start_downloads(&downloadNAME)[0], "linux64_deb")
         } else {
-            assert_eq!(start_downloads(&fileBOX)[0], "we currently only support Mac OS, Windows 10, and Ubuntu")
+            assert_eq!(start_downloads(&downloadNAME)[0], "we currently only support Mac OS, Windows 10, and Ubuntu")
         }
+        //need a cleanup func to erase the DL'd VSCode
     }
 
     #[test]
     fn start_downloads_git_switch() {
         //this works in linux, mac and windows
-        let fileBOX = "flutter".to_string();
+        let downloadNAME = "git".to_string();
         if cfg!(target_os = "macos")  {
-            assert_eq!(start_downloads(&fileBOX)[1], "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
+            assert_eq!(start_downloads(&downloadNAME)[1], "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
         } else if cfg!(target_os = "windows") {
-            assert_eq!(start_downloads(&fileBOX)[1], "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
+            assert_eq!(start_downloads(&downloadNAME)[1], "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
         } else {
-            assert_eq!(start_downloads(&fileBOX)[1], "git browser install currently only supports Mac OS and Windows 10")
+            assert_eq!(start_downloads(&downloadNAME)[1], "git browser install currently only supports Mac OS and Windows 10")
         }
+        //need a cleanup func to erase the DL'd git
     }
 
     #[test]
     fn start_downloads_uml_switch() {
         //this works in mac windows and linux
-        let fileBOX = "StarUML".to_string();
+        let downloadNAME = "StarUML".to_string();
         if cfg!(target_os = "macos")  {
-            assert_eq!(start_downloads(&fileBOX)[2], "StarUML-3.0.2.dmg")
+            assert_eq!(start_downloads(&downloadNAME)[2], "StarUML-3.0.2.dmg")
         } else if cfg!(target_os = "windows") {
-            assert_eq!(start_downloads(&fileBOX)[2], "StarUML%20Setup%203.0.2.exe")
+            assert_eq!(start_downloads(&downloadNAME)[2], "StarUML%20Setup%203.0.2.exe")
         } else if cfg!(target_os = "linux") {
-            assert_eq!(start_downloads(&fileBOX)[2], "StarUML-3.0.2-x86_64.AppImage")        
+            assert_eq!(start_downloads(&downloadNAME)[2], "StarUML-3.0.2-x86_64.AppImage")        
         } else {
-            assert_eq!(start_downloads(&fileBOX)[2], "we currently only support Mac OS, Windows 10, and Ubuntu")
+            assert_eq!(start_downloads(&downloadNAME)[2], "we currently only support Mac OS, Windows 10, and Ubuntu")
         }
     }
 
@@ -643,8 +690,8 @@ mod tests {
                     ];
 
         for index in 0..fileLIST.len() {
-                let fileBOX = fileLIST.get(index).unwrap().to_string();
-                assert_eq!(start_downloads(&fileBOX)[3], "none");
+                let downloadNAME = fileLIST.get(index).unwrap().to_string();
+                assert_eq!(start_downloads(&downloadNAME)[3], "none");
         }
     }
     */
@@ -670,8 +717,8 @@ mod tests {
         let mut testLIST: Vec<String> = [].to_vec();
         let testNUM: i16 = 5;
         for index in 0..fileLIST.len() {
-            let fileBOX = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&fileBOX, testNUM);
+            let downloadNAME = fileLIST.get(index).unwrap().to_string();
+            let outBOX = is_complete(&downloadNAME, testNUM);
             testLIST.push(outBOX);
         }
         
@@ -686,8 +733,8 @@ mod tests {
         let mut testLIST: Vec<String> = [].to_vec();
         let testNUM: i16 = 2;
         for index in 0..fileLIST.len() {
-                let fileBOX = fileLIST.get(index).unwrap().to_string();
-                let outBOX = is_complete(&fileBOX, testNUM);
+                let downloadNAME = fileLIST.get(index).unwrap().to_string();
+                let outBOX = is_complete(&downloadNAME, testNUM);
                 testLIST.push(outBOX);
         }
 
@@ -729,8 +776,8 @@ mod tests {
     #[test]
     fn start_downloads_linux_apt(){
         if cfg!(target_os = "linux"){
-            let fileBOX = "git".to_string();
-            assert_eq!(start_downloads(&fileBOX)[3], "none");
+            let downloadNAME = "git".to_string();
+            assert_eq!(start_downloads(&downloadNAME)[3], "none");
 
         }
     }
