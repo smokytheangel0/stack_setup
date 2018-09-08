@@ -13,140 +13,229 @@
 # limitations under the License.
 
 
+import os
 import sys
-import platform
-import webbrowser
-def start_downloads(fileBOX):
-    testLIST = [
-                None,
-                None,
-                None,
-                None
-               ]
+#outBOX is int
+def check_dirs():
+    outBOX = 0
+    pathBOX = os.getcwd()
 
-    if platform.uname()[0] == "Windows":
-        vsVersion = "win32"
-        gitURL = "https://github.com/git-for-windows/git/releases/downloadNAME/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
-    elif platform.uname()[0] == "Linux":
-        vsVersion = "linux64_deb"
-        gitURL = "browser install currently only support Mac OS and Windows 10"
-    elif platform.uname()[0] == "Darwin":
-        vsVersion = "osx"
-        gitURL = "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/downloadNAME?use_mirror=autoselect"
-    else:
-        vsVersion = "we currently only support Mac OS, Windows 10, and Linux"
-    testLIST[0] = vsVersion
-    testLIST[1] = gitURL
-
-    if fileBOX == "co_demo0-":
-        try:
-            webbrowser.open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
-        except:
-            print("there was an error opening the co_demo web page in your browser")
-    elif fileBOX == "flutter-":
-        try:
-            webbrowser.open("https://github.com/flutter/flutter/archive/master.zip")
-        except:
-            print("there was an error opening the flutter web page in your browser")
-    elif fileBOX == "VSCode-":
-        try:
-            webbrowser.open("https://code.visualstudio.com/docs/?dv="+vsVersion)
-        except:
-            print("there was an error opening the vs Code web page in your browser")
-    elif fileBOX == "git-" and platform.uname()[0] != "Linux":
-        try:
-            webbrowser.open(gitURL)
-        except:
-            print("there was an error opening git in your browser")
-    elif fileBOX == "git-" and platform.uname()[0] == "Linux":
-        try:
-            print("your computer will ask for your password to install git")
-            os.system("sudo apt install git")
-        except:
-            print("there was an error installing git with apt")
-    elif fileBOX == "android":
-        try:
-            webbrowser.open("https://developer.android.com/studio/#downloads")
-        except:
-            print("there was an error opening android studio in your web browser")
-    else:
-        testLIST[2] = "the switch branches have all been avoided"
-        print(testLIST[2])
-
+    if "Downloads" not in pathBOX:
+        outBOX += 1
+        print("This program you've just run does not appear to be in the Downloads folder, please try running it again with it in the Downloads folder")
+        return outBOX
 
 import os
-import time
-#outBOX == bool
-def is_complete(fileBOX):
-    filesInDirectory = os.listdir('.')
-    for downloadNAME in filesInDirectory:
-        if fileBOX in downloadNAME or "crdownload" in downloadNAME:
-            if 'part' in downloadNAME:
-                outBOX = False
-            elif 'partial'in downloadNAME:
-                outBOX = False
-            elif 'crdownload' in downloadNAME:
-                outBOX = False
-            else:
-                outBOX = True
-            break
-        else:
-            outBOX = None
-    if outBOX == False:
-        print(fileBOX[:-1]+" is still transfering...")
-    elif outBOX == None:
-        print(fileBOX[:-1]+" still has not been started...")
-    return outBOX
+import platform
+from pathlib import Path
+TEST_FLAG = False
+#outBOX is String
+def is_complete(downloadNAME, testNUM):
+    targetOS = platform.uname()[0]
+    outBOX = "None"
 
-def main():
-    filesNeeded = {
-                'co_demo0-' : None, 
-                'flutter-': None, 
-                'VSCode-': None, 
-                'git-': None, 
-                'android-': None
-            }
-    androidTimeOut = 0
-    filesInDirectory = [None]
-    while filesInDirectory == [None]:
-        filesInDirectory = os.listdir('.')
+    if targetOS == "Windows":
+        downloadsPATH = str(Path.home())
+        downloadsPATH += "\\Downloads"
+        testPATH = str(Path.home())
+        if testNUM == 5:
+            testPATH += "\\Desktop\\share\\test_data\\five_complete"
+        else:
+            testPATH += "\\Desktop\\share\\test_data\\four_complete"
+
+    elif targetOS == "Darwin" or targetOS == "Linux":
+        downloadsPATH = str(Path.home())
+        downloadsPATH += "/Downloads"
+        testPATH = str(Path.home())
+        if testNUM == 5:
+            testPATH += "/Desktop/share/test_data/five_complete"
+        else:
+            testPATH += "/Desktop/share/test_data/four_complete"
+
     else:
-        while all(filesNeeded.values()) != True:
-            for fileBOX in filesNeeded.keys():
-                done = False
-                #while done is None or False, check it
-                while done != True:
-                    done = is_complete(fileBOX)
-                #if done is True, say complete
+        downloadsPATH = "we currently only support Windows 10, Ubuntu and Mac OS"
+
+    if TEST_FLAG == True:
+        filesInDowloads = os.listdir(testPATH)
+    else:
+        filesInDownloads = os.listdir(downloadsPATH)
+
+    if targetOS == "Windows":
+        if downloadNAME == "git":
+            alternateGIT = "Git"
+        else:
+            alternateGIT = "None"
+    else:
+        alternateGIT = "None"
+    
+    if targetOS == "Linux":
+        if downloadNAME == "VSCode":
+            alternateCODE = "code"
+        else:
+            alternateCODE = "None"
+    else:
+        alternateCODE = "None"
+
+    unconfirmed = 0
+    for fileNAME in filesInDownloads:
+        if downloadNAME in fileNAME or "crdownload" in fileNAME or str(alternateGIT) in fileNAME or str(alternateCODE) in fileNAME:
+            if "part" in fileNAME:
+                return False
+            elif "partial" in fileNAME:
+                return False
+            elif "crdownload" in fileNAME:
+                unconfirmed += 1
+                continue
+            else:
+                return True
+        
+        else:
+            found = "None"
+        
+        if found == "None":
+            continue
+        else:
+            break
+
+    if unconfirmed == 0:
+        return outBOX
+    else:
+        return False
+
+import platform
+import webbrowser
+import subprocess
+#outBOX is vec[4] Strings
+def start_downloads(downloadNAME):
+    targetOS = platform.uname()[0]
+    testLIST = [
+        "None",
+        "None",
+        "None",
+        "None",
+        "None"
+    ]
+
+    if targetOS == "Windows":
+        vsVersion = "win32"
+        gitURL = "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
+        umlVersion = "StarUML%20Setup%203.0.2.exe"
+    elif targetOS == "Darwin":
+        vsVersion = "osx"
+        gitURL = "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+        umlVersion = "StarUML-3.0.2.dmg"
+    elif targetOS == "Linux":
+        vsVersion = "linux64_deb"
+        gitURL = "git browser install currently only supports Mac OS and Windows 10"
+        umlVersion = "StarUML-3.0.2-x86_64.AppImage"
+    else:
+        "we currently only support Mac OS, Windows 10, and Ubuntu"
+    testLIST[0] = vsVersion
+    testLIST[1] = gitURL
+    testLIST[2] = umlVersion
+
+    if downloadNAME == "StarUML":
+        umlURL = "http://staruml.io/download/releases/" + umlVersion
+        webbrowser.open(umlURL)
+    elif downloadNAME == "co_demo0":
+        webbrowser.open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
+    elif downloadNAME == "flutter":
+        webbrowser.open("https://github.com/flutter/flutter/archive/master.zip")
+    elif downloadNAME == "VSCode":
+        vsURL = "https://code.visualstudio.com/docs/?dv=" + vsVersion
+        webbrowser.open(vsURL)
+    elif downloadNAME == "git" and not targetOS == "linux":
+        webbrowser.open(gitURL)
+    elif downloadNAME == "git" and targetOS == "linux":
+        returnBOX = subprocess.call(["sudo", "apt", "install", "git"], shell=True, check=True)
+        if returnBOX == 0:
+            testLIST[4] == "anything else"
+        else:
+            testLIST[4] == "E: Failed"
+    elif downloadNAME == "android":
+        webbrowser.open("https://developer.android.com/studio/#downloads")
+
+    else:
+        testLIST[3] = "the switch branches have all been avoided !!!"
+
+    return testLIST
+            
+
+import platform
+import time
+def main():
+    targetOS = platform.uname()[0]
+    check_dirs()
+
+    downloadMAP = {
+        "StarUML": "None",
+        "git": "None",
+        "co_demo0": "None",
+        "flutter": "None",
+        "VSCode": "None",
+        "android": "None",
+    }
+
+    testNUM = 0
+
+    for downloadNAME in downloadMAP.keys():
+        answerBOX = is_complete(downloadNAME, testNUM)
+
+        if answerBOX == True:
+            print("{0} is already complete!\n".format(downloadNAME))
+        else:
+            print("{0} has not yet been completed\n".format(downloadNAME))
+
+        downloadMAP[downloadNAME] = answerBOX
+
+    timeSTART = time.time()
+    while True:
+        for downloadNAME in downloadMAP.keys():
+            if downloadMAP[downloadNAME] == "None":
+                if downloadNAME == "android":
+                    print("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
                 else:
-                    #if done is True, say complete
-                    if done == True and filesNeeded[fileBOX] != True:
-                        print(fileBOX[:-1]+' completed!')
-                        filesNeeded[fileBOX] = True
-                    elif filesNeeded[fileBOX] == True:
-                        pass
-                    #if done is False,
-                    else:
-                        #check if it is android
-                        if fileBOX == 'android-studio-ide':
-                            #if this is the first time it hasnt been started
-                            if androidTimeOut == 0:
-                                #open the downloadNAME
-                                start_downloads(fileBOX)
-                                filesNeeded[fileBOX] = False
-                                androidTimeOut += 1
-                            else:
-                                #if this is the second time around,
-                                #warn the user
-                                if androidTimeOut == 1:                                    
-                                    print("please start the android downloadNAME in your browser")
-                                    androidTimeOut += 1
-                                #if the user has been warned, ignore until complete
-                                else:
-                                    pass
-                        else:
-                            start_downloads(fileBOX)
-                            filesNeeded[fileBOX] = False
+                    print("starting {0} download now!\n".format(downloadNAME))
+
+                testLIST = start_downloads(downloadNAME)
+
+                print("waiting for browser to download...\n")
+
+                if downloadNAME == "android":
+                    time.sleep(20)
+                elif downloadNAME == "git":
+                    time.sleep(10)
+                else:
+                    time.sleep(5)
+
+                if "E: Failed" not in testLIST[4] and "None" not in testLIST[4]:
+                    downloadMAP[downloadNAME] = True
+            else:
+                continue
+
+        for downloadNAME in downloadMAP.keys():
+            if downloadNAME == "git" and not targetOS == "Linux":
+                continue
+            else:
+                answerBOX = is_complete(downloadNAME, testNUM)
+        
+        completeNUM = 0
+        for downloadNAME in downloadMAP.keys():
+            if downloadMAP[downloadNAME] == True:
+                completeNUM += 1
+            else:
+                continue
+        
+        if completeNUM == len(downloadMAP):
+            print("\n\nall the downloads are complete!\n")
+            break
+        
+        elif time.time() - timeSTART > 150:
+            for downloadNAME in downloadMAP.keys():
+                if downloadMAP[downloadNAME] == "None":
+                    print("the {} download has not started despite multiple attempts\n".format(downloadNAME))
+    
+    time.sleep(60)
 
 if __name__ == "__main__":
     main()

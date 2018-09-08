@@ -185,11 +185,11 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
 
     let mut testLIST = vec![
-        "none".to_string(),
-        "none".to_string(),
-        "none".to_string(),
-        "none".to_string(),
-        "none".to_string()
+        "None".to_string(),
+        "None".to_string(),
+        "None".to_string(),
+        "None".to_string(),
+        "None".to_string()
     ];
 
     let vsVersion: &str = {
@@ -236,10 +236,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
         webbrowser::open(&umlURL)
                     .expect("there was an error opening the star uml webpage in your browser");
         return testLIST;
-    }   
-    
-    
-    if downloadNAME == "co_demo0" {
+    } else if downloadNAME == "co_demo0" {
         webbrowser::open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
                     .expect("there was an error opening the co_demo web page in your browser");
         return testLIST;
@@ -541,8 +538,8 @@ fn main() {
                     thread::sleep(sleepTIME);
                 }
 
-                if !testLIST[4].contains("E: Failed") {
-                    downloadMAP.insert("git".to_string(),"True".to_string());
+                if !testLIST[4].contains("E: Failed") || !testLIST[4].contains("None") {
+                    downloadMAP.insert(downloadNAME.to_string(),"True".to_string());
                 }
             } else {
                 continue
@@ -691,7 +688,7 @@ mod tests {
 
         for index in 0..fileLIST.len() {
                 let downloadNAME = fileLIST.get(index).unwrap().to_string();
-                assert_eq!(start_downloads(&downloadNAME)[3], "none");
+                assert_eq!(start_downloads(&downloadNAME)[3], "None");
         }
     }
     */
@@ -777,7 +774,7 @@ mod tests {
     fn start_downloads_linux_apt(){
         if cfg!(target_os = "linux"){
             let downloadNAME = "git".to_string();
-            assert_eq!(start_downloads(&downloadNAME)[3], "none");
+            assert_eq!(start_downloads(&downloadNAME)[3], "None");
 
         }
     }
