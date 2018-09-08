@@ -59,6 +59,11 @@
 ///         when android studio has already been downloaded
 /// 
 ///         double download bug fixed on my mac, need to test on the x102ba
+/// 
+///     ON WIN:
+///         edge on windows has an issue detecting when the dls are complete and
+///         it also requires you to save each download in the tab it was started in
+///         so it wont pop up the DL save window like firefox, leaving even more trouble for the user
 use std::fs;
 use std::env;
 use std::fs::ReadDir;
