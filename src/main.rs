@@ -116,67 +116,62 @@ fn check_dirs() -> i8 {
 /// ```python
 /// [replace all 'is not' with '!=']
 /// [replace all 'is' with '==']
-/// import os
-/// import sys
 /// import platform
 /// import webbrowser
-/// #outBOX is vec[4] named testLIST
+/// import subprocess
+/// #outBOX is vec[4] Strings
 /// def start_downloads(downloadNAME):
+///     targetOS = platform.uname()[0]
 ///     testLIST = [
-///                 None,
-///                 None,
-///                 None,
-///                 None
-///                ]
+///         "None",
+///         "None",
+///         "None",
+///         "None",
+///         "None"
+///     ]
 ///
-///     if platform.uname()[0] is "Windows":
+///     if targetOS is "Windows":
 ///         vsVersion = "win32"
-///         gitURL = "https://github.com/gitfor-windows/git/releases/download/v2.18.0.windows.1/git2.18.0-64-bit.exe"
-///     elif platform.uname()[0] is "Linux":
-///         vsVersion = "linux64_deb"
-///         gitURL = "browser install currently only support Mac OS and Windows 10"
-///     elif platform.uname()[0] is "Darwin":
+///         gitURL = "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
+///         umlVersion = "StarUML%20Setup%203.0.2.exe"
+///     elif targetOS is "Darwin":
 ///         vsVersion = "osx"
-///         gitURL = "https://sourceforge.net/projects/gitosx-installer/files/git2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+///         gitURL = "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+///         umlVersion = "StarUML-3.0.2.dmg"
+///     elif targetOS is "Linux":
+///         vsVersion = "linux64_deb"
+///         gitURL = "git browser install currently only supports Mac OS and Windows 10"
+///         umlVersion = "StarUML-3.0.2-x86_64.AppImage"
 ///     else:
 ///         vsVersion = "we currently only support Mac OS, Windows 10, and Ubuntu"
+///         umlVersion = "we currently only support Mac OS, Windows 10, and Ubuntu"
 ///     testLIST[0] = vsVersion
 ///     testLIST[1] = gitURL
+///     testLIST[2] = umlVersion
 ///
-///     if downloadNAME is "co_demo0":
-///         try:
-///             webbrowser.open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
-///         except:
-///             print("there was an error opening the co_demo web page in your browser")
+///     if downloadNAME is "StarUML":
+///         umlURL = "http://staruml.io/download/releases/" + umlVersion
+///         webbrowser.open(umlURL)
+///     elif downloadNAME is "co_demo0":
+///         webbrowser.open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
 ///     elif downloadNAME is "flutter":
-///         try:
-///             webbrowser.open("https://github.com/flutter/flutter/archive/master.zip")
-///         except:
-///             print("there was an error opening the flutter web page in your browser")
-///     elif downloadNAME is "VSCode":
-///         try:
-///             webbrowser.open("https://code.visualstudio.com/docs/?dv={}"+vsVersion)
-///         except:
-///             print("there was an error opening the vs Code web page in your browser")
-///     elif downloadNAME is "git" and platform.uname()[0] is not "Linux":
-///         try:
-///             webbrowser.open(gitURL)
-///         except:
-///             print("there was an error opening git in your browser")
-///     elif downloadNAME is "git" and platform.uname()[0] is "Linux":
-///         try:
-///             print("your computer will ask for your password to install git")
-///             os.system("sudo apt install git")
-///         except:
-///             print("there was an error installing git with apt")
+///         webbrowser.open("https://github.com/flutter/flutter/archive/master.zip")
+///    elif downloadNAME is "VSCode":
+///         vsURL = "https://code.visualstudio.com/docs/?dv=" + vsVersion
+///         webbrowser.open(vsURL)
+///     elif downloadNAME is "git" and targetOS is not "Linux":
+///         webbrowser.open(gitURL)
+///     elif downloadNAME is "git" and targetOS is "Linux":
+///         returnBOX = subprocess.call(["sudo", "apt", "install", "git"])
+///         if returnBOX is 0:
+///             testLIST[4] = "anything else"
+///        else:
+///             testLIST[4] = "E: Failed"
 ///     elif downloadNAME is "android":
-///         try:
-///             webbrowser.open("https://developer.android.com/studio/#downloads")
-///         except:
-///             print("there was an error opening android studio in your web browser")
-///     else:
-///         testLIST[2] = "the switch branches have all been avoided"
+///         webbrowser.open("https://developer.android.com/studio/#downloads")
 ///
+///     else:
+///         testLIST[3] = "the switch branches have all been avoided !!!"
 ///     return testLIST
 ///```
 /// 
@@ -288,33 +283,99 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 }
 
 
-///this is what the [is_complete] function is likely to be
+///this is what the [is_complete] function is in python
 ///```python
 /// [replace all 'is not' with '!=']
 /// [replace all 'is' with '==']
+/// import os
+/// import platform
+/// from pathlib import Path
+/// TEST_FLAG = False
 /// #outBOX is String
 /// def is_complete(downloadNAME, testNUM):
-///     outBOX = None
-///     filesInDownloads = os.listdir('.')
+///     targetOS = platform.uname()[0]
+///     outBOX = "None"
+///
+///     if targetOS is "Windows":
+///         downloadsPATH = str(Path.home())
+///         downloadsPATH += "\\Downloads\\"
+///         testPATH = str(Path.home())
+///         if testNUM is 5:
+///             testPATH += "\\Desktop\\share\\test_data\\five_complete\\"
+///         else:
+///             testPATH += "\\Desktop\\share\\test_data\\four_complete\\"
+///
+///     elif targetOS in ("Darwin", "Linux"):
+///         downloadsPATH = str(Path.home())
+///         downloadsPATH += "/Downloads/"
+///         testPATH = str(Path.home())
+///         if testNUM in 5:
+///             testPATH += "/Desktop/share/test_data/five_complete/"
+///         else:
+///             testPATH += "/Desktop/share/test_data/four_complete/"
+///
+///     else:
+///         downloadsPATH = "we currently only support Windows 10, Ubuntu and Mac OS"
+///
+///     if TEST_FLAG is True:
+///         filesInDowloads = os.listdir(testPATH)
+///     else:
+///         filesInDownloads = os.listdir(downloadsPATH)
+///
+///     if targetOS is "Windows":
+///         if downloadNAME is "git":
+///             alternateGIT = "Git"
+///         else:
+///             alternateGIT = "None"
+///     else:
+///         alternateGIT = "None"
+///    
+///     if targetOS is "Linux":
+///         if downloadNAME is "VSCode":
+///             alternateCODE = "code_"
+///         else:
+///             alternateCODE = "None"
+///     else if targetOS is "Darwin":
+///         if downloadNAME is "VSCode":
+///             alternateCODE = "Visual Studio Code"
+///         else:
+///             alternateCODE = "None"
+///     else:
+///         alternateCODE = "None"
+///
 ///     unconfirmed = 0
 ///     for fileNAME in filesInDownloads:
-///         if downloadNAME in fileNAME or "crdownload" in fileNAME:
+///         if downloadNAME in fileNAME 
+///             or ".crdownload" in fileNAME 
+///             or str(alternateGIT) in fileNAME 
+///             or str(alternateCODE) in fileNAME:
 /// 
-///             if 'part' in fileNAME:
-///                 outBOX = False
-///             elif 'partial'in fileNAME:
-///                 outBOX = False
-///             elif 'crdownload' in fileNAME:
+///             if ".part" in fileNAME:
+///                 return False
+///             elif ".partial" in fileNAME:
+///                 return False
+///             elif ".download" in fileNAME:
+///                 return False
+///             elif ".crdownload" in fileNAME:
 ///                 unconfirmed += 1
 ///                 continue
 ///             else:
-///                 outBOX = True
-///             break
-/// 
+///                 filePATH = downloadsPATH + fileNAME
+///                 metaDATA = os.stat(filePATH)
+///                 if metaDATA.st_size is not 0:
+///                     return True
+///                 else:
+///                     return False
+///        
 ///         else:
-///             outBOX = None
-/// 
-///     if unconfirmed == 0:
+///             found = "None"
+///        
+///         if found is "None":
+///             continue
+///         else:
+///             break
+///
+///     if unconfirmed in 0:
 ///         return outBOX
 ///     else:
 ///         return False
@@ -433,7 +494,7 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
         //android studio on safari does not show the list of dls,
         //and opens at the bottom of the page but the link is at top
         //besides that though it works now on mac
-        
+
         let found: String = {
             if fileNAME.contains(&downloadNAME) || 
                 fileNAME.contains(&"crdownload"[..]) || 
