@@ -398,7 +398,7 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
     let alternateCODE: &str = {
         if cfg!(target_os = "linux") {
             if downloadNAME == "VSCode".to_string() {
-                "code"
+                "code_"
             } else {
                 "None"
             }
@@ -418,6 +418,10 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
                                         .unwrap()
                                         .to_owned();
 
+        //need to handle firefox and safari better,
+        //they have a .part file AND a 0B file for the dl
+        //the size zero file will match and return true, before
+        //the download is complete
         let found: String = {
             if fileNAME.contains(&downloadNAME) || 
                 fileNAME.contains(&"crdownload"[..]) || 
@@ -432,6 +436,7 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
                     unconfirmed += 1;
                     continue
                 } else {
+                    //check for size zero file, return False if found
                     return "True".to_string();
                 }
 

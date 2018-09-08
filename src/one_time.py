@@ -70,7 +70,7 @@ def is_complete(downloadNAME, testNUM):
     
     if targetOS == "Linux":
         if downloadNAME == "VSCode":
-            alternateCODE = "code"
+            alternateCODE = "code_"
         else:
             alternateCODE = "None"
     else:
@@ -144,14 +144,14 @@ def start_downloads(downloadNAME):
     elif downloadNAME == "VSCode":
         vsURL = "https://code.visualstudio.com/docs/?dv=" + vsVersion
         webbrowser.open(vsURL)
-    elif downloadNAME == "git" and not targetOS == "linux":
+    elif downloadNAME == "git" and targetOS != "Linux":
         webbrowser.open(gitURL)
-    elif downloadNAME == "git" and targetOS == "linux":
-        returnBOX = subprocess.call(["sudo", "apt", "install", "git"], shell=True, check=True)
+    elif downloadNAME == "git" and targetOS == "Linux":
+        returnBOX = subprocess.call(["sudo", "apt", "install", "git"])
         if returnBOX == 0:
-            testLIST[4] == "anything else"
+            testLIST[4] = "anything else"
         else:
-            testLIST[4] == "E: Failed"
+            testLIST[4] = "E: Failed"
     elif downloadNAME == "android":
         webbrowser.open("https://developer.android.com/studio/#downloads")
 
