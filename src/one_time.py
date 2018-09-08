@@ -14,7 +14,6 @@
 
 
 import os
-import sys
 #outBOX is int
 def check_dirs():
     outBOX = 0
@@ -36,21 +35,21 @@ def is_complete(downloadNAME, testNUM):
 
     if targetOS == "Windows":
         downloadsPATH = str(Path.home())
-        downloadsPATH += "\\Downloads"
+        downloadsPATH += "\\Downloads\\"
         testPATH = str(Path.home())
         if testNUM == 5:
-            testPATH += "\\Desktop\\share\\test_data\\five_complete"
+            testPATH += "\\Desktop\\share\\test_data\\five_complete\\"
         else:
-            testPATH += "\\Desktop\\share\\test_data\\four_complete"
+            testPATH += "\\Desktop\\share\\test_data\\four_complete\\"
 
-    elif targetOS == "Darwin" or targetOS == "Linux":
+    elif targetOS in ("Darwin", "Linux"):
         downloadsPATH = str(Path.home())
-        downloadsPATH += "/Downloads"
+        downloadsPATH += "/Downloads/"
         testPATH = str(Path.home())
         if testNUM == 5:
-            testPATH += "/Desktop/share/test_data/five_complete"
+            testPATH += "/Desktop/share/test_data/five_complete/"
         else:
-            testPATH += "/Desktop/share/test_data/four_complete"
+            testPATH += "/Desktop/share/test_data/four_complete/"
 
     else:
         downloadsPATH = "we currently only support Windows 10, Ubuntu and Mac OS"
@@ -73,21 +72,33 @@ def is_complete(downloadNAME, testNUM):
             alternateCODE = "code_"
         else:
             alternateCODE = "None"
+    else if targetOS == "Darwin":
+        if downloadNAME == "VSCode":
+            alternateCODE = "Visual Studio Code"
+        else:
+            alternateCODE = "None"
     else:
         alternateCODE = "None"
 
     unconfirmed = 0
     for fileNAME in filesInDownloads:
-        if downloadNAME in fileNAME or "crdownload" in fileNAME or str(alternateGIT) in fileNAME or str(alternateCODE) in fileNAME:
-            if "part" in fileNAME:
+        if downloadNAME in fileNAME or ".crdownload" in fileNAME or str(alternateGIT) in fileNAME or str(alternateCODE) in fileNAME:
+            if ".part" in fileNAME:
                 return False
-            elif "partial" in fileNAME:
+            elif ".partial" in fileNAME:
                 return False
-            elif "crdownload" in fileNAME:
+            elif ".download" in fileNAME:
+                return False
+            elif ".crdownload" in fileNAME:
                 unconfirmed += 1
                 continue
             else:
-                return True
+                filePATH = downloadsPATH + fileNAME
+                metaDATA = os.stat(filePATH)
+                if metaDATA.st_size != 0:
+                    return True
+                else:
+                    return False
         
         else:
             found = "None"
@@ -129,7 +140,8 @@ def start_downloads(downloadNAME):
         gitURL = "git browser install currently only supports Mac OS and Windows 10"
         umlVersion = "StarUML-3.0.2-x86_64.AppImage"
     else:
-        "we currently only support Mac OS, Windows 10, and Ubuntu"
+        vsVersion = "we currently only support Mac OS, Windows 10, and Ubuntu"
+        umlVersion = "we currently only support Mac OS, Windows 10, and Ubuntu"
     testLIST[0] = vsVersion
     testLIST[1] = gitURL
     testLIST[2] = umlVersion
@@ -178,7 +190,7 @@ def main():
 
     testNUM = 0
 
-    for downloadNAME in downloadMAP.keys():
+    for downloadNAME, downloadSTATUS in downloadMAP:
         answerBOX = is_complete(downloadNAME, testNUM)
 
         if answerBOX == True:
@@ -190,7 +202,7 @@ def main():
 
     timeSTART = time.time()
     while True:
-        for downloadNAME in downloadMAP.keys():
+        for downloadNAME, downloadSTATUS in downloadMAP:
             if downloadMAP[downloadNAME] == "None":
                 if downloadNAME == "android":
                     print("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
@@ -204,7 +216,7 @@ def main():
                 if downloadNAME == "android":
                     time.sleep(20)
                 elif downloadNAME == "git":
-                    time.sleep(10)
+                    time.sleep(20)
                 else:
                     time.sleep(5)
 
@@ -213,14 +225,14 @@ def main():
             else:
                 continue
 
-        for downloadNAME in downloadMAP.keys():
+        for downloadNAME, downloadSTATUS in downloadMAP:
             if downloadNAME == "git" and not targetOS == "Linux":
                 continue
             else:
                 answerBOX = is_complete(downloadNAME, testNUM)
         
         completeNUM = 0
-        for downloadNAME in downloadMAP.keys():
+        for downloadNAME, downloadSTATUS in downloadMAP:
             if downloadMAP[downloadNAME] == True:
                 completeNUM += 1
             else:
@@ -231,7 +243,7 @@ def main():
             break
         
         elif time.time() - timeSTART > 150:
-            for downloadNAME in downloadMAP.keys():
+            for downloadNAME, downloadSTATUS in downloadMAP:
                 if downloadMAP[downloadNAME] == "None":
                     print("the {} download has not started despite multiple attempts\n".format(downloadNAME))
     

@@ -332,14 +332,14 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
                                         .to_owned();
-            downloadsPATH += "\\Downloads";
+            downloadsPATH += "\\Downloads\\";
             downloadsPATH
         }else if cfg!(unix){
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
                                         .to_owned();
-            downloadsPATH += "/Downloads";
+            downloadsPATH += "/Downloads/";
             downloadsPATH
         } else {
             "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
@@ -354,9 +354,9 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
                                    .unwrap()
                                    .to_owned();
             if testNUM == 5 {
-                testPATH += "\\Desktop\\share\\test_data\\five_complete";
+                testPATH += "\\Desktop\\share\\test_data\\five_complete\\";
             } else {
-                testPATH += "\\Desktop\\share\\test_data\\four_complete";
+                testPATH += "\\Desktop\\share\\test_data\\four_complete\\";
             }
             testPATH
         }else if cfg!(unix){
@@ -365,9 +365,9 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
                                    .unwrap()
                                    .to_owned();
             if testNUM == 5 {
-                testPATH += "/Desktop/share/test_data/five_complete";
+                testPATH += "/Desktop/share/test_data/five_complete/";
             } else {
-                testPATH += "/Desktop/share/test_data/four_complete";
+                testPATH += "/Desktop/share/test_data/four_complete/";
             }
             testPATH
         } else {
@@ -402,6 +402,12 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
             } else {
                 "None"
             }
+        } else if cfg!(target_os = "macos") {
+            if downloadNAME == "VSCode".to_string() {
+                "Visual Studio Code"
+            } else {
+                "None"
+            }
         } else {
             "None"
         }
@@ -418,10 +424,16 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
                                         .unwrap()
                                         .to_owned();
 
-        //need to handle firefox and safari better,
-        //they have a .part file AND a 0B file for the dl
-        //the size zero file will match and return true, before
-        //the download is complete
+        //firefox works on mac
+
+
+        //safari uses .download only so should be safe matching
+        //it also appears to unpack zips by default
+        //it also changes the name on vscode so it dont match
+        //android studio on safari does not show the list of dls,
+        //and opens at the bottom of the page but the link is at top
+        //besides that though it works now on mac
+        
         let found: String = {
             if fileNAME.contains(&downloadNAME) || 
                 fileNAME.contains(&"crdownload"[..]) || 
@@ -430,14 +442,21 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
             {
                 if fileNAME.contains(&"part"[..]) {
                     return "False".to_string();
-                } else if fileNAME.contains(&"partial"[..]) {
+                } else if fileNAME.contains(&".download"[..]) {
                     return "False".to_string();
-                } else if fileNAME.contains(&"crdownload"[..]) {
+                } else if fileNAME.contains(&".partial"[..]) {
+                    return "False".to_string();
+                } else if fileNAME.contains(&".crdownload"[..]) {
                     unconfirmed += 1;
                     continue
                 } else {
-                    //check for size zero file, return False if found
-                    return "True".to_string();
+                    let filePATH: String = format!("{}{}", &downloadsPATH, &fileNAME);
+                    let metaDATA = fs::metadata(filePATH).unwrap();
+                    if metaDATA.len() != 0 {
+                        return "True".to_string();
+                    } else {
+                        return "False".to_string();
+                    }
                 }
 
             } else {
@@ -461,6 +480,7 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
 }
 
 fn setup_downloads() -> String {
+    //safari unpacks zips by default
     let errorBOX = String::from("");
     errorBOX
 
@@ -536,7 +556,7 @@ fn main() {
                     let sleepTIME = time::Duration::from_secs(20);
                     thread::sleep(sleepTIME);
                 } else if downloadNAME.to_owned() == "git".to_string() {
-                    let sleepTIME = time::Duration::from_secs(10);
+                    let sleepTIME = time::Duration::from_secs(20);
                     thread::sleep(sleepTIME);
                 } else {
                     let sleepTIME = time::Duration::from_secs(5);
