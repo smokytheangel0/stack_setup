@@ -28,7 +28,7 @@
 			"_parent": {
 				"$ref": "AAAAAAFF+h6SjaM2Hec="
 			},
-			"name": "Activity1",
+			"name": "fn_main",
 			"ownedElements": [
 				{
 					"_type": "UMLActivityDiagram",
@@ -36,7 +36,7 @@
 					"_parent": {
 						"$ref": "AAAAAAFlomNsShGmoJM="
 					},
-					"name": "ActivityDiagram1",
+					"name": "fn_main",
 					"ownedViews": [
 						{
 							"_type": "UMLControlNodeView",
@@ -111,7 +111,7 @@
 											"top": 160,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -308,7 +308,7 @@
 											"top": 16,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -505,7 +505,7 @@
 											"top": 8,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -702,7 +702,7 @@
 											"top": 16,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -897,7 +897,7 @@
 											"left": 352,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -1202,7 +1202,7 @@
 											"top": 16,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -1398,7 +1398,7 @@
 											"top": 16,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -1688,7 +1688,7 @@
 											"top": -144,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -1791,7 +1791,7 @@
 											"top": -144,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -1989,7 +1989,7 @@
 											"top": -140,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -2296,7 +2296,7 @@
 											"top": -160,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -2492,7 +2492,7 @@
 											"top": -160,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -2782,7 +2782,7 @@
 											"top": -144,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -2884,7 +2884,7 @@
 											"top": -156,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -3081,7 +3081,7 @@
 											"top": -144,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -3278,7 +3278,7 @@
 											"top": -288,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -3584,7 +3584,7 @@
 											"top": -288,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -3780,7 +3780,7 @@
 											"top": -288,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -4070,7 +4070,7 @@
 											"top": 208,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -4282,7 +4282,7 @@
 											"top": 192,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -4478,7 +4478,7 @@
 											"top": 192,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -4674,7 +4674,7 @@
 											"top": -396,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -4964,7 +4964,7 @@
 											"top": 204,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -5270,7 +5270,7 @@
 											"top": 208,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -5466,7 +5466,7 @@
 											"top": 208,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -5756,7 +5756,7 @@
 											"top": -388,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -6062,7 +6062,7 @@
 											"top": -288,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -6258,7 +6258,7 @@
 											"top": -288,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -6454,7 +6454,7 @@
 											"top": -512,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -6650,7 +6650,7 @@
 											"top": 48,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -6752,7 +6752,7 @@
 											"top": -368,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -7058,7 +7058,7 @@
 											"top": -288,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -7254,7 +7254,7 @@
 											"top": -288,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -7638,7 +7638,7 @@
 											"top": 1332,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",
@@ -7928,7 +7928,7 @@
 											"top": -416,
 											"width": 86.6708984375,
 											"height": 13,
-											"text": "(from Activity1)"
+											"text": "(from fn_main)"
 										},
 										{
 											"_type": "LabelView",

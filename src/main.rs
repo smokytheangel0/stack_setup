@@ -59,11 +59,16 @@
 ///         when android studio has already been downloaded
 /// 
 ///         double download bug fixed on my mac, need to test on the x102ba
+///         we should try the yandex browser
 /// 
 ///     ON WIN:
 ///         edge on windows has an issue detecting when the dls are complete and
 ///         it also requires you to save each download in the tab it was started in
 ///         so it wont pop up the DL save window like firefox, leaving even more trouble for the user
+///         
+///         we should try UC Browser in Win
+///         we should try the yandex browser
+///         we should try the firefox browser
 use std::fs;
 use std::env;
 use std::fs::ReadDir;
@@ -297,7 +302,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 /// from pathlib import Path
 /// TEST_FLAG = False
 /// #outBOX is String
-/// def is_complete(downloadNAME, testNUM):
+/// def is_complete(downloadNAME, &testPATH):
 ///     targetOS = platform.uname()[0]
 ///     outBOX = "None"
 ///
@@ -305,25 +310,25 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 ///         downloadsPATH = str(Path.home())
 ///         downloadsPATH += "\\Downloads\\"
 ///         testPATH = str(Path.home())
-///         if testNUM is 5:
-///             testPATH += "\\Desktop\\share\\test_data\\five_complete\\"
+///         if testPATH is 5:
+///             testPATH += "\\Desktop\\share\\test_data\\all_True\\"
 ///         else:
-///             testPATH += "\\Desktop\\share\\test_data\\four_complete\\"
+///             testPATH += "\\Desktop\\share\\test_data\\two_None\\"
 ///
 ///     elif targetOS in ("Darwin", "Linux"):
 ///         downloadsPATH = str(Path.home())
 ///         downloadsPATH += "/Downloads/"
 ///         testPATH = str(Path.home())
-///         if testNUM in 5:
-///             testPATH += "/Desktop/share/test_data/five_complete/"
+///         if testPATH in 5:
+///             testPATH += "/Desktop/share/test_data/all_True/"
 ///         else:
-///             testPATH += "/Desktop/share/test_data/four_complete/"
+///             testPATH += "/Desktop/share/test_data/two_None/"
 ///
 ///     else:
 ///         downloadsPATH = "we currently only support Windows 10, Ubuntu and Mac OS"
 ///
 ///     if TEST_FLAG is True:
-///         filesInDowloads = os.listdir(testPATH)
+///         filesInDowloads = os.listdir(&testPATH)
 ///     else:
 ///         filesInDownloads = os.listdir(downloadsPATH)
 ///
@@ -386,7 +391,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 ///         return False
 /// ```
 /// 
-fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
+fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
     //this function called from main and the associated tests
     //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
 
@@ -411,39 +416,12 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
             "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
         }
     }; 
-
-
-    let testPATH: String = { 
-        if cfg!(windows){
-            let path = env::home_dir().unwrap();
-            let mut testPATH = path.to_str()
-                                   .unwrap()
-                                   .to_owned();
-            if testNUM == 5 {
-                testPATH += "\\Desktop\\share\\test_data\\five_complete\\";
-            } else {
-                testPATH += "\\Desktop\\share\\test_data\\four_complete\\";
-            }
-            testPATH
-        }else if cfg!(unix){
-            let path = env::home_dir().unwrap();
-            let mut testPATH = path.to_str()
-                                   .unwrap()
-                                   .to_owned();
-            if testNUM == 5 {
-                testPATH += "/Desktop/share/test_data/five_complete/";
-            } else {
-                testPATH += "/Desktop/share/test_data/four_complete/";
-            }
-            testPATH
-        } else {
-            "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
-        }
-    };    
-   
+    
     let filesInDownloads: ReadDir = {
         if cfg!(test) {
-            fs::read_dir(&testPATH).unwrap()
+            //the directory returns err for
+            //one_False_opera and all_True
+            fs::read_dir(&&testPATH).unwrap()
         } else {            
             fs::read_dir(&downloadsPATH).unwrap()
         }
@@ -499,10 +477,12 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
         //android studio on safari does not show the list of dls,
         //and opens at the bottom of the page but the link is at top
         //besides that though it works now on mac
-
+        if downloadNAME == "android" {
+            let debugBOX = 0;
+        }
         let found: String = {
             if fileNAME.contains(&downloadNAME) || 
-                fileNAME.contains(&"crdownload"[..]) || 
+                fileNAME.contains(&"Unconfirmed"[..]) || 
                 fileNAME.contains(&alternateGIT[..]) ||
                 fileNAME.contains(&alternateCODE[..]) 
             {
@@ -511,6 +491,8 @@ fn is_complete(downloadNAME: &str, testNUM: i16) -> String {
                 } else if fileNAME.contains(&".download"[..]) {
                     return "False".to_string();
                 } else if fileNAME.contains(&".partial"[..]) {
+                    return "False".to_string();
+                } else if fileNAME.contains(&".~"[..]){
                     return "False".to_string();
                 } else if fileNAME.contains(&".crdownload"[..]) {
                     unconfirmed += 1;
@@ -590,9 +572,9 @@ fn main() {
         ("android".to_string(),  "None".to_string())    
     ].iter().cloned().collect();
 
-    let testNUM: i16 = 0;
+    let _testPATH: String = "None".to_string();
     for downloadNAME in downloadMAP.clone().keys() {
-        let answerBOX = is_complete(&downloadNAME, testNUM);
+        let answerBOX = is_complete(&downloadNAME, &_testPATH);
 
         if answerBOX == "True".to_string() {
             println!("{} is already complete!\n", downloadNAME)
@@ -641,7 +623,10 @@ fn main() {
             if downloadNAME.to_owned() == "git" && cfg!(target_os = "linux") {
                 continue
             } else  {
-                let answerBOX = is_complete(&downloadNAME, testNUM);
+                let answerBOX = is_complete(&downloadNAME, &_testPATH);
+                if downloadNAME == "android" {
+                    let thisBOX = 1;
+                }
                 downloadMAP.insert(downloadNAME.to_string(), answerBOX);
             }
         }
@@ -785,55 +770,300 @@ mod tests {
     */
 
     // start_downloads_linux_apt is at the bottom cos it brings up the sudo prompt
+            //at this rate we should just feed in the path before things get too confusing
+            //if we do these as macro parameterized tests then it will be much shorter
+
+    fn is_complete_switch_paths() -> String {
+        let testPATH: String = { 
+            if cfg!(windows){
+                let path = env::home_dir().unwrap();
+                let mut testPATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                testPATH += "\\Desktop\\share\\test_data\\";
+                testPATH
+
+            } else if cfg!(unix){
+                let path = env::home_dir().unwrap();
+                let mut testPATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                testPATH += "/Desktop/share/test_data/";
+                testPATH
+
+            } else {
+                "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
+            }
+        };
+        return testPATH    
+    }
 
     #[test]
-    fn is_complete_offline_switch() {
-        //this works in mac and windows
-
-        //later we will have an online version
-        //which will try five times or something and clean up
-        //need to add starUML to this list
+    fn is_complete_switch_all_true() {
+        //cannot find all_True directory
         let fileLIST: Vec<String> = vec!(
-                    "StarUML".to_string(),
-                    "git".to_string(),
-                    "co_demo0".to_string(), 
-                    "flutter".to_string(),
-                    "VSCode".to_string(),
-                    "android".to_string()
-                    );
+            "StarUML".to_string(),
+            "git".to_string(),
+            "co_demo0".to_string(), 
+            "flutter".to_string(),
+            "VSCode".to_string(),
+            "android".to_string()
+            );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let testNUM: i16 = 5;
+        let mut testPATH = is_complete_switch_paths();
+        testPATH += "all_True";
         for index in 0..fileLIST.len() {
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&downloadNAME, testNUM);
+            let outBOX = is_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
         }
         
-        assert_eq!(testLIST[0], "None");
+        assert_eq!(testLIST[0], "True");
         assert_eq!(testLIST[1], "True");
         assert_eq!(testLIST[2], "True");
         assert_eq!(testLIST[3], "True");
         assert_eq!(testLIST[4], "True");
         assert_eq!(testLIST[5], "True");
-        
+
+    }
+
+    #[test]
+    fn is_complete_switch_two_none() {
+        //test passes on mac
+        let fileLIST: Vec<String> = vec!(
+            "StarUML".to_string(),
+            "git".to_string(),
+            "co_demo0".to_string(), 
+            "flutter".to_string(),
+            "VSCode".to_string(),
+            "android".to_string()
+            );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let testNUM: i16 = 2;
+        let mut testPATH = is_complete_switch_paths();
+        testPATH += "two_None";
         for index in 0..fileLIST.len() {
-                let downloadNAME = fileLIST.get(index).unwrap().to_string();
-                let outBOX = is_complete(&downloadNAME, testNUM);
-                testLIST.push(outBOX);
+            let downloadNAME = fileLIST.get(index).unwrap().to_string();
+            let outBOX = is_complete(&downloadNAME, &testPATH);
+            testLIST.push(outBOX);
         }
-
         assert_eq!(testLIST[0], "True");
-        assert_eq!(testLIST[1], "False");
+        assert_eq!(testLIST[1], "None");
+        assert_eq!(testLIST[2], "True");
+        assert_eq!(testLIST[3], "True");
+        assert_eq!(testLIST[4], "True");
+        assert_eq!(testLIST[5], "None");
+    }
+
+    #[test]
+    fn is_complete_switch_one_false_chrome() {
+        //test passes on mac
+        let fileLIST: Vec<String> = vec!(
+            "StarUML".to_string(),
+            "git".to_string(),
+            "co_demo0".to_string(), 
+            "flutter".to_string(),
+            "VSCode".to_string(),
+            "android".to_string()
+            );
+
+        let mut testLIST: Vec<String> = [].to_vec();
+        let mut testPATH = is_complete_switch_paths();
+        testPATH += "one_False_chrome";
+        for index in 0..fileLIST.len() {
+            let downloadNAME = fileLIST.get(index).unwrap().to_string();
+            let outBOX = is_complete(&downloadNAME, &testPATH);
+            testLIST.push(outBOX);
+        }
+        assert_eq!(testLIST[0], "True");
+        assert_eq!(testLIST[1], "True");
         assert_eq!(testLIST[2], "True");
         assert_eq!(testLIST[3], "True");
         assert_eq!(testLIST[4], "True");
         assert_eq!(testLIST[5], "False");
-        
+
     }
+
+    #[test]
+    //returns a None
+    fn is_complete_switch_one_false_edge() {
+        //this one has no partial file (needs win)
+        let fileLIST: Vec<String> = vec!(
+            "StarUML".to_string(),
+            "git".to_string(),
+            "co_demo0".to_string(), 
+            "flutter".to_string(),
+            "VSCode".to_string(),
+            "android".to_string()
+            );
+
+        let mut testLIST: Vec<String> = [].to_vec();
+        let mut testPATH = is_complete_switch_paths();
+        testPATH += "one_False_edge";
+        for index in 0..fileLIST.len() {
+            let downloadNAME = fileLIST.get(index).unwrap().to_string();
+            let outBOX = is_complete(&downloadNAME, &testPATH);
+            testLIST.push(outBOX);
+        }
+        assert_eq!(testLIST[0], "True");
+        assert_eq!(testLIST[1], "True");
+        assert_eq!(testLIST[2], "True");
+        assert_eq!(testLIST[3], "True");
+        assert_eq!(testLIST[4], "True");
+        //returns None as there is no edge partial yet
+        assert_eq!(testLIST[5], "False");
+
+    }
+
+    #[test]
+    fn is_complete_switch_one_false_firefox() {
+        //test passes on mac
+        let fileLIST: Vec<String> = vec!(
+            "StarUML".to_string(),
+            "git".to_string(),
+            "co_demo0".to_string(), 
+            "flutter".to_string(),
+            "VSCode".to_string(),
+            "android".to_string()
+            );
+
+        let mut testLIST: Vec<String> = [].to_vec();
+        let mut testPATH = is_complete_switch_paths();
+        testPATH += "one_False_firefox";
+        for index in 0..fileLIST.len() {
+            let downloadNAME = fileLIST.get(index).unwrap().to_string();
+            let outBOX = is_complete(&downloadNAME, &testPATH);
+            testLIST.push(outBOX);
+        }
+        assert_eq!(testLIST[0], "True");
+        assert_eq!(testLIST[1], "True");
+        assert_eq!(testLIST[2], "True");
+        assert_eq!(testLIST[3], "True");
+        assert_eq!(testLIST[4], "True");
+        assert_eq!(testLIST[5], "False");
+
+    }
+
+
+    #[test]
+    fn is_complete_switch_one_false_opera() {
+        //cannot find opera directory
+        let fileLIST: Vec<String> = vec!(
+            "StarUML".to_string(),
+            "git".to_string(),
+            "co_demo0".to_string(), 
+            "flutter".to_string(),
+            "VSCode".to_string(),
+            "android".to_string()
+            );
+
+        let mut testLIST: Vec<String> = [].to_vec();
+        let mut testPATH = is_complete_switch_paths();
+        testPATH += "one_False_opera";
+        for index in 0..fileLIST.len() {
+            let downloadNAME = fileLIST.get(index).unwrap().to_string();
+            let outBOX = is_complete(&downloadNAME, &testPATH);
+            testLIST.push(outBOX);
+        }
+        assert_eq!(testLIST[0], "True");
+        assert_eq!(testLIST[1], "True");
+        assert_eq!(testLIST[2], "True");
+        assert_eq!(testLIST[3], "True");
+        assert_eq!(testLIST[4], "True");
+        assert_eq!(testLIST[5], "False");
+
+    }
+    
+    #[test]
+    fn is_complete_switch_one_false_safari() {
+        //test passes on mac
+        let fileLIST: Vec<String> = vec!(
+            "StarUML".to_string(),
+            "git".to_string(),
+            "co_demo0".to_string(), 
+            "flutter".to_string(),
+            "VSCode".to_string(),
+            "android".to_string()
+            );
+
+        let mut testLIST: Vec<String> = [].to_vec();
+        let mut testPATH = is_complete_switch_paths();
+        testPATH += "one_False_safari";
+        for index in 0..fileLIST.len() {
+            let downloadNAME = fileLIST.get(index).unwrap().to_string();
+            let outBOX = is_complete(&downloadNAME, &testPATH);
+            testLIST.push(outBOX);
+        }
+        assert_eq!(testLIST[0], "True");
+        assert_eq!(testLIST[1], "True");
+        assert_eq!(testLIST[2], "True");
+        assert_eq!(testLIST[3], "True");
+        assert_eq!(testLIST[4], "True");
+        assert_eq!(testLIST[5], "False");
+
+    }
+
+    #[test]
+    fn is_complete_switch_one_false_yandex() {
+        //this one needs logic work
+        let fileLIST: Vec<String> = vec!(
+            "StarUML".to_string(),
+            "git".to_string(),
+            "co_demo0".to_string(), 
+            "flutter".to_string(),
+            "VSCode".to_string(),
+            "android".to_string()
+            );
+
+        let mut testLIST: Vec<String> = [].to_vec();
+        let mut testPATH = is_complete_switch_paths();
+        testPATH += "one_False_yandex";
+        for index in 0..fileLIST.len() {
+            let downloadNAME = fileLIST.get(index).unwrap().to_string();
+            let outBOX = is_complete(&downloadNAME, &testPATH);
+            testLIST.push(outBOX);
+        }
+        assert_eq!(testLIST[0], "True");
+        assert_eq!(testLIST[1], "True");
+        assert_eq!(testLIST[2], "True");
+        assert_eq!(testLIST[3], "True");
+        //this one thought VSCode was partial
+        assert_eq!(testLIST[4], "True");
+        assert_eq!(testLIST[5], "False");
+
+    }
+
+    #[test]
+    fn is_complete_switch_one_false_uc() {
+        //this one has no partial file (needs win)
+        let fileLIST: Vec<String> = vec!(
+            "StarUML".to_string(),
+            "git".to_string(),
+            "co_demo0".to_string(), 
+            "flutter".to_string(),
+            "VSCode".to_string(),
+            "android".to_string()
+            );
+
+        let mut testLIST: Vec<String> = [].to_vec();
+        let mut testPATH = is_complete_switch_paths();
+        testPATH += "one_False_uc";
+        for index in 0..fileLIST.len() {
+            let downloadNAME = fileLIST.get(index).unwrap().to_string();
+            let outBOX = is_complete(&downloadNAME, &testPATH);
+            testLIST.push(outBOX);
+        }
+        assert_eq!(testLIST[0], "True");
+        assert_eq!(testLIST[1], "True");
+        assert_eq!(testLIST[2], "True");
+        assert_eq!(testLIST[3], "True");
+        assert_eq!(testLIST[4], "True");
+        //this one returns none because there is no uc partial yet
+        assert_eq!(testLIST[5], "False");
+
+    }
+
 
     /*
     #[test]
