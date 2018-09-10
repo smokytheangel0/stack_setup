@@ -66,9 +66,17 @@
 ///         it also requires you to save each download in the tab it was started in
 ///         so it wont pop up the DL save window like firefox, leaving even more trouble for the user
 ///         
-///         we should try UC Browser in Win
-///         we should try the yandex browser
-///         we should try the firefox browser
+///         so apparently the mac resource fork appears on windows as extra hidden files prepended with "._"
+///         this appeared to have confused the is_complete function a bit and I had to label
+///         my unwraps to find it, however I fixed the resource fork problem and now I have figured out
+///         that the metadata call did not set testpath during tests, just download path
+///         I may have made this more complicated than neccessary by adding platform switches to each test
+///         I kind of want to go through them later to make a better non macro version as well as the macro version
+///         but they seem to properly probe the test_data dirs now, so onward with testing
+///         
+///         I wish the lldb debugger for windows was more developed, I will have to experiment
+///         with msvc debugger setup, and gitignoring the launch.json, for this little bit of windows work
+///         I have been using panic statements which work well when testing
 use std::fs;
 use std::env;
 use std::fs::ReadDir;
@@ -103,7 +111,9 @@ fn check_dirs() -> i8 {
     let mut outBOX = 0;
 
     //might definitely be a better way to do this
-    let pathBuffer = env::current_dir().ok().unwrap();
+    //this returns a result to the ok which returns an option
+    let pathBuffer = env::current_dir().expect("the result from current_dir which sets the pathBuffer has broken");
+    //this returns an option to unwrap
     let pathBOX = pathBuffer.to_str().unwrap();
 
     let errorBOX = String::from("This program you've just run does not appear to be in the Downloads folder, \nplease try running it again with it in the Downloads folder\n");
@@ -267,6 +277,9 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
         println!("if you see [sudo] please click\n and enter your password to install git !>");
         let output = Command::new("sudo")
             .arg("apt").arg("install").arg("git")
+            //this returns a result to unwrap
+            //and this seems /ike a better way to handle this
+            //than using expect, this one came verbatim from sO
             .output().unwrap_or_else(|e| {
                 panic!("failed to execute process: {}", e)
         });
@@ -356,7 +369,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 ///     unconfirmed = 0
 ///     for fileNAME in filesInDownloads:
 ///         if downloadNAME in fileNAME 
-///             or ".crdownload" in fileNAME 
+///             or "Unconfirmed" in fileNAME 
 ///             or str(alternateGIT) in fileNAME 
 ///             or str(alternateCODE) in fileNAME:
 /// 
@@ -366,6 +379,9 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 ///                 return False
 ///             elif ".download" in fileNAME:
 ///                 return False
+///             elif ".~" in fileNAME:
+///                 unconfirmed += 1
+///                 continue
 ///             elif ".crdownload" in fileNAME:
 ///                 unconfirmed += 1
 ///                 continue
@@ -399,6 +415,7 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
 
     let downloadsPATH: String = {
         if cfg!(windows){
+            //these both yield options to unwrap
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
@@ -406,6 +423,7 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
             downloadsPATH += "\\Downloads\\";
             downloadsPATH
         }else if cfg!(unix){
+            //these both yield options to unwrap
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
@@ -421,9 +439,12 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
         if cfg!(test) {
             //the directory returns err for
             //one_False_opera and all_True
-            fs::read_dir(&&testPATH).unwrap()
-        } else {            
-            fs::read_dir(&downloadsPATH).unwrap()
+
+            //this returns a result to unwrap
+            fs::read_dir(&testPATH).expect("the read_dir that sets filesInDownloads broke")
+        } else {
+            //this returns a result to unwrap          
+            fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke")
         }
     };
 
@@ -461,11 +482,11 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
     //how many unwraps can one rapper stack if
     //one rapper could stack unwraps delicately
     for fileNAME in filesInDownloads {
-        
-        let fileNAME: String = fileNAME.unwrap()
+        //these both return results to unwrap
+        let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
                                         .file_name()
                                         .into_string()
-                                        .unwrap()
+                                        .expect("the post string result which sets fileNAME has broken")
                                         .to_owned();
 
         //firefox works on mac
@@ -486,20 +507,30 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
                 fileNAME.contains(&alternateGIT[..]) ||
                 fileNAME.contains(&alternateCODE[..]) 
             {
-                if fileNAME.contains(&"part"[..]) {
+                //panic!("the fileNAME is: \n{}", fileNAME);
+
+                if fileNAME.contains(&".part"[..]) {
                     return "False".to_string();
                 } else if fileNAME.contains(&".download"[..]) {
                     return "False".to_string();
                 } else if fileNAME.contains(&".partial"[..]) {
                     return "False".to_string();
                 } else if fileNAME.contains(&".~"[..]){
-                    return "False".to_string();
+                    unconfirmed += 1;
+                    continue
                 } else if fileNAME.contains(&".crdownload"[..]) {
                     unconfirmed += 1;
                     continue
                 } else {
-                    let filePATH: String = format!("{}{}", &downloadsPATH, &fileNAME);
-                    let metaDATA = fs::metadata(filePATH).unwrap();
+                    let metaDATA = {
+                        if cfg!(test) {
+                            let filePATH: String = format!("{}{}", &testPATH, &fileNAME);
+                            fs::metadata(filePATH).expect("the filesize metadata failed to set during test run")
+                        } else {
+                            let filePATH: String = format!("{}{}", &downloadsPATH, &fileNAME);
+                            fs::metadata(filePATH).expect("the filesize metadata failed to set during build run")
+                        }
+                    };
                     if metaDATA.len() != 0 {
                         return "True".to_string();
                     } else {
@@ -550,6 +581,13 @@ fn show_licences() -> String {
 }
 
 fn create_package() -> String {
+    //this misleadingly named thing is where
+    //we just integrate the contents of co_demo with
+    //a new locally created flutter project
+
+    //it turns out that .idea and .packages have local paths
+    //but are git ignored normally so removing them from the repo
+    //might mean that it runs without this step
     let errorBOX = String::from("");
     errorBOX
 }
@@ -561,6 +599,16 @@ enum DownloadStatus {
 }
 
 fn main() {
+    let path = env::home_dir().unwrap();
+    let mut testPATH = path.to_str()
+                        .unwrap()
+                        .to_owned();
+    println!("first stage of testpath: \n {}", testPATH);
+    testPATH += "\\Desktop\\share\\test_data\\";
+    println!("second stage of testpath: \n {}", testPATH);
+    testPATH += "all_True";
+    println!("the third stage of testpath: \n {}", testPATH);
+    //this comes out all right
     check_dirs();
 
     let mut downloadMAP: IndexMap<String, String> = [
@@ -682,11 +730,13 @@ mod tests {
         //still very proud of my first test, and glad
         //types are explicit
         if cfg!(windows){
+            //these return options to unwrap
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str().unwrap().to_owned();
             downloadsPATH += "\\Downloads";
             env::set_current_dir(&downloadsPATH);
         } else if cfg!(unix){
+            //these return options to unwrap
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str().unwrap().to_owned();
             downloadsPATH += "/Downloads";
@@ -773,9 +823,11 @@ mod tests {
             //at this rate we should just feed in the path before things get too confusing
             //if we do these as macro parameterized tests then it will be much shorter
 
+            //these entirely fail directory discovery in windows
     fn is_complete_switch_paths() -> String {
         let testPATH: String = { 
             if cfg!(windows){
+                //these yield options to unwrap
                 let path = env::home_dir().unwrap();
                 let mut testPATH = path.to_str()
                                     .unwrap()
@@ -784,6 +836,7 @@ mod tests {
                 testPATH
 
             } else if cfg!(unix){
+                //these yield options to unwrap
                 let path = env::home_dir().unwrap();
                 let mut testPATH = path.to_str()
                                     .unwrap()
@@ -811,9 +864,22 @@ mod tests {
             );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let mut testPATH = is_complete_switch_paths();
-        testPATH += "all_True";
+        let testPATH: String = {
+            if cfg!(windows) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "all_True\\";
+                testPATH
+            } else if cfg!(unix) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "all_True/";
+                testPATH
+            } else {
+                let testPATH = "we currently only support Windows 10, Ubuntu and Mac OS".to_string();
+                testPATH
+            }
+        };
         for index in 0..fileLIST.len() {
+            //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
             let outBOX = is_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
@@ -841,9 +907,23 @@ mod tests {
             );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let mut testPATH = is_complete_switch_paths();
-        testPATH += "two_None";
+        let testPATH: String = {
+            if cfg!(windows) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "two_None\\";
+                testPATH
+            } else if cfg!(unix) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "two_None/";
+                testPATH
+            } else {
+                let testPATH = "we currently only support Windows 10, Ubuntu and Mac OS".to_string();
+                testPATH
+            }
+        };
+        
         for index in 0..fileLIST.len() {
+            //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
             let outBOX = is_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
@@ -869,9 +949,22 @@ mod tests {
             );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let mut testPATH = is_complete_switch_paths();
-        testPATH += "one_False_chrome";
+        let testPATH: String = {
+            if cfg!(windows) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_chrome\\";
+                testPATH
+            } else if cfg!(unix) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_chrome/";
+                testPATH
+            } else {
+                let testPATH = "we currently only support Windows 10, Ubuntu and Mac OS".to_string();
+                testPATH
+            }
+        };
         for index in 0..fileLIST.len() {
+            //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
             let outBOX = is_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
@@ -888,7 +981,7 @@ mod tests {
     #[test]
     //returns a None
     fn is_complete_switch_one_false_edge() {
-        //this one has no partial file (needs win)
+        //test passes on win
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
@@ -899,9 +992,22 @@ mod tests {
             );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let mut testPATH = is_complete_switch_paths();
-        testPATH += "one_False_edge";
+        let testPATH: String = {
+            if cfg!(windows) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_edge\\";
+                testPATH
+            } else if cfg!(unix) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_edge/";
+                testPATH
+            } else {
+                let testPATH = "we currently only support Windows 10, Ubuntu and Mac OS".to_string();
+                testPATH
+            }
+        };
         for index in 0..fileLIST.len() {
+            //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
             let outBOX = is_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
@@ -911,14 +1017,13 @@ mod tests {
         assert_eq!(testLIST[2], "True");
         assert_eq!(testLIST[3], "True");
         assert_eq!(testLIST[4], "True");
-        //returns None as there is no edge partial yet
         assert_eq!(testLIST[5], "False");
 
     }
 
     #[test]
     fn is_complete_switch_one_false_firefox() {
-        //test passes on mac
+        //test passes on mac and win
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
@@ -929,9 +1034,22 @@ mod tests {
             );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let mut testPATH = is_complete_switch_paths();
-        testPATH += "one_False_firefox";
+        let testPATH: String = {
+            if cfg!(windows) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_firefox\\";
+                testPATH
+            } else if cfg!(unix) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_firefox/";
+                testPATH
+            } else {
+                let testPATH = "we currently only support Windows 10, Ubuntu and Mac OS".to_string();
+                testPATH
+            }
+        };
         for index in 0..fileLIST.len() {
+            //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
             let outBOX = is_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
@@ -959,9 +1077,22 @@ mod tests {
             );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let mut testPATH = is_complete_switch_paths();
-        testPATH += "one_False_opera";
+        let testPATH: String = {
+            if cfg!(windows) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_opera\\";
+                testPATH
+            } else if cfg!(unix) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "all_True/";
+                testPATH
+            } else {
+                let testPATH = "we currently only support Windows 10, Ubuntu and Mac OS".to_string();
+                testPATH
+            }
+        };
         for index in 0..fileLIST.len() {
+            //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
             let outBOX = is_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
@@ -971,13 +1102,14 @@ mod tests {
         assert_eq!(testLIST[2], "True");
         assert_eq!(testLIST[3], "True");
         assert_eq!(testLIST[4], "True");
+        //returns true instead of false, havent added identifier to is_complete logic yet
         assert_eq!(testLIST[5], "False");
 
     }
     
     #[test]
     fn is_complete_switch_one_false_safari() {
-        //test passes on mac
+        //test passes on mac and win
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
@@ -988,9 +1120,22 @@ mod tests {
             );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let mut testPATH = is_complete_switch_paths();
-        testPATH += "one_False_safari";
+        let testPATH: String = {
+            if cfg!(windows) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_safari\\";
+                testPATH
+            } else if cfg!(unix) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_safari/";
+                testPATH
+            } else {
+                let testPATH = "we currently only support Windows 10, Ubuntu and Mac OS".to_string();
+                testPATH
+            }
+        };
         for index in 0..fileLIST.len() {
+            //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
             let outBOX = is_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
@@ -1007,6 +1152,7 @@ mod tests {
     #[test]
     fn is_complete_switch_one_false_yandex() {
         //this one needs logic work
+        //test passes on win
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
@@ -1017,9 +1163,22 @@ mod tests {
             );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let mut testPATH = is_complete_switch_paths();
-        testPATH += "one_False_yandex";
+        let testPATH: String = {
+            if cfg!(windows) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_yandex\\";
+                testPATH
+            } else if cfg!(unix) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_yandex/";
+                testPATH
+            } else {
+                let testPATH = "we currently only support Windows 10, Ubuntu and Mac OS".to_string();
+                testPATH
+            }
+        };
         for index in 0..fileLIST.len() {
+            //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
             let outBOX = is_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
@@ -1036,7 +1195,7 @@ mod tests {
 
     #[test]
     fn is_complete_switch_one_false_uc() {
-        //this one has no partial file (needs win)
+        //test passes on win
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
@@ -1047,9 +1206,22 @@ mod tests {
             );
 
         let mut testLIST: Vec<String> = [].to_vec();
-        let mut testPATH = is_complete_switch_paths();
-        testPATH += "one_False_uc";
+        let testPATH: String = {
+            if cfg!(windows) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_uc\\";
+                testPATH
+            } else if cfg!(unix) {
+                let mut testPATH = is_complete_switch_paths();
+                testPATH += "one_False_uc/";
+                testPATH
+            } else {
+                let testPATH = "we currently only support Windows 10, Ubuntu and Mac OS".to_string();
+                testPATH
+            }
+        };
         for index in 0..fileLIST.len() {
+            //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
             let outBOX = is_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
@@ -1059,7 +1231,6 @@ mod tests {
         assert_eq!(testLIST[2], "True");
         assert_eq!(testLIST[3], "True");
         assert_eq!(testLIST[4], "True");
-        //this one returns none because there is no uc partial yet
         assert_eq!(testLIST[5], "False");
 
     }
