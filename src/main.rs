@@ -595,6 +595,28 @@ fn setup_downloads(downloadNAME: &str, testPATH: &str) -> String {
             io::copy(&mut file, &mut outfile).expect("failed to copy the files out");
         }
     }
+    //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
+    //for the non directory names, which should match a vec of them
+    //this as well as checking dirs that have stuff extracted to them, like co_demo and flutter
+    //MAC:
+    //  "/Applications/Android Studio.app"
+    //  "/Applications/StarUML.app"
+    //  "/Applications/Visual Studio Code.app"
+    //  --git doesnt show up in the applications folder
+    //  possibly "/usr/local/git/uninstall.sh"
+
+    //WIN:
+    //  "C:\Program Files\Android\Android Studio\"
+    //  all the rest ought to be in Program Files or (x86)
+    //  we dont have enough space on the black book to check
+    //  so we will try on mums pc
+
+    //LIN:
+    //  "/opt/android-studio/"
+    //  ~/.config/StarUML/
+    //  VSCode:
+    //      /usr/bin/code
+    //      /usr/share/code/
     outBOX
 }
 
