@@ -28,56 +28,39 @@
 /// the user to start their browser if its not
 /// 
 /// RE: pseudoPYTHON equality
-/// rework is_complete and start_downloads
-/// to include StarUML and functioning changes
-/// to is_complete
+/// keep it updated
 /// 
 /// RE: test triggered downloads
 /// create a cleanup function to erase the
 /// previously flutter *2 and now VSCode and git
 /// switch test downloads
+/// 
+/// RE: browser tests
+/// finish debugging opera logic
+/// clean up browser tests within the limits of the vanilla test infrastructure
+/// create macro parameterized test as well
+/// 
+/// RE: win debugger
+/// need to set up a working msvc debugger on win
+/// and gitignore the launch.json file
+/// want to try out lldb on there even though it might not work
+/// for now am using panic macros to reveal var contents during runtime
 ///
+/// RE: is_complete spin check is using an entire core...
 
-/// IS_COMPLETE NOTES:
+/// SETUP_DOWNLOADS NOTES:
 ///     ON MAC:
-///         when android studio is complete before script
-///         git downloads twice consistently
-/// 
-///         when co_demo is complete before script it works fine
-/// 
-///         just noticed VSCODE always false positives in the initial check
-///         seems like it matches on a hidden .vscode folder in my mac downloads
-///         this may be due to the linux alias for VSCode which is code
-///         added compliler directives to specify that behaviour is only for linux
-///         this may still impact the linux functionality when there is a similar .vscode object
-///         in order to mitigate this I think we need to match a larger slice of the name on linux
-/// 
-///         we need a longer sleep when android studio is ignored
-///         added also a longer sleep for git, as the double download didnt
-///         occur when debugging, might be related to timing
-/// 
-///         when android studio has already been downloaded
-/// 
-///         double download bug fixed on my mac, need to test on the x102ba
-///         we should try the yandex browser
 /// 
 ///     ON WIN:
-///         edge on windows has an issue detecting when the dls are complete and
-///         it also requires you to save each download in the tab it was started in
-///         so it wont pop up the DL save window like firefox, leaving even more trouble for the user
-///         
-///         so apparently the mac resource fork appears on windows as extra hidden files prepended with "._"
-///         this appeared to have confused the is_complete function a bit and I had to label
-///         my unwraps to find it, however I fixed the resource fork problem and now I have figured out
-///         that the metadata call did not set testpath during tests, just download path
-///         I may have made this more complicated than neccessary by adding platform switches to each test
-///         I kind of want to go through them later to make a better non macro version as well as the macro version
-///         but they seem to properly probe the test_data dirs now, so onward with testing
-///         
-///         I wish the lldb debugger for windows was more developed, I will have to experiment
-///         with msvc debugger setup, and gitignoring the launch.json, for this little bit of windows work
-///         I have been using panic statements which work well when testing
+/// 
+///     ON LIN:
+/// 
+
+//so far ~500 lines of function code
+// ~100 lines in main
+//and ~500 lines of test code
 use std::fs;
+use std::io;
 use std::env;
 use std::fs::ReadDir;
 use std::{thread, time};
@@ -86,8 +69,9 @@ use std::process::Command;
 extern crate webbrowser;
 extern crate indexmap;
 use indexmap::IndexMap;
+extern crate zip;
 
-
+//#region py_check_dirs
 ///the [check_dirs] function looks like this
 /// in python:
 /// ```python
@@ -106,6 +90,7 @@ use indexmap::IndexMap;
 ///         return outBOX
 /// ```
 /// 
+//#endregion
 fn check_dirs() -> i8 {
     //this works in Windows
     let mut outBOX = 0;
@@ -131,7 +116,7 @@ fn check_dirs() -> i8 {
     outBOX
 }
 
-
+//#region py_start_downloads
 ///the [start_downloads] function probably looks like this
 /// ```python
 /// [replace all 'is not' with '!=']
@@ -195,6 +180,7 @@ fn check_dirs() -> i8 {
 ///     return testLIST
 ///```
 /// 
+//#endregion
 fn start_downloads(downloadNAME: &str) -> Vec<String> {  
     //this function called from main and the associated tests
     //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
@@ -305,7 +291,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     
 }
 
-
+//#region py_is_complete
 ///this is what the [is_complete] function is in python
 ///```python
 /// [replace all 'is not' with '!=']
@@ -407,6 +393,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 ///         return False
 /// ```
 /// 
+//#endregion
 fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
     //this function called from main and the associated tests
     //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
@@ -498,7 +485,7 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
         //android studio on safari does not show the list of dls,
         //and opens at the bottom of the page but the link is at top
         //besides that though it works now on mac
-        if downloadNAME == "android" {
+        if downloadNAME.contains(&"android"[..]) {
             let debugBOX = 0;
         }
         let found: String = {
@@ -509,11 +496,13 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
             {
                 //panic!("the fileNAME is: \n{}", fileNAME);
 
-                if fileNAME.contains(&".part"[..]) {
+                if fileNAME.contains(&".partial"[..]) {
+                    return "False".to_string();
+                } else if fileNAME.contains(&".opdownload"[..]) {
                     return "False".to_string();
                 } else if fileNAME.contains(&".download"[..]) {
                     return "False".to_string();
-                } else if fileNAME.contains(&".partial"[..]) {
+                } else if fileNAME.contains(&".part"[..]) {
                     return "False".to_string();
                 } else if fileNAME.contains(&".~"[..]){
                     unconfirmed += 1;
@@ -558,11 +547,55 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
     }
 }
 
-fn setup_downloads() -> String {
+fn setup_downloads(downloadNAME: &str, testPATH: &str) -> String {
     //safari unpacks zips by default
-    let errorBOX = String::from("");
-    errorBOX
+    //i think this is going to be the most platform diverse function by far
 
+    //for mac dmgs
+    //0) $hdiutil mount soso.dmg
+    //1) accept licence
+    //2) $cp -R /Volumes/soso.app /Applications
+    //3) unmount dmg, delete file from downloads
+    //4) the copy will only return a value when it is finished
+
+    //for mac apps
+    //0) unzip
+    //1) "$open soso.app"
+    //2) let user handle gui install
+    //3) open may not return a handle to the process
+
+    //for win exe
+    //0) $.\soso.exe
+    //1) let user handle GUI install
+    //2) this shouldnt return till the process is complete
+
+    //for lin deb
+    //0) $sudo dpkg -i soso.deb
+
+    //for all zip
+    //Zip crate
+    let outBOX = "".to_string();
+    //so the path logic from the is complete function
+    //can go above this and then we just operate on each file name like this
+    let filePATH = std::path::Path::new(&""[..]);
+    let file = fs::File::open(&filePATH).expect("failed to open file");
+    let mut archive = zip::ZipArchive::new(file).expect("failed to open zip");
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i).expect("failed to get first file from archive");
+        let outpath = file.sanitized_name();    
+        if (&*file.name()).ends_with("/") {
+            fs::create_dir_all(&outpath).expect("failed to create out bound folders")
+        } else {
+            if let Some(p) = outpath.parent() {
+                if !p.exists() {
+                    fs::create_dir_all(&p).expect("failed to create out bound folders");
+                }
+            }
+            let mut outfile = fs::File::create(&outpath).expect("failed to create file at path");
+            io::copy(&mut file, &mut outfile).expect("failed to copy the files out");
+        }
+    }
+    outBOX
 }
 
 fn create_directories() -> String {
@@ -979,7 +1012,6 @@ mod tests {
     }
 
     #[test]
-    //returns a None
     fn is_complete_switch_one_false_edge() {
         //test passes on win
         let fileLIST: Vec<String> = vec!(
