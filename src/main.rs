@@ -570,7 +570,17 @@ fn setup_downloads(downloadNAME: &str) {
             "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
         }
     };
-    println!("downloadsPATH is: {}", downloadsPATH);
+    let alternateGIT: &str = {
+        if cfg!(target_os = "windows") {
+            if downloadNAME == "git".to_string() {
+                "Git"
+            } else {
+                "None"
+            }
+        } else {
+            "None"
+        }
+    };
 
     let alternateCODE: &str = {
         if cfg!(target_os = "linux") {
@@ -589,7 +599,8 @@ fn setup_downloads(downloadNAME: &str) {
             "None"
         }
     };
-
+    
+    println!("downloadNAME is: {}", downloadNAME);
     //this doesnt find the android studio dl in linux and we need to handle spaces for windows, i believe the
     //args in the Command thing do not wrap the string in quotes, so we need to use \space
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
@@ -603,8 +614,8 @@ fn setup_downloads(downloadNAME: &str) {
         
         if fileNAME.contains(&downloadNAME) ||
            fileNAME.contains(&alternateCODE) 
-        {
-            filePATH = format!("{}{}", &downloadsPATH, &fileNAME);
+        {   
+            filePATH = format!("'{}{}'", &downloadsPATH, &fileNAME);
         }
     }
     println!("filePATH is: {}", filePATH);
