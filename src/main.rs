@@ -547,7 +547,66 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
     }
 }
 
-fn setup_downloads(downloadNAME: &str, testPATH: &str) -> String {
+fn setup_downloads(downloadNAME: &str) {
+
+    let downloadsPATH: String = {
+        if cfg!(windows){
+            //these both yield options to unwrap
+            let path = env::home_dir().unwrap();
+            let mut downloadsPATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
+            downloadsPATH += "\\Downloads\\";
+            downloadsPATH
+        }else if cfg!(unix){
+            //these both yield options to unwrap
+            let path = env::home_dir().unwrap();
+            let mut downloadsPATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
+            downloadsPATH += "/Downloads/";
+            downloadsPATH
+        } else {
+            "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
+        }
+    };
+    println!("downloadsPATH is: {}", downloadsPATH);
+
+    let alternateCODE: &str = {
+        if cfg!(target_os = "linux") {
+            if downloadNAME == "VSCode".to_string() {
+                "code_"
+            } else {
+                "None"
+            }
+        } else if cfg!(target_os = "macos") {
+            if downloadNAME == "VSCode".to_string() {
+                "Visual Studio Code"
+            } else {
+                "None"
+            }
+        } else {
+            "None"
+        }
+    };
+
+    let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
+    let mut filePATH: String = "None".to_string();
+    for fileNAME in filesInDownloads {
+        let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
+                                        .file_name()
+                                        .into_string()
+                                        .expect("the post string result which sets fileNAME has broken")
+                                        .to_owned();
+        
+        if fileNAME.contains(&downloadNAME) ||
+           fileNAME.contains(&alternateCODE) 
+        {
+            filePATH = format!("{}{}", &downloadsPATH, &fileNAME);
+        }
+    }
+    println!("filePATH is: {}", filePATH);
+
     //safari unpacks zips by default
     //i think this is going to be the most platform diverse function by far
 
@@ -571,30 +630,73 @@ fn setup_downloads(downloadNAME: &str, testPATH: &str) -> String {
 
     //for lin deb
     //0) $sudo dpkg -i soso.deb
+    let len = filePATH.len();
+    if filePATH[len-3..] == "exe".to_string() ||
+       filePATH[len-3..] == "app".to_string() ||
+       filePATH[len-3..] == "deb".to_string() 
+    {
+        let setupCMD = {
+            if cfg!(target_os = "windows") {
+                //this might need -Wait after filePATH to lock
+                ["Start-Process", "-FilePath", ""]
+            } else if cfg!(target_os = "macos") {
+                //this locks the terminal (good)
+                ["open", "", ""]
+            } else if cfg!(target_os = "linux") {
+                //this locks the terminal and gives oodles of output
+                ["sudo", "dpkg", "-i"]
+            } else {
+                ["we currently only support Windows 10, Ubuntu and Mac OS",
+                "we currently only support Windows 10, Ubuntu and Mac OS",
+                "we currently only support Windows 10, Ubuntu and Mac OS"]
+            }
+        };
+        for index in 0..setupCMD.len() {
+            println!("cmd number {} is: {}", index, setupCMD[index]);
+        }
+
+        let output = Command::new(&setupCMD[0])
+            .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH)
+            //this returns a result to unwrap
+            //and this seems /ike a better way to handle this
+            //than using expect, this one came verbatim from sO
+            .output().unwrap_or_else(|e| {
+                panic!("failed to execute process: {}", e)
+        });
+
+        if output.status.success() {
+            println!("command successful, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+        } else {
+            println!("command failed, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+        }
+    }
 
     //for all zip
     //Zip crate
-    let outBOX = "".to_string();
     //so the path logic from the is complete function
     //can go above this and then we just operate on each file name like this
-    let filePATH = std::path::Path::new(&""[..]);
-    let file = fs::File::open(&filePATH).expect("failed to open file");
-    let mut archive = zip::ZipArchive::new(file).expect("failed to open zip");
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i).expect("failed to get first file from archive");
-        let outpath = file.sanitized_name();    
-        if (&*file.name()).ends_with("/") {
-            fs::create_dir_all(&outpath).expect("failed to create out bound folders")
-        } else {
-            if let Some(p) = outpath.parent() {
-                if !p.exists() {
-                    fs::create_dir_all(&p).expect("failed to create out bound folders");
+    /*
+    if filePATH[len-3..] == "zip".to_string() {
+        let file = fs::File::open(&filePATH).expect("failed to open file");
+        let mut archive = zip::ZipArchive::new(file).expect("failed to create zip from file");
+        for i in 0..archive.len() {
+            let mut file = archive.by_index(i).expect("failed to get first file from archive");
+            let outpath = file.sanitized_name();    
+            if (&*file.name()).ends_with("/") {
+                fs::create_dir_all(&outpath).expect("failed to create out bound folders")
+            } else {
+                if let Some(p) = outpath.parent() {
+                    if !p.exists() {
+                        fs::create_dir_all(&p).expect("failed to create out bound folders");
+                    }
                 }
+                let mut outfile = fs::File::create(&outpath).expect("failed to create file at path");
+                io::copy(&mut file, &mut outfile).expect("failed to copy the files out");
             }
-            let mut outfile = fs::File::create(&outpath).expect("failed to create file at path");
-            io::copy(&mut file, &mut outfile).expect("failed to copy the files out");
         }
+
     }
+    */
     //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
     //for the non directory names, which should match a vec of them
     //this as well as checking dirs that have stuff extracted to them, like co_demo and flutter
@@ -617,7 +719,6 @@ fn setup_downloads(downloadNAME: &str, testPATH: &str) -> String {
     //  VSCode:
     //      /usr/bin/code
     //      /usr/share/code/
-    outBOX
 }
 
 fn create_directories() -> String {
@@ -654,6 +755,19 @@ enum DownloadStatus {
 }
 
 fn main() {
+    let mut downloadMAP: IndexMap<String, String> = [
+        ("StarUML".to_string(),  "None".to_string()),
+        ("git".to_string(),      "None".to_string()),
+        ("co_demo0".to_string(), "None".to_string()),
+        ("flutter".to_string(),  "None".to_string()),
+        ("VSCode".to_string(),   "None".to_string()),
+        ("android".to_string(),  "None".to_string())    
+    ].iter().cloned().collect();
+
+    for downloadNAME in downloadMAP.clone().keys() {
+        let answerBOX = setup_downloads(&downloadNAME);
+    }
+    /*
     let path = env::home_dir().unwrap();
     let mut testPATH = path.to_str()
                         .unwrap()
@@ -757,7 +871,7 @@ fn main() {
     }
     let sleepTIME = time::Duration::from_secs(60);
     thread::sleep(sleepTIME);
-
+*/
 }
 
 #[cfg(test)]
@@ -1289,6 +1403,22 @@ mod tests {
 
     }
 
+    #[test]
+    fn setup_downloads_filepath() {
+        let fileLIST = [
+                        "StarUML".to_string(),                
+                        "git".to_string(),
+                        "co_demo0".to_string(), 
+                        "flutter".to_string(),
+                        "VSCode".to_string(),
+                        "android".to_string()
+                    ];
+
+        for index in 0..fileLIST.len() {
+                let downloadNAME = fileLIST.get(index).unwrap().to_string();
+                assert_eq!(setup_downloads(&downloadNAME), ());
+        }
+    }
 
     /*
     #[test]
