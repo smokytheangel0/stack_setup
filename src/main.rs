@@ -590,6 +590,8 @@ fn setup_downloads(downloadNAME: &str) {
         }
     };
 
+    //this doesnt find the android studio dl in linux and we need to handle spaces for windows, i believe the
+    //args in the Command thing do not wrap the string in quotes, so we need to use \space
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
     let mut filePATH: String = "None".to_string();
     for fileNAME in filesInDownloads {
