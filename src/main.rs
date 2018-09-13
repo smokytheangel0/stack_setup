@@ -615,7 +615,7 @@ fn setup_downloads(downloadNAME: &str) {
         if fileNAME.contains(&downloadNAME) ||
            fileNAME.contains(&alternateCODE) 
         {   
-            filePATH = format!("\"{}{}\"", &downloadsPATH, &fileNAME);
+            filePATH = format!("'{}{}'", &downloadsPATH, &fileNAME);
         }
     }
 
@@ -650,21 +650,14 @@ fn setup_downloads(downloadNAME: &str) {
     {
         //mac 'open' works no problem for the single .app in the dls, we must try the dmg bit
 
-        //this works in powershell-win, third arg doesnt seem to affect it
-        //Start-Process -FilePath "C:\Users\Jesse Abell\Downloads\StarUML Setup 3.0.2.exe"
-        //from here though:
-        //output: the system cannot find the file specified
-
-        //this works when i execute from binary in dls file
-        //this works in terminal-lin, however it outputs the same confusion when run from here
-        //sudo dpkg -i "/home/j/Downloads/code_1.27.2-1536736588_amd64.deb"
-        //output: dpkg: error: cannot access archive '"/home/j/Downloads/code_1.27.2-1536736588_amd64.deb"': No such file or directory
+        //the commands werent working because the program had been run from within vscode
+        //linux and win appear to work now
         let setupCMD = {
             if cfg!(target_os = "windows") {
                 //tried also the cmd varient of the commands
                 //start /w ~, this also didnt work, but it didnt work in CMD too
                 //single quotes also dont work in CMD, so I changed them to double
-                ["powershell.exe","Start-Process", "-FilePath", "-Wait"]
+                ["powershell.exe","Start-Process", "-FilePath", ""]
             } else if cfg!(target_os = "macos") {
                 //this locks the terminal (good)
                 ["open", "", "", ""]
