@@ -605,6 +605,7 @@ fn setup_downloads(downloadNAME: &str) {
     //args in the Command thing do not wrap the string in quotes, so we need to use \space
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
     let mut filePATH: String = "None".to_string();
+    let mut volumePATH: String = "None".to_string();
     for fileNAME in filesInDownloads {
         let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
                                         .file_name()
@@ -616,18 +617,13 @@ fn setup_downloads(downloadNAME: &str) {
            fileNAME.contains(&alternateCODE) 
         {   
             filePATH = format!("'{}{}'", &downloadsPATH, &fileNAME);
+            volumePATH = format!("'{}{}'", &"/Volumes/"[..], &fileNAME);
         }
     }
 
     //safari unpacks zips by default
     //i think this is going to be the most platform diverse function by far
 
-    //for mac dmgs
-    //0) $hdiutil mount soso.dmg
-    //1) accept licence
-    //2) $cp -R /Volumes/soso.app /Applications
-    //3) unmount dmg, delete file from downloads
-    //4) the copy will only return a value when it is finished
 
     //for mac apps
     //0) unzip
@@ -666,9 +662,9 @@ fn setup_downloads(downloadNAME: &str) {
                 ["sudo", "dpkg", "-i",""]
             } else {
                 ["we currently only support Windows 10, Ubuntu and Mac OS",
-                "we currently only support Windows 10, Ubuntu and Mac OS",
-                "we currently only support Windows 10, Ubuntu and Mac OS",
-                "we currently only support Windows 10, Ubuntu and Mac OS"]
+                 "we currently only support Windows 10, Ubuntu and Mac OS",
+                 "we currently only support Windows 10, Ubuntu and Mac OS",
+                 "we currently only support Windows 10, Ubuntu and Mac OS"]
             }
         };
         for index in 0..setupCMD.len() {
@@ -690,8 +686,40 @@ fn setup_downloads(downloadNAME: &str) {
         } else {
             println!("command failed, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
         }
+
     }
 
+    //for mac dmgs
+    //0) $hdiutil mount soso.dmg
+    //1) accept licence
+    //2) $cp -R /Volumes/soso.app /Applications
+    //3) unmount dmg, delete file from downloads
+    //4) the copy will only return a value when it is finished
+    if filePATH[len-4..len-1] == "dmg".to_string() {
+        let mountCMD = ["hdiutil", "mount"];
+        let output = Command::new(&mountCMD[0])
+            .arg(&mountCMD[1]).arg(&filePATH)
+            //this returns a result to unwrap
+            //and this seems /ike a better way to handle this
+            //than using expect, this one came verbatim from sO
+            .output().expect("failed to execute mount cmd");
+
+        let copyCMD = ["cp", "-R"];
+        let output = Command::new(&copyCMD[0])
+                        .arg(&copyCMD[1])
+                        .arg(&volumePATH)
+                        .arg("/Applications")
+                        .output().expect("failed to execute copy cmd");
+
+        let unmountCMD = ["hdiutil", "unmount"];
+        let output = Command::new(&unmountCMD[0])
+            .arg(&unmountCMD[1]).arg(&filePATH)
+            //this returns a result to unwrap
+            //and this seems /ike a better way to handle this
+            //than using expect, this one came verbatim from sO
+            .output().expect("failed to execute unmount cmd");
+        
+    }
     //for all zip
     //Zip crate
     //so the path logic from the is complete function
