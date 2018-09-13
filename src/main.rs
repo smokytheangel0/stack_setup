@@ -695,8 +695,12 @@ fn setup_downloads(downloadNAME: &str) {
     //2) $cp -R /Volumes/soso.app /Applications
     //3) unmount dmg, delete file from downloads
     //4) the copy will only return a value when it is finished
+
+    //so we are back to the same symptoms as before but even when built and run from Downloads...
+    //no such file or directory, but copy and pasting the same cmd into a new terminal works (quotes and everything)...
     if filePATH[len-4..len-1] == "dmg".to_string() {
         let mountCMD = ["hdiutil", "mount"];
+        println!("cmd is: {} {}", mountCMD.join(" "), &filePATH);
         let output = Command::new(&mountCMD[0])
             .arg(&mountCMD[1]).arg(&filePATH)
             //this returns a result to unwrap
@@ -704,14 +708,28 @@ fn setup_downloads(downloadNAME: &str) {
             //than using expect, this one came verbatim from sO
             .output().expect("failed to execute mount cmd");
 
+        if output.status.success() {
+            println!("command successful, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+        } else {
+            println!("command failed, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+        }
+
         let copyCMD = ["cp", "-R"];
+        println!("cmd is: {} {} {}", copyCMD.join(" "), &volumePATH, "/Applications");
         let output = Command::new(&copyCMD[0])
                         .arg(&copyCMD[1])
                         .arg(&volumePATH)
                         .arg("/Applications")
                         .output().expect("failed to execute copy cmd");
 
+        if output.status.success() {
+            println!("command successful, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+        } else {
+            println!("command failed, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+        }
+
         let unmountCMD = ["hdiutil", "unmount"];
+        println!("cmd is: {} {}", unmountCMD.join(" "), &filePATH);
         let output = Command::new(&unmountCMD[0])
             .arg(&unmountCMD[1]).arg(&filePATH)
             //this returns a result to unwrap
@@ -719,7 +737,14 @@ fn setup_downloads(downloadNAME: &str) {
             //than using expect, this one came verbatim from sO
             .output().expect("failed to execute unmount cmd");
         
+        if output.status.success() {
+            println!("command successful, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+        } else {
+            println!("command failed, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+        }
+        
     }
+
     //for all zip
     //Zip crate
     //so the path logic from the is complete function
