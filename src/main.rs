@@ -618,7 +618,6 @@ fn setup_downloads(downloadNAME: &str) {
             filePATH = format!("\"{}{}\"", &downloadsPATH, &fileNAME);
         }
     }
-    println!("filePATH is: {}", filePATH);
 
     //safari unpacks zips by default
     //i think this is going to be the most platform diverse function by far
@@ -649,23 +648,32 @@ fn setup_downloads(downloadNAME: &str) {
        filePATH[len-4..len-1] == "app".to_string() ||
        filePATH[len-4..len-1] == "deb".to_string() 
     {
-        //this works in powershell, third arg doesnt seem to affect it
-        //Start-Process -FilePath 'C:\Users\Jesse Abell\Downloads\StarUML Setup 3.0.2.exe'
+        //mac 'open' works no problem for the single .app in the dls, we must try the dmg bit
+
+        //this works in powershell-win, third arg doesnt seem to affect it
+        //Start-Process -FilePath "C:\Users\Jesse Abell\Downloads\StarUML Setup 3.0.2.exe"
+        //from here though:
         //output: the system cannot find the file specified
+
+        //this works when i execute from binary in dls file
+        //this works in terminal-lin, however it outputs the same confusion when run from here
+        //sudo dpkg -i "/home/j/Downloads/code_1.27.2-1536736588_amd64.deb"
+        //output: dpkg: error: cannot access archive '"/home/j/Downloads/code_1.27.2-1536736588_amd64.deb"': No such file or directory
         let setupCMD = {
             if cfg!(target_os = "windows") {
                 //tried also the cmd varient of the commands
                 //start /w ~, this also didnt work, but it didnt work in CMD too
                 //single quotes also dont work in CMD, so I changed them to double
-                ["Start-Process", "-FilePath", "-Wait"]
+                ["powershell.exe","Start-Process", "-FilePath", "-Wait"]
             } else if cfg!(target_os = "macos") {
                 //this locks the terminal (good)
-                ["open", "", ""]
+                ["open", "", "", ""]
             } else if cfg!(target_os = "linux") {
                 //this locks the terminal and gives oodles of output
-                ["sudo", "dpkg", "-i"]
+                ["sudo", "dpkg", "-i",""]
             } else {
                 ["we currently only support Windows 10, Ubuntu and Mac OS",
+                "we currently only support Windows 10, Ubuntu and Mac OS",
                 "we currently only support Windows 10, Ubuntu and Mac OS",
                 "we currently only support Windows 10, Ubuntu and Mac OS"]
             }
@@ -676,7 +684,7 @@ fn setup_downloads(downloadNAME: &str) {
         println!("filePATH is: {}", filePATH);
 
         let output = Command::new(&setupCMD[0])
-            .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH)
+            .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&setupCMD[3]).arg(&filePATH)
             //this returns a result to unwrap
             //and this seems /ike a better way to handle this
             //than using expect, this one came verbatim from sO
@@ -891,7 +899,8 @@ fn main() {
     }
     let sleepTIME = time::Duration::from_secs(60);
     thread::sleep(sleepTIME);
-*/
+    */
+
 }
 
 #[cfg(test)]
@@ -1037,7 +1046,8 @@ mod tests {
                 "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
             }
         };
-        return testPATH    
+        return testPATH
+        
     }
 
     #[test]
