@@ -615,7 +615,7 @@ fn setup_downloads(downloadNAME: &str) {
         if fileNAME.contains(&downloadNAME) ||
            fileNAME.contains(&alternateCODE) 
         {   
-            filePATH = format!("'{}{}'", &downloadsPATH, &fileNAME);
+            filePATH = format!("\"{}{}\"", &downloadsPATH, &fileNAME);
         }
     }
     println!("filePATH is: {}", filePATH);
@@ -644,14 +644,20 @@ fn setup_downloads(downloadNAME: &str) {
     //for lin deb
     //0) $sudo dpkg -i soso.deb
     let len = filePATH.len();
-    if filePATH[len-3..] == "exe".to_string() ||
-       filePATH[len-3..] == "app".to_string() ||
-       filePATH[len-3..] == "deb".to_string() 
+    //the last char is a quote, couldnt see values in debugger
+    if filePATH[len-4..len-1] == "exe".to_string() ||
+       filePATH[len-4..len-1] == "app".to_string() ||
+       filePATH[len-4..len-1] == "deb".to_string() 
     {
+        //this works in powershell, third arg doesnt seem to affect it
+        //Start-Process -FilePath 'C:\Users\Jesse Abell\Downloads\StarUML Setup 3.0.2.exe'
+        //output: the system cannot find the file specified
         let setupCMD = {
             if cfg!(target_os = "windows") {
-                //this might need -Wait after filePATH to lock
-                ["Start-Process", "-FilePath", ""]
+                //tried also the cmd varient of the commands
+                //start /w ~, this also didnt work, but it didnt work in CMD too
+                //single quotes also dont work in CMD, so I changed them to double
+                ["Start-Process", "-FilePath", "-Wait"]
             } else if cfg!(target_os = "macos") {
                 //this locks the terminal (good)
                 ["open", "", ""]
@@ -667,6 +673,7 @@ fn setup_downloads(downloadNAME: &str) {
         for index in 0..setupCMD.len() {
             println!("cmd number {} is: {}", index, setupCMD[index]);
         }
+        println!("filePATH is: {}", filePATH);
 
         let output = Command::new(&setupCMD[0])
             .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH)

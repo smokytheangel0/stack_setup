@@ -5,54 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Terminal (integrated)",
-            "type": "python",
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug setup",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--bin=setup",
-                ]
-            },
+            "program": "${workspaceFolder}/target/debug/setup.exe",
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
         },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug tests in setup",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=setup"
-                ]
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Test Docs in setup",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=setup"
-                ]
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        }
-
     ]
 }
