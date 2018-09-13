@@ -15,5 +15,47 @@
             "environment": [],
             "externalConsole": true,
         },
+        {
+            "type": "lldb",
+            "request": "launch",
+             "name": "Debug setup",
+             "cargo": {
+                 "args": [
+                     "build",
+                     "--bin=setup",
+                 ]
+             },
+             "args": [],
+             "cwd": "${workspaceFolder}"
+         },
+         {
+             "type": "lldb",
+             "request": "launch",
+             "name": "Debug tests in setup",
+             "cargo": {
+                 "args": [
+                     "test",
+                     "--no-run",
+                     "--bin=setup"
+                 ]
+             },
+             "args": [],
+             "cwd": "${workspaceFolder}"
+         },
+ 
+         {
+             "type": "lldb",
+             "request": "launch",
+             "name": "Test Docs in setup",
+             "cargo": {
+                 "args": [
+                     "test",
+                     "--no-run",
+                     "--bin=setup"
+                 ]
+             },
+             "args": [],
+             "cwd": "${workspaceFolder}"
+         }
     ]
 }
