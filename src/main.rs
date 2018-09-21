@@ -570,6 +570,7 @@ fn setup_downloads(downloadNAME: &str) {
             "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
         }
     };
+//need to set up vms to test all of this
     let alternateGIT: &str = {
         if cfg!(target_os = "windows") {
             if downloadNAME == "git".to_string() {
@@ -601,11 +602,8 @@ fn setup_downloads(downloadNAME: &str) {
     };
     
     println!("downloadNAME is: {}", downloadNAME);
-    //this doesnt find the android studio dl in linux and we need to handle spaces for windows, i believe the
-    //args in the Command thing do not wrap the string in quotes, so we need to use \space
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
     let mut filePATH: String = "None".to_string();
-    let mut volumePATH: String = "None".to_string();
     for fileNAME in filesInDownloads {
         let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
                                         .file_name()
@@ -616,10 +614,24 @@ fn setup_downloads(downloadNAME: &str) {
         if fileNAME.contains(&downloadNAME) ||
            fileNAME.contains(&alternateCODE) 
         {   
-            filePATH = format!("'{}{}'", &downloadsPATH, &fileNAME);
-            volumePATH = format!("'{}{}'", &"/Volumes/"[..], &fileNAME);
+            filePATH = {
+                if cfg!(target_os = "windows") {
+                    format!("'{}{}'", &downloadsPATH, &fileNAME)
+                } else {
+                    format!("{}{}", &downloadsPATH, &fileNAME)
+                }
+            }
+            //this needs an escaped space where the - is for starUML,
+            //im not sure if this is standard mac mounting behaviour
+            //or hardcoded into the DMG we should try it with a different file
+            //it looks like its dmg behaviour, so we need another search loop
+            //that looks case insensitively for directories in volumes that have Download Name or download-name in them
+
+            //volumePATH = format!("'{}{}{}'", &"/Volumes/"[..], &fileNAME[..len-4], &"/");
         }
     }
+
+
 
     //safari unpacks zips by default
     //i think this is going to be the most platform diverse function by far
@@ -641,8 +653,8 @@ fn setup_downloads(downloadNAME: &str) {
     let len = filePATH.len();
     //the last char is a quote, couldnt see values in debugger
     if filePATH[len-4..len-1] == "exe".to_string() ||
-       filePATH[len-4..len-1] == "app".to_string() ||
-       filePATH[len-4..len-1] == "deb".to_string() 
+       filePATH[len-3..len] == "app".to_string() ||
+       filePATH[len-3..len] == "deb".to_string() 
     {
         //mac 'open' works no problem for the single .app in the dls, we must try the dmg bit
 
@@ -661,12 +673,13 @@ fn setup_downloads(downloadNAME: &str) {
                 //this locks the terminal and gives oodles of output
                 ["sudo", "dpkg", "-i",""]
             } else {
-                ["we currently only support Windows 10, Ubuntu and Mac OS",
-                 "we currently only support Windows 10, Ubuntu and Mac OS",
-                 "we currently only support Windows 10, Ubuntu and Mac OS",
-                 "we currently only support Windows 10, Ubuntu and Mac OS"]
+                ["None",
+                 "None",
+                 "None",
+                 "None"]
             }
         };
+
         for index in 0..setupCMD.len() {
             println!("cmd number {} is: {}", index, setupCMD[index]);
         }
@@ -674,9 +687,6 @@ fn setup_downloads(downloadNAME: &str) {
 
         let output = Command::new(&setupCMD[0])
             .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&setupCMD[3]).arg(&filePATH)
-            //this returns a result to unwrap
-            //and this seems /ike a better way to handle this
-            //than using expect, this one came verbatim from sO
             .output().unwrap_or_else(|e| {
                 panic!("failed to execute process: {}", e)
         });
@@ -698,14 +708,11 @@ fn setup_downloads(downloadNAME: &str) {
 
     //so we are back to the same symptoms as before but even when built and run from Downloads...
     //no such file or directory, but copy and pasting the same cmd into a new terminal works (quotes and everything)...
-    if filePATH[len-4..len-1] == "dmg".to_string() {
+    if filePATH[len-3..len] == "dmg".to_string() {
         let mountCMD = ["hdiutil", "mount"];
         println!("cmd is: {} {}", mountCMD.join(" "), &filePATH);
         let output = Command::new(&mountCMD[0])
             .arg(&mountCMD[1]).arg(&filePATH)
-            //this returns a result to unwrap
-            //and this seems /ike a better way to handle this
-            //than using expect, this one came verbatim from sO
             .output().expect("failed to execute mount cmd");
 
         if output.status.success() {
@@ -714,14 +721,44 @@ fn setup_downloads(downloadNAME: &str) {
             println!("command failed, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
         }
 
-        let copyCMD = ["cp", "-R"];
-        println!("cmd is: {} {} {}", copyCMD.join(" "), &volumePATH, "/Applications");
+        let mut volumePATH: String = "None".to_string();
+        if cfg!(target_os = "macos") {
+            let foldersInVolumes = fs::read_dir("/Volumes/").expect("the read_dir that sets foldersInVolumes broke");
+            for folderNAME in foldersInVolumes {
+                let folderNAME: String = folderNAME.expect("the pre string result which sets fileNAME has broken")
+                                                .file_name()
+                                                .into_string()
+                                                .expect("the post string result which sets fileNAME has broken")
+                                                .to_owned();
+                
+                let mut downloadCHARS: Vec<char> = downloadNAME.chars().collect();
+                downloadCHARS[0] = downloadCHARS[0].to_uppercase().nth(0).expect("downloadCHARS first index is out of bounds");
+                let downloadNAME: String = downloadCHARS.into_iter().collect();
+
+                if folderNAME.contains(&downloadNAME) {   
+                    //this needs an escaped space where the - is for starUML,
+                    //im not sure if this is standard mac mounting behaviour
+                    //or hardcoded into the DMG we should try it with a different file
+                    //it looks like its dmg behaviour, so we need another search loop
+                    //that looks case insensitively for directories in volumes that have Download Name or download-name in them
+
+                    volumePATH = format!("{}{}", &"/Volumes/"[..], &folderNAME);
+                }
+            }
+        }
+
+        //need askpass program for mac sudo
+        let copyCMD = ["sudo", "cp", "-R"];
+        //use debug formatter println!("{:?}", var) in order to see what the actual output string looks like
+        //printing through the standard formatter will do magic things to the string which will make it appear legit
         let output = Command::new(&copyCMD[0])
                         .arg(&copyCMD[1])
+                        .arg(&copyCMD[2])
                         .arg(&volumePATH)
                         .arg("/Applications")
                         .output().expect("failed to execute copy cmd");
 
+        //this returns success even if the operation is not permitted
         if output.status.success() {
             println!("command successful, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
         } else {
@@ -732,9 +769,6 @@ fn setup_downloads(downloadNAME: &str) {
         println!("cmd is: {} {}", unmountCMD.join(" "), &filePATH);
         let output = Command::new(&unmountCMD[0])
             .arg(&unmountCMD[1]).arg(&filePATH)
-            //this returns a result to unwrap
-            //and this seems /ike a better way to handle this
-            //than using expect, this one came verbatim from sO
             .output().expect("failed to execute unmount cmd");
         
         if output.status.success() {
