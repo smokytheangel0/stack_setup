@@ -570,7 +570,7 @@ fn setup_downloads(downloadNAME: &str) {
             "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
         }
     };
-//need to set up vms to test all of this
+
     let alternateGIT: &str = {
         if cfg!(target_os = "windows") {
             if downloadNAME == "git".to_string() {
@@ -601,7 +601,7 @@ fn setup_downloads(downloadNAME: &str) {
         }
     };
     
-    println!("downloadNAME is: {}", downloadNAME);
+    println!("downloadNAME is: {:?}", downloadNAME);
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
     let mut filePATH: String = "None".to_string();
     for fileNAME in filesInDownloads {
@@ -621,13 +621,6 @@ fn setup_downloads(downloadNAME: &str) {
                     format!("{}{}", &downloadsPATH, &fileNAME)
                 }
             }
-            //this needs an escaped space where the - is for starUML,
-            //im not sure if this is standard mac mounting behaviour
-            //or hardcoded into the DMG we should try it with a different file
-            //it looks like its dmg behaviour, so we need another search loop
-            //that looks case insensitively for directories in volumes that have Download Name or download-name in them
-
-            //volumePATH = format!("'{}{}{}'", &"/Volumes/"[..], &fileNAME[..len-4], &"/");
         }
     }
 
@@ -650,28 +643,16 @@ fn setup_downloads(downloadNAME: &str) {
 
     //for lin deb
     //0) $sudo dpkg -i soso.deb
+
     let len = filePATH.len();
-    //the last char is a quote, couldnt see values in debugger
     if filePATH[len-4..len-1] == "exe".to_string() ||
-       filePATH[len-3..len] == "app".to_string() ||
        filePATH[len-3..len] == "deb".to_string() 
     {
-        //mac 'open' works no problem for the single .app in the dls, we must try the dmg bit
-
-        //the commands werent working because the program had been run from within vscode
-        //linux and win appear to work now
         let setupCMD = {
             if cfg!(target_os = "windows") {
-                //tried also the cmd varient of the commands
-                //start /w ~, this also didnt work, but it didnt work in CMD too
-                //single quotes also dont work in CMD, so I changed them to double
-                ["powershell.exe","Start-Process", "-FilePath", ""]
-            } else if cfg!(target_os = "macos") {
-                //this locks the terminal (good)
-                ["open", "", "", ""]
+                ["powershell.exe","Start-Process", "-FilePath", "-Wait"]
             } else if cfg!(target_os = "linux") {
-                //this locks the terminal and gives oodles of output
-                ["sudo", "dpkg", "-i",""]
+                ["sudo", "dpkg", "-i",";"]
             } else {
                 ["None",
                  "None",
@@ -681,20 +662,20 @@ fn setup_downloads(downloadNAME: &str) {
         };
 
         for index in 0..setupCMD.len() {
-            println!("cmd number {} is: {}", index, setupCMD[index]);
+            println!("cmd number {:?} is: {:?}", index, setupCMD[index]);
         }
-        println!("filePATH is: {}", filePATH);
+        println!("filePATH is: {:?}", filePATH);
 
         let output = Command::new(&setupCMD[0])
-            .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&setupCMD[3]).arg(&filePATH)
+            .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH).arg(&setupCMD[3])
             .output().unwrap_or_else(|e| {
                 panic!("failed to execute process: {}", e)
         });
 
         if output.status.success() {
-            println!("command successful, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+            println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
         } else {
-            println!("command failed, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+            println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
         }
 
     }
@@ -706,75 +687,87 @@ fn setup_downloads(downloadNAME: &str) {
     //3) unmount dmg, delete file from downloads
     //4) the copy will only return a value when it is finished
 
-    //so we are back to the same symptoms as before but even when built and run from Downloads...
-    //no such file or directory, but copy and pasting the same cmd into a new terminal works (quotes and everything)...
-    if filePATH[len-3..len] == "dmg".to_string() {
-        let mountCMD = ["hdiutil", "mount"];
-        println!("cmd is: {} {}", mountCMD.join(" "), &filePATH);
-        let output = Command::new(&mountCMD[0])
-            .arg(&mountCMD[1]).arg(&filePATH)
-            .output().expect("failed to execute mount cmd");
-
-        if output.status.success() {
-            println!("command successful, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
-        } else {
-            println!("command failed, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
-        }
-
+    //need to add the VSCODE in here but skip the mounting steps, just copy
+    if filePATH[len-3..len] == "dmg".to_string() ||
+        filePATH[len-3..len] == "app".to_string() {
+        
         let mut volumePATH: String = "None".to_string();
-        if cfg!(target_os = "macos") {
-            let foldersInVolumes = fs::read_dir("/Volumes/").expect("the read_dir that sets foldersInVolumes broke");
-            for folderNAME in foldersInVolumes {
-                let folderNAME: String = folderNAME.expect("the pre string result which sets fileNAME has broken")
+        let mut appPATH: String = "None".to_string();
+        if filePATH[len-3..len] == "dmg".to_string() {
+            let mountCMD = ["hdiutil", "mount"];
+            println!("cmd is: {:?} {:?}", mountCMD.join(" "), &filePATH);
+            let output = Command::new(&mountCMD[0])
+                .arg(&mountCMD[1]).arg(&filePATH)
+                .output().expect("failed to execute mount cmd");
+
+            if output.status.success() {
+                println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
+            } else {
+                println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
+            }
+
+            if cfg!(target_os = "macos") {
+                let foldersInVolumes = fs::read_dir("/Volumes/").expect("the read_dir that sets foldersInVolumes broke");
+                for folderNAME in foldersInVolumes {
+                    let folderNAME: String = folderNAME.expect("the pre string result which sets fileNAME has broken")
+                                                    .file_name()
+                                                    .into_string()
+                                                    .expect("the post string result which sets fileNAME has broken")
+                                                    .to_owned();
+                    
+                    let mut downloadCHARS: Vec<char> = downloadNAME.chars().collect();
+                    downloadCHARS[0] = downloadCHARS[0].to_uppercase().nth(0).expect("downloadCHARS first index is out of bounds");
+                    let downloadNAME: String = downloadCHARS.into_iter().collect();
+
+                    if folderNAME.contains(&downloadNAME) {   
+                        volumePATH = format!("{}{}", &"/Volumes/"[..], &folderNAME);
+                        let filesInVolume = fs::read_dir(&appPATH).expect("the read_dir that sets filesInVolume broke");
+                        for itemNAME in filesInVolume {
+                            let itemNAME = itemNAME.expect("the prestring result which sets the itemNAME has broken")
                                                 .file_name()
                                                 .into_string()
-                                                .expect("the post string result which sets fileNAME has broken")
+                                                .expect("the post string result which sets itemNAME has broken")
                                                 .to_owned();
-                
-                let mut downloadCHARS: Vec<char> = downloadNAME.chars().collect();
-                downloadCHARS[0] = downloadCHARS[0].to_uppercase().nth(0).expect("downloadCHARS first index is out of bounds");
-                let downloadNAME: String = downloadCHARS.into_iter().collect();
 
-                if folderNAME.contains(&downloadNAME) {   
-                    //this needs an escaped space where the - is for starUML,
-                    //im not sure if this is standard mac mounting behaviour
-                    //or hardcoded into the DMG we should try it with a different file
-                    //it looks like its dmg behaviour, so we need another search loop
-                    //that looks case insensitively for directories in volumes that have Download Name or download-name in them
-
-                    volumePATH = format!("{}{}", &"/Volumes/"[..], &folderNAME);
+                            if itemNAME.contains(&".app"[..]) {
+                                appPATH = format!("{}{}", &volumePATH, &itemNAME);
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        //need askpass program for mac sudo
+        if filePATH[len-3..len] == "app".to_string() {
+            appPATH = filePATH.clone();
+        }
+        //do an if .app, make appPATH the DL/.app path
+
         let copyCMD = ["sudo", "cp", "-R"];
-        //use debug formatter println!("{:?}", var) in order to see what the actual output string looks like
-        //printing through the standard formatter will do magic things to the string which will make it appear legit
         let output = Command::new(&copyCMD[0])
                         .arg(&copyCMD[1])
                         .arg(&copyCMD[2])
-                        .arg(&volumePATH)
+                        .arg(&appPATH)
                         .arg("/Applications")
                         .output().expect("failed to execute copy cmd");
 
         //this returns success even if the operation is not permitted
         if output.status.success() {
-            println!("command successful, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+            println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
         } else {
-            println!("command failed, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+            println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
         }
 
         let unmountCMD = ["hdiutil", "unmount"];
-        println!("cmd is: {} {}", unmountCMD.join(" "), &filePATH);
+        println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &filePATH);
         let output = Command::new(&unmountCMD[0])
-            .arg(&unmountCMD[1]).arg(&filePATH)
+            .arg(&unmountCMD[1]).arg(&volumePATH)
             .output().expect("failed to execute unmount cmd");
         
         if output.status.success() {
-            println!("command successful, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+            println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
         } else {
-            println!("command failed, returns: {}", String::from_utf8_lossy(&output.stderr).into_owned());
+            println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
         }
         
     }
@@ -926,7 +919,7 @@ fn main() {
                 println!("waiting for browser to download...\n");
 
                 if downloadNAME.to_owned() == "android".to_string() {
-                    let sleepTIME = time::Duration::from_secs(20);
+                    let sleepTIME = time::Duration::from_secs(30);
                     thread::sleep(sleepTIME);
                 } else if downloadNAME.to_owned() == "git".to_string() {
                     let sleepTIME = time::Duration::from_secs(20);
