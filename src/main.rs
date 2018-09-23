@@ -856,6 +856,7 @@ enum DownloadStatus {
 }
 
 fn main() {
+    /*
     let mut downloadMAP: IndexMap<String, String> = [
         ("StarUML".to_string(),  "None".to_string()),
         ("git".to_string(),      "None".to_string()),
@@ -868,7 +869,7 @@ fn main() {
     for downloadNAME in downloadMAP.clone().keys() {
         let answerBOX = setup_downloads(&downloadNAME);
     }
-    /*
+    */
     let path = env::home_dir().unwrap();
     let mut testPATH = path.to_str()
                         .unwrap()
@@ -974,7 +975,7 @@ fn main() {
     }
     let sleepTIME = time::Duration::from_secs(60);
     thread::sleep(sleepTIME);
-    */
+    
 
 }
 
