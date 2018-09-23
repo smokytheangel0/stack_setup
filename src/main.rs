@@ -941,6 +941,8 @@ fn main() {
             if downloadNAME.to_owned() == "git" && cfg!(target_os = "linux") {
                 continue
             } else  {
+                let sleepTIME = time::Duration::from_secs(1);
+                thread::sleep(sleepTIME);
                 let answerBOX = is_complete(&downloadNAME, &_testPATH);
                 if downloadNAME == "android" {
                     let thisBOX = 1;
