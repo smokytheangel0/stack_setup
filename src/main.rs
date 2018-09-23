@@ -208,6 +208,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     
     let gitURL: &str = {
         if cfg!(target_os = "windows") {
+//version specific will break on update
             "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
         } else if cfg!(target_os = "macos") {
             "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
@@ -217,7 +218,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     };
     testLIST[1] = String::from(gitURL);
 
-    
+//version specific will break on update
     let umlVersion: &str = {
         if cfg!(target_os = "windows") {
             "StarUML%20Setup%203.0.2.exe"
