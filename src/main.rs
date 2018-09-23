@@ -652,7 +652,7 @@ fn setup_downloads(downloadNAME: &str) {
             if cfg!(target_os = "windows") {
                 ["powershell.exe","Start-Process", "-FilePath", "-Wait"]
             } else if cfg!(target_os = "linux") {
-                ["sudo", "dpkg", "-i",";"]
+                ["sudo", "dpkg", "-i","mousepad"]
             } else {
                 ["None",
                  "None",
@@ -721,7 +721,7 @@ fn setup_downloads(downloadNAME: &str) {
 
                     if folderNAME.contains(&downloadNAME) {   
                         volumePATH = format!("{}{}", &"/Volumes/"[..], &folderNAME);
-                        let filesInVolume = fs::read_dir(&appPATH).expect("the read_dir that sets filesInVolume broke");
+                        let filesInVolume = fs::read_dir(&volumePATH).expect("the read_dir that sets filesInVolume broke");
                         for itemNAME in filesInVolume {
                             let itemNAME = itemNAME.expect("the prestring result which sets the itemNAME has broken")
                                                 .file_name()
