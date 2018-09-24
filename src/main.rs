@@ -762,22 +762,9 @@ fn setup_downloads(downloadNAME: &str) {
                 println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
             }
         }
-        
-        if downloadNAME == "git".to_string() {
-            let pkgCMD = ["open"];
-            println!("cmd is: {:?} {:?}", pkgCMD[0], &appPATH);
-            let output = Command::new(&pkgCMD[0])
-                .arg(&appPATH)
-                .output().expect("failed to execute pkg cmd");
 
-            if output.status.success() {
-                println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stdout).into_owned());
-            } else {
-                println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
-            }
-        }
-
-        if downloadNAME != "VSCode".to_string() {
+        if downloadNAME != "VSCode".to_string() ||
+            downloadNAME != "git".to_string() {
             let unmountCMD = ["hdiutil", "unmount"];
             println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &volumePATH);
             let output = Command::new(&unmountCMD[0])
