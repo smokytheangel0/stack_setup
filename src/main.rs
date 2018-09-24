@@ -263,7 +263,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     } else if downloadNAME == "git" && cfg!(target_os = "linux") {
         println!("if you see [sudo] please click\n and enter your password to install git !>");
         let output = Command::new("sudo")
-            .arg("apt").arg("install").arg("git")
+            .arg("apt").arg("install").arg("git").arg("libgconf-2-4")
             //this returns a result to unwrap
             //and this seems /ike a better way to handle this
             //than using expect, this one came verbatim from sO
@@ -793,6 +793,7 @@ fn setup_downloads(downloadNAME: &str) {
         
     }
 
+//this is next, then ./ installs on linux
     //for all zip
     //Zip crate
     //so the path logic from the is complete function
