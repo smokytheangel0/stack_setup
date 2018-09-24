@@ -651,12 +651,11 @@ fn setup_downloads(downloadNAME: &str) {
     {
         let setupCMD = {
             if cfg!(target_os = "windows") {
-                ["powershell.exe","Start-Process", "-FilePath", "-Wait"]
+                ["powershell.exe","Start-Process", "-FilePath"]
             } else if cfg!(target_os = "linux") {
-                ["sudo", "dpkg", "-i",""]
+                ["sudo", "dpkg", "-i"]
             } else {
                 ["None",
-                 "None",
                  "None",
                  "None"]
             }
@@ -666,19 +665,6 @@ fn setup_downloads(downloadNAME: &str) {
             println!("cmd number {:?} is: {:?}", index, setupCMD[index]);
         }
         println!("filePATH is: {:?}", filePATH);
-        if cfg!(target_os = "windows") {
-            let output = Command::new(&setupCMD[0])
-                .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH).arg(&setupCMD[3])
-                .output().unwrap_or_else(|e| {
-                    panic!("failed to execute process: {}", e)
-            });
-
-            if output.status.success() {
-                println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stdout).into_owned());
-            } else {
-                println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
-            }
-        } else {
             let output = Command::new(&setupCMD[0])
                 .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH)
                 .output().unwrap_or_else(|e| {
@@ -690,7 +676,6 @@ fn setup_downloads(downloadNAME: &str) {
             } else {
                 println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
             }
-        }
 
     }
 
