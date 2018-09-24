@@ -674,7 +674,7 @@ fn setup_downloads(downloadNAME: &str) {
         });
 
         if output.status.success() {
-            println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
+            println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stdout).into_owned());
         } else {
             println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
         }
@@ -730,8 +730,9 @@ fn setup_downloads(downloadNAME: &str) {
                                                 .expect("the post string result which sets itemNAME has broken")
                                                 .to_owned();
 
-                            if itemNAME.contains(&".app"[..]) {
-                                appPATH = format!("{}{}", &volumePATH, &itemNAME);
+                            if itemNAME.contains(&".app"[..]) ||
+                                itemNAME.contains(&".pkg"[..]) {
+                                appPATH = format!("{}/{}", &volumePATH, &itemNAME);
                             }
                         }
                     }
@@ -743,34 +744,49 @@ fn setup_downloads(downloadNAME: &str) {
             appPATH = filePATH.clone();
         }
         //do an if .app, make appPATH the DL/.app path
+        if downloadNAME != "git".to_string() {
+            let copyCMD = ["sudo", "cp", "-R"];
+            let output = Command::new(&copyCMD[0])
+                            .arg(&copyCMD[1])
+                            .arg(&copyCMD[2])
+                            .arg(&appPATH)
+                            .arg("/Applications")
+                            .output().expect("failed to execute copy cmd");
+            println!("cmd is: {:?} {:?}", copyCMD.join(" "), &appPATH);
 
-        let copyCMD = ["sudo", "cp", "-R"];
-        let output = Command::new(&copyCMD[0])
-                        .arg(&copyCMD[1])
-                        .arg(&copyCMD[2])
-                        .arg(&appPATH)
-                        .arg("/Applications")
-                        .output().expect("failed to execute copy cmd");
-        println!("cmd is: {:?} {:?}", copyCMD.join(" "), &appPATH);
 
-
-        //this returns success even if the operation is not permitted
-        if output.status.success() {
-            println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
-        } else {
-            println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
+            //this returns success even if the operation is not permitted
+            if output.status.success() {
+                println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stdout).into_owned());
+            } else {
+                println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
+            }
         }
+        if downloadNAME != "VSCode".to_string() {
+            let unmountCMD = ["hdiutil", "unmount"];
+            println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &volumePATH);
+            let output = Command::new(&unmountCMD[0])
+                .arg(&unmountCMD[1]).arg(&volumePATH)
+                .output().expect("failed to execute unmount cmd");
+            
+            if output.status.success() {
+                println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stdout).into_owned());
+            } else {
+                println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
+            }
+        }
+        if downloadNAME == "git".to_string() {
+            let pkgCMD = ["open"];
+            println!("cmd is: {:?} {:?}", pkgCMD[0], &appPATH);
+            let output = Command::new(&pkgCMD[0])
+                .arg(&appPATH)
+                .output().expect("failed to execute pkg cmd");
 
-        let unmountCMD = ["hdiutil", "unmount"];
-        println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &volumePATH);
-        let output = Command::new(&unmountCMD[0])
-            .arg(&unmountCMD[1]).arg(&volumePATH)
-            .output().expect("failed to execute unmount cmd");
-        
-        if output.status.success() {
-            println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
-        } else {
-            println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
+            if output.status.success() {
+                println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stdout).into_owned());
+            } else {
+                println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
+            }
         }
         
     }
