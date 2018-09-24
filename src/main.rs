@@ -577,10 +577,10 @@ fn setup_downloads(downloadNAME: &str) {
             if downloadNAME == "git".to_string() {
                 "Git"
             } else {
-                "None"
+                "git"
             }
         } else {
-            "None"
+            "git"
         }
     };
 
@@ -589,16 +589,16 @@ fn setup_downloads(downloadNAME: &str) {
             if downloadNAME == "VSCode".to_string() {
                 "code_"
             } else {
-                "None"
+                "VSCode"
             }
         } else if cfg!(target_os = "macos") {
             if downloadNAME == "VSCode".to_string() {
                 "Visual Studio Code"
             } else {
-                "None"
+                "VSCode"
             }
         } else {
-            "None"
+            "VSCode"
         }
     };
     
@@ -751,6 +751,8 @@ fn setup_downloads(downloadNAME: &str) {
                         .arg(&appPATH)
                         .arg("/Applications")
                         .output().expect("failed to execute copy cmd");
+        println!("cmd is: {:?} {:?}", copyCMD.join(" "), &appPATH);
+
 
         //this returns success even if the operation is not permitted
         if output.status.success() {
@@ -760,7 +762,7 @@ fn setup_downloads(downloadNAME: &str) {
         }
 
         let unmountCMD = ["hdiutil", "unmount"];
-        println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &filePATH);
+        println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &volumePATH);
         let output = Command::new(&unmountCMD[0])
             .arg(&unmountCMD[1]).arg(&volumePATH)
             .output().expect("failed to execute unmount cmd");
