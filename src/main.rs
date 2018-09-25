@@ -686,7 +686,6 @@ fn setup_downloads(downloadNAME: &str) {
     //3) unmount dmg, delete file from downloads
     //4) the copy will only return a value when it is finished
 
-    //need to add the VSCODE in here but skip the mounting steps, just copy
     if filePATH[len-3..len] == "dmg".to_string() ||
         filePATH[len-3..len] == "app".to_string() {
         
