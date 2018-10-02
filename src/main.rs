@@ -577,10 +577,10 @@ fn setup_downloads(downloadNAME: &str) {
             if downloadNAME == "git".to_string() {
                 "Git"
             } else {
-                "git"
+                "None"
             }
         } else {
-            "git"
+            "None"
         }
     };
 
@@ -589,16 +589,16 @@ fn setup_downloads(downloadNAME: &str) {
             if downloadNAME == "VSCode".to_string() {
                 "code_"
             } else {
-                "VSCode"
+                "None"
             }
         } else if cfg!(target_os = "macos") {
             if downloadNAME == "VSCode".to_string() {
                 "Visual Studio Code"
             } else {
-                "VSCode"
+                "None"
             }
         } else {
-            "VSCode"
+            "None"
         }
     };
     
