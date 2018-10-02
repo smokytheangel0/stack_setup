@@ -615,7 +615,8 @@ fn setup_downloads(downloadNAME: &str) {
                                         .to_owned();
         
         if fileNAME.contains(&downloadNAME) ||
-           fileNAME.contains(&alternateCODE) 
+           fileNAME.contains(&alternateCODE)||
+           fileNAME.contains(&alternateGIT)
         {   
             //never finds git during execution
             filePATH = {
