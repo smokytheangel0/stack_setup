@@ -208,8 +208,8 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     
     let gitURL: &str = {
         if cfg!(target_os = "windows") {
-//version specific will break on update
-            "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
+//version specific will break on update (current as of 2OCT)
+            "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.19.0-64-bit.exe"
         } else if cfg!(target_os = "macos") {
             "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
         } else {
@@ -549,7 +549,9 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
 }
 
 fn setup_downloads(downloadNAME: &str) {
-
+    if downloadNAME == "git".to_string() {
+        let thisBOX = "";
+    }
     let downloadsPATH: String = {
         if cfg!(windows){
             //these both yield options to unwrap
@@ -615,9 +617,7 @@ fn setup_downloads(downloadNAME: &str) {
         if fileNAME.contains(&downloadNAME) ||
            fileNAME.contains(&alternateCODE) 
         {   
-            if downloadNAME.contains(&"git"[..]) {
-                panic!("git found properly!");
-            }
+            //never finds git during execution
             filePATH = {
                 if cfg!(target_os = "windows") {
                     format!("'{}{}'", &downloadsPATH, &fileNAME)
