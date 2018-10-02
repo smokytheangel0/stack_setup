@@ -615,6 +615,9 @@ fn setup_downloads(downloadNAME: &str) {
         if fileNAME.contains(&downloadNAME) ||
            fileNAME.contains(&alternateCODE) 
         {   
+            if downloadNAME.contains(&"git"[..]) {
+                panic!("git found properly!");
+            }
             filePATH = {
                 if cfg!(target_os = "windows") {
                     format!("'{}{}'", &downloadsPATH, &fileNAME)
