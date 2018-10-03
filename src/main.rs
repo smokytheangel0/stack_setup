@@ -65,6 +65,7 @@ use std::env;
 use std::fs::ReadDir;
 use std::{thread, time};
 use std::process::Command;
+use std::path::Path;
 
 extern crate webbrowser;
 extern crate indexmap;
@@ -788,10 +789,18 @@ fn setup_downloads(downloadNAME: &str) {
     
 //this spends alot of time doing something but does not end up creating a folder and extracting to it
     if filePATH[len-3..] == "zip".to_string() {
-        //I think the problem here is that I am providing the .zips path as the output path,
-        //so I will try this factory code from ziprs repo and then modify the path when I see what it does
-        //this is the same code I rewrote for the initial zip test, it appears to have more at the end in terms
-        //of permisssions as well as a println interface
+        //this extracts to the same path as the binary...means we probably need to cwd to the appropriate folders
+        if originalNAME != "co_demo0".to_string() {
+            let path = env::home_dir().unwrap();
+            let mut workingPATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
+            workingPATH += "/SDK/";
+
+            let sdkPATH = Path::new(&workingPATH);
+            env::set_current_dir(&sdkPATH);
+        }
+
         let fname = std::path::Path::new(&filePATH);
         let file = fs::File::open(&fname).unwrap();
 
