@@ -790,17 +790,52 @@ fn setup_downloads(downloadNAME: &str) {
 //this spends alot of time doing something but does not end up creating a folder and extracting to it
     if filePATH[len-3..] == "zip".to_string() {
         //this extracts to the same path as the binary...means we probably need to cwd to the appropriate folders
-        if originalNAME != "co_demo0".to_string() {
-            let path = env::home_dir().unwrap();
-            let mut workingPATH = path.to_str()
-                                        .unwrap()
-                                        .to_owned();
-            workingPATH += "/SDK/";
+        let workingPATH: String = {
+            if cfg!(windows){
+                if originalNAME == "co_demo0".to_string() {
+                    //these both yield options to unwrap
+                    let path = env::home_dir().unwrap();
+                    let mut workingPATH = path.to_str()
+                                                .unwrap()
+                                                .to_owned();
+                    workingPATH += "\\Downloads\\";
+                    workingPATH
+                } else {
+                    //these both yield options to unwrap
+                    let path = env::home_dir().unwrap();
+                    let mut workingPATH = path.to_str()
+                                                .unwrap()
+                                                .to_owned();
+                    workingPATH += "\\SDKs\\";
+                    workingPATH
 
-            let sdkPATH = Path::new(&workingPATH);
-            env::set_current_dir(&sdkPATH);
-        }
+                }
+            }else if cfg!(unix){
+                if originalNAME == "co_demo0".to_string() {
+                    //these both yield options to unwrap
+                    let path = env::home_dir().unwrap();
+                    let mut workingPATH = path.to_str()
+                                                .unwrap()
+                                                .to_owned();
+                    workingPATH += "/Downloads/";
+                    workingPATH
 
+                } else {
+                    //these both yield options to unwrap
+                    let path = env::home_dir().unwrap();
+                    let mut workingPATH = path.to_str()
+                                                .unwrap()
+                                                .to_owned();
+                    workingPATH += "/SDKs/";
+                    workingPATH
+
+                }
+            } else {
+                "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
+            }
+        };
+
+        env::set_current_dir(&workingPATH).unwrap();
         let fname = std::path::Path::new(&filePATH);
         let file = fs::File::open(&fname).unwrap();
 
