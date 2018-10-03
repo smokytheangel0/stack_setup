@@ -806,7 +806,7 @@ fn setup_downloads(downloadNAME: &str) {
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
                                                 .to_owned();
-                    workingPATH += "\\SDKs\\";
+                    workingPATH += "\\Desktop\\SDKs\\";
                     workingPATH
 
                 }
@@ -826,7 +826,7 @@ fn setup_downloads(downloadNAME: &str) {
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
                                                 .to_owned();
-                    workingPATH += "/SDKs/";
+                    workingPATH += "/Desktop/SDKs/";
                     workingPATH
 
                 }
@@ -834,7 +834,7 @@ fn setup_downloads(downloadNAME: &str) {
                 "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
             }
         };
-
+        fs::create_dir_all(&workingPATH).unwrap();
         env::set_current_dir(&workingPATH).unwrap();
         let fname = std::path::Path::new(&filePATH);
         let file = fs::File::open(&fname).unwrap();
