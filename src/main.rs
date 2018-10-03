@@ -209,9 +209,9 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     let gitURL: &str = {
         if cfg!(target_os = "windows") {
 //version specific will break on update (current as of 2OCT)
-            "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.19.0-64-bit.exe"
+            "https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/Git-2.19.0-64-bit.exe"
         } else if cfg!(target_os = "macos") {
-            "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+            "https://sourceforge.net/projects/git-osx-installer/files/git-2.19.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
         } else {
             "git browser install currently only supports Mac OS and Windows 10"
         }
@@ -763,7 +763,7 @@ fn setup_downloads(downloadNAME: &str) {
                 println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
             }
         }
-
+//we are entering this branch even on the VSCode iteration, need to check the string (MAC)
         if downloadNAME != "VSCode".to_string() ||
             downloadNAME != "git".to_string() {
             let unmountCMD = ["hdiutil", "unmount"];
@@ -786,7 +786,7 @@ fn setup_downloads(downloadNAME: &str) {
     //Zip crate
     //so the path logic from the is complete function
     //can go above this and then we just operate on each file name like this
-    /*
+
     if filePATH[len-3..] == "zip".to_string() {
         let file = fs::File::open(&filePATH).expect("failed to open file");
         let mut archive = zip::ZipArchive::new(file).expect("failed to create zip from file");
@@ -807,7 +807,7 @@ fn setup_downloads(downloadNAME: &str) {
         }
 
     }
-    */
+
     //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
     //for the non directory names, which should match a vec of them
     //this as well as checking dirs that have stuff extracted to them, like co_demo and flutter
