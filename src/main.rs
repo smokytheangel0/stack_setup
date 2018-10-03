@@ -793,7 +793,7 @@ fn setup_downloads(downloadNAME: &str) {
         for i in 0..archive.len() {
             let mut file = archive.by_index(i).expect("failed to get first file from archive");
             let outpath = file.sanitized_name();
-            println!("{}", outpath.to_string());    
+            println!("{:?}", outpath.to_str());    
             if (&*file.name()).ends_with("/") {
                 fs::create_dir_all(&outpath).expect("failed to create out bound folders")
             } else {
