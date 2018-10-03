@@ -788,27 +788,51 @@ fn setup_downloads(downloadNAME: &str) {
     
 //this spends alot of time doing something but does not end up creating a folder and extracting to it
     if filePATH[len-3..] == "zip".to_string() {
-        let file = fs::File::open(&filePATH).expect("failed to open file");
-        let mut archive = zip::ZipArchive::new(file).expect("failed to create zip from file");
+        //I think the problem here is that I am providing the .zips path as the output path,
+        //so I will try this factory code from ziprs repo and then modify the path when I see what it does
+        //this is the same code I rewrote for the initial zip test, it appears to have more at the end in terms
+        //of permisssions as well as a println interface
+        let fname = std::path::Path::new(&filePATH);
+        let file = fs::File::open(&fname).unwrap();
+
+        let mut archive = zip::ZipArchive::new(file).unwrap();
+
         for i in 0..archive.len() {
-            let mut file = archive.by_index(i).expect("failed to get first file from archive");
+            let mut file = archive.by_index(i).unwrap();
             let outpath = file.sanitized_name();
-            println!("{:?}", outpath.to_str());    
-            if (&*file.name()).ends_with("/") {
-                fs::create_dir_all(&outpath).expect("failed to create out bound folders")
+
+            {
+                let comment = file.comment();
+                if !comment.is_empty() {
+                    println!("File {} comment: {}", i, comment);
+                }
+            }
+
+            if (&*file.name()).ends_with('/') {
+                println!("File {} extracted to \"{}\"", i, outpath.as_path().display());
+                fs::create_dir_all(&outpath).unwrap();
             } else {
+                println!("File {} extracted to \"{}\" ({} bytes)", i, outpath.as_path().display(), file.size());
                 if let Some(p) = outpath.parent() {
                     if !p.exists() {
-                        fs::create_dir_all(&p).expect("failed to create out bound folders");
+                        fs::create_dir_all(&p).unwrap();
                     }
                 }
-                let mut outfile = fs::File::create(&outpath).expect("failed to create file at path");
-                io::copy(&mut file, &mut outfile).expect("failed to copy the files out");
+                let mut outfile = fs::File::create(&outpath).unwrap();
+                io::copy(&mut file, &mut outfile).unwrap();
             }
+
+            // Get and Set permissions
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+
+                if let Some(mode) = file.unix_mode() {
+                    fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
+                }
+            }  
         }
-
     }
-
     //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
     //for the non directory names, which should match a vec of them
     //this as well as checking dirs that have stuff extracted to them, like co_demo and flutter
