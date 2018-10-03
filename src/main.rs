@@ -788,7 +788,8 @@ fn setup_downloads(downloadNAME: &str) {
     //can go above this and then we just operate on each file name like this
     
 //this spends alot of time doing something but does not end up creating a folder and extracting to it
-    if filePATH[len-3..] == "zip".to_string() {
+    if filePATH[len-3..] == "zip".to_string() ||
+       filePATH[len-4..len-1] == "zip".to_string() {
         //this extracts to the same path as the binary...means we probably need to cwd to the appropriate folders
         let workingPATH: String = {
             if cfg!(windows){
