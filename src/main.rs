@@ -786,7 +786,8 @@ fn setup_downloads(downloadNAME: &str) {
     //Zip crate
     //so the path logic from the is complete function
     //can go above this and then we just operate on each file name like this
-
+    
+//this spends alot of time doing something but does not end up creating a folder and extracting to it
     if filePATH[len-3..] == "zip".to_string() {
         let file = fs::File::open(&filePATH).expect("failed to open file");
         let mut archive = zip::ZipArchive::new(file).expect("failed to create zip from file");
