@@ -59,18 +59,21 @@
 //so far ~500 lines of function code
 // ~100 lines in main
 //and ~500 lines of test code
+extern crate webbrowser;
+extern crate indexmap;
+use indexmap::IndexMap;
+extern crate zip;
+extern crate fs_extra;
+
 use std::fs;
 use std::io;
 use std::env;
 use std::fs::ReadDir;
 use std::{thread, time};
 use std::process::Command;
+use fs_extra::dir::copy;
 use std::path::Path;
 
-extern crate webbrowser;
-extern crate indexmap;
-use indexmap::IndexMap;
-extern crate zip;
 
 //#region py_check_dirs
 ///the [check_dirs] function looks like this
@@ -823,6 +826,7 @@ fn setup_downloads(downloadNAME: &str) {
 
                 } else {
                     //these both yield options to unwrap
+//need to start using dirs::home_dir as env::home_dir() is deprecated
                     let path = env::home_dir().unwrap();
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
@@ -835,8 +839,8 @@ fn setup_downloads(downloadNAME: &str) {
                 "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
             }
         };
-        fs::create_dir_all(&workingPATH).unwrap();
-        env::set_current_dir(&workingPATH).unwrap();
+        fs::create_dir_all(&workingPATH).expect("creating dirs failed");
+        env::set_current_dir(&workingPATH).expect("setting cwd failed");
         let fname = std::path::Path::new(&filePATH);
         let file = fs::File::open(&fname).unwrap();
 
@@ -878,6 +882,7 @@ fn setup_downloads(downloadNAME: &str) {
             }  
         }
     }
+    
     //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
     //for the non directory names, which should match a vec of them
     //this as well as checking dirs that have stuff extracted to them, like co_demo and flutter
