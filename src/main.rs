@@ -549,9 +549,8 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
 }
 
 fn setup_downloads(downloadNAME: &str) {
-    if downloadNAME == "git".to_string() {
-        let thisBOX = "";
-    }
+    let originalNAME = downloadNAME;
+
     let downloadsPATH: String = {
         if cfg!(windows){
             //these both yield options to unwrap
@@ -764,8 +763,8 @@ fn setup_downloads(downloadNAME: &str) {
             }
         }
 //we are entering this branch even on the VSCode iteration, need to check the string (MAC)
-        if downloadNAME != "VSCode".to_string() ||
-            downloadNAME != "git".to_string() {
+        if originalNAME != "VSCode".to_string() ||
+            originalNAME != "git".to_string() {
             let unmountCMD = ["hdiutil", "unmount"];
             println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &volumePATH);
             let output = Command::new(&unmountCMD[0])
@@ -793,7 +792,8 @@ fn setup_downloads(downloadNAME: &str) {
         let mut archive = zip::ZipArchive::new(file).expect("failed to create zip from file");
         for i in 0..archive.len() {
             let mut file = archive.by_index(i).expect("failed to get first file from archive");
-            let outpath = file.sanitized_name();    
+            let outpath = file.sanitized_name();
+            println!("{}", outpath.to_string());    
             if (&*file.name()).ends_with("/") {
                 fs::create_dir_all(&outpath).expect("failed to create out bound folders")
             } else {
