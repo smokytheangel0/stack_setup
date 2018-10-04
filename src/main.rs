@@ -738,46 +738,48 @@ fn setup_downloads(downloadNAME: &str) {
     }
 
     if cfg!(target_os = "macos") {
-        let mut folderPATH = "".to_string();
-        let movedPATH = {
-            if downloadNAME == "flutter".to_string() {
-                let homePATH = dirs::home_dir().unwrap();
-                let mut movedPATH = homePATH.to_str()
-                                            .unwrap()
-                                            .to_owned();
-                movedPATH += "/Desktop/SDKs/";
-                movedPATH
-            } else {
-                let homePATH = dirs::home_dir().unwrap();
-                let mut movedPATH = homePATH.to_str()
-                                            .unwrap()
-                                            .to_owned();
-                movedPATH += "/Desktop/Code/";
-                movedPATH
-            }
-        };
-        
+        if filePATH[len-1..] == "/".to_string() {
+            let mut folderPATH = "".to_string();
+            let movedPATH = {
+                if downloadNAME == "flutter".to_string() {
+                    let homePATH = dirs::home_dir().unwrap();
+                    let mut movedPATH = homePATH.to_str()
+                                                .unwrap()
+                                                .to_owned();
+                    movedPATH += "/Desktop/SDKs/";
+                    movedPATH
+                } else {
+                    let homePATH = dirs::home_dir().unwrap();
+                    let mut movedPATH = homePATH.to_str()
+                                                .unwrap()
+                                                .to_owned();
+                    movedPATH += "/Desktop/Code/";
+                    movedPATH
+                }
+            };
+            
 
-        let foldersInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets foldersInDownloads broke");
-        for folderNAME in foldersInDownloads {
-            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
-                                            .file_name()
-                                            .into_string()
-                                            .expect("the post string result which sets folderNAME has broken")
-                                            .to_owned();
-            //names are the same as the zip names, no upper case
-            //this could probably be condensed with the other and branch by ending with /
-            if folderNAME.contains(&downloadNAME) {   
-                folderPATH = format!("{}{}", &downloadsPATH, &folderNAME);
+            let foldersInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets foldersInDownloads broke");
+            for folderNAME in foldersInDownloads {
+                let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                                .file_name()
+                                                .into_string()
+                                                .expect("the post string result which sets folderNAME has broken")
+                                                .to_owned();
+                //names are the same as the zip names, no upper case
+                //this could probably be condensed with the other and branch by ending with /
+                if folderNAME.contains(&downloadNAME) {   
+                    folderPATH = format!("{}{}", &downloadsPATH, &folderNAME);
+                }
             }
+            let options = CopyOptions::new();
+            let handle = |process_info: TransitProcess| {
+                println!("{}", process_info.total_bytes);
+                fs_extra::dir::TransitProcessResult::ContinueOrAbort
+            };
+            move_dir_with_progress(&folderPATH, &movedPATH, &options, handle).expect("unable to copy mac repo folders");
+
         }
-        let options = CopyOptions::new();
-        let handle = |process_info: TransitProcess| {
-            println!("{}", process_info.total_bytes);
-            fs_extra::dir::TransitProcessResult::ContinueOrAbort
-        };
-        move_dir_with_progress(&folderPATH, &movedPATH, &options, handle).expect("unable to copy mac repo folders");
-
     }    
 //tests first might have made this a quicker process, cargo test and burn the vm on fail, rinse, repeat
     //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
