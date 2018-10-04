@@ -47,6 +47,10 @@
 /// for now am using panic macros to reveal var contents during runtime
 ///
 /// RE: is_complete spin check is using an entire core...
+///
+/// RE: windows quote bullshit
+/// it seems to me like it would be better to handle these in an isolated manner that
+/// doesnt affect the rest of the code, so we dont have to len around it nonstop
 
 /// SETUP_DOWNLOADS NOTES:
 ///     ON MAC:
@@ -552,6 +556,10 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
     }
 }
 
+//this should be cut into two functions at least
+//extract should run first
+//copy on mac (this and extract could be called setup_downloads)
+//then install (this could be called install_downloads)
 fn setup_downloads(downloadNAME: &str) {
     let originalNAME = downloadNAME;
 
@@ -802,7 +810,7 @@ fn setup_downloads(downloadNAME: &str) {
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
                                                 .to_owned();
-                    workingPATH += "\\Downloads\\";
+                    workingPATH += "\\Desktop\\Code\\";
                     workingPATH
                 } else {
                     //these both yield options to unwrap
@@ -821,7 +829,7 @@ fn setup_downloads(downloadNAME: &str) {
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
                                                 .to_owned();
-                    workingPATH += "/Downloads/";
+                    workingPATH += "/Desktop/Code/";
                     workingPATH
 
                 } else {
@@ -841,7 +849,8 @@ fn setup_downloads(downloadNAME: &str) {
         };
         fs::create_dir_all(&workingPATH).expect("creating dirs failed");
         env::set_current_dir(&workingPATH).expect("setting cwd failed");
-        //filepath has an extra / at the end
+        //filepath has an extra / at the end and a quote at the beginnnig
+        //the problem was probably just that one of the quotes was missing
         let fname = std::path::Path::new(&filePATH[1..len-1]);
         //windows panics right here
         println!("{:?}", &fname);
@@ -886,6 +895,7 @@ fn setup_downloads(downloadNAME: &str) {
         }
     }
     
+//tests first might have made this a quicker process, cargo test and burn the vm on fail, rinse, repeat
     //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
     //for the non directory names, which should match a vec of them
     //this as well as checking dirs that have stuff extracted to them, like co_demo and flutter
