@@ -68,6 +68,7 @@ extern crate indexmap;
 use indexmap::IndexMap;
 extern crate zip;
 extern crate fs_extra;
+extern crate dirs;
 
 use std::fs;
 use std::io;
@@ -77,6 +78,7 @@ use std::{thread, time};
 use std::process::Command;
 use fs_extra::dir::copy;
 use std::path::Path;
+use dirs::home_dir;
 
 
 //#region py_check_dirs
@@ -411,7 +413,7 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
 
     let downloadsPATH: String = {
         if cfg!(windows){
-            //these both yield options to unwrap
+//change to dirs::home_dir()
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
@@ -419,7 +421,7 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
             downloadsPATH += "\\Downloads\\";
             downloadsPATH
         }else if cfg!(unix){
-            //these both yield options to unwrap
+//change to dirs::home_dir()
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
@@ -561,11 +563,11 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
 //copy on mac (this and extract could be called setup_downloads)
 //then install (this could be called install_downloads)
 fn setup_downloads(downloadNAME: &str) {
-    let originalNAME = downloadNAME;
+    let downloadNAME = downloadNAME;
 
     let downloadsPATH: String = {
         if cfg!(windows){
-            //these both yield options to unwrap
+//change to dirs::home_dir()
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
@@ -573,7 +575,7 @@ fn setup_downloads(downloadNAME: &str) {
             downloadsPATH += "\\Downloads\\";
             downloadsPATH
         }else if cfg!(unix){
-            //these both yield options to unwrap
+//change to dirs::home_dir()
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
@@ -640,14 +642,12 @@ fn setup_downloads(downloadNAME: &str) {
         }
     }
     let len = filePATH.len();
-//this spends alot of time doing something but does not end up creating a folder and extracting to it
     if filePATH[len-3..] == "zip".to_string() ||
        filePATH[len-4..len-1] == "zip".to_string() {
-        //this extracts to the same path as the binary...means we probably need to cwd to the appropriate folders
         let workingPATH: String = {
             if cfg!(windows){
-                if originalNAME == "co_demo0".to_string() {
-                    //these both yield options to unwrap
+                if downloadNAME == "co_demo0".to_string() {
+//needs to change to dirs::home_dir()
                     let path = env::home_dir().unwrap();
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
@@ -655,7 +655,7 @@ fn setup_downloads(downloadNAME: &str) {
                     workingPATH += "\\Desktop\\Code\\";
                     workingPATH
                 } else {
-                    //these both yield options to unwrap
+//needs to change to dirs::home_dir()
                     let path = env::home_dir().unwrap();
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
@@ -665,8 +665,8 @@ fn setup_downloads(downloadNAME: &str) {
 
                 }
             }else if cfg!(unix){
-                if originalNAME == "co_demo0".to_string() {
-                    //these both yield options to unwrap
+                if downloadNAME == "co_demo0".to_string() {
+//needs to change to dirs::home_dir()
                     let path = env::home_dir().unwrap();
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
@@ -675,7 +675,6 @@ fn setup_downloads(downloadNAME: &str) {
                     workingPATH
 
                 } else {
-                    //these both yield options to unwrap
 //need to start using dirs::home_dir as env::home_dir() is deprecated
                     let path = env::home_dir().unwrap();
                     let mut workingPATH = path.to_str()
@@ -743,7 +742,26 @@ fn setup_downloads(downloadNAME: &str) {
             }  
         }
     }
-    
+
+    if cfg!(target_os = "macos") {
+        let foldersInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets foldersInDownloads broke");
+        for folderNAME in foldersInDownloads {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+            
+            let mut downloadCHARS: Vec<char> = downloadNAME.chars().collect();
+            downloadCHARS[0] = downloadCHARS[0].to_uppercase().nth(0).expect("downloadCHARS first index is out of bounds");
+            let upperNAME: String = downloadCHARS.into_iter().collect();
+            //names are the same as the zip names, no upper case
+            //this could probably be condensed with the other and branch by ending with /
+            if folderNAME.contains(&upperNAME) {   
+                folderPATH = format!("{}{}", &downloadsPATH, &folderNAME);
+            }
+        }
+    }    
 //tests first might have made this a quicker process, cargo test and burn the vm on fail, rinse, repeat
     //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
     //for the non directory names, which should match a vec of them
@@ -770,11 +788,11 @@ fn setup_downloads(downloadNAME: &str) {
 }
 
 fn install_downloads(downloadNAME: &str) {
-    let originalNAME = downloadNAME;
+    let downloadNAME = downloadNAME;
 
     let downloadsPATH: String = {
         if cfg!(windows){
-            //these both yield options to unwrap
+//this needs to be changed to dirs::home_dir()
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
@@ -782,7 +800,7 @@ fn install_downloads(downloadNAME: &str) {
             downloadsPATH += "\\Downloads\\";
             downloadsPATH
         }else if cfg!(unix){
-            //these both yield options to unwrap
+//this needs to be changed to dirs::home_dir()
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
@@ -849,24 +867,6 @@ fn install_downloads(downloadNAME: &str) {
         }
     }
 
-    //safari unpacks zips by default
-    //i think this is going to be the most platform diverse function by far
-
-
-    //for mac apps
-    //0) unzip
-    //1) "$open soso.app"
-    //2) let user handle gui install
-    //3) open may not return a handle to the process
-
-    //for win exe
-    //0) $.\soso.exe
-    //1) let user handle GUI install
-    //2) this shouldnt return till the process is complete
-
-    //for lin deb
-    //0) $sudo dpkg -i soso.deb
-
     let len = filePATH.len();
     if filePATH[len-4..len-1] == "exe".to_string() ||
        filePATH[len-3..len] == "deb".to_string() 
@@ -901,13 +901,6 @@ fn install_downloads(downloadNAME: &str) {
 
     }
 
-    //for mac dmgs
-    //0) $hdiutil mount soso.dmg
-    //1) accept licence
-    //2) $cp -R /Volumes/soso.app /Applications
-    //3) unmount dmg, delete file from downloads
-    //4) the copy will only return a value when it is finished
-
     if filePATH[len-3..len] == "dmg".to_string() ||
         filePATH[len-3..len] == "app".to_string() {
         
@@ -937,9 +930,9 @@ fn install_downloads(downloadNAME: &str) {
                     
                     let mut downloadCHARS: Vec<char> = downloadNAME.chars().collect();
                     downloadCHARS[0] = downloadCHARS[0].to_uppercase().nth(0).expect("downloadCHARS first index is out of bounds");
-                    let downloadNAME: String = downloadCHARS.into_iter().collect();
+                    let upperNAME: String = downloadCHARS.into_iter().collect();
 
-                    if folderNAME.contains(&downloadNAME) {   
+                    if folderNAME.contains(&upperNAME) {   
                         volumePATH = format!("{}{}", &"/Volumes/"[..], &folderNAME);
                         let filesInVolume = fs::read_dir(&volumePATH).expect("the read_dir that sets filesInVolume broke");
                         for itemNAME in filesInVolume {
@@ -981,9 +974,9 @@ fn install_downloads(downloadNAME: &str) {
                 println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
             }
         }
-//we are entering this branch even on the VSCode iteration, need to check the string (MAC)
-        if originalNAME != "VSCode".to_string() ||
-            originalNAME != "git".to_string() {
+
+        if downloadNAME != "VSCode".to_string() ||
+            downloadNAME != "git".to_string() {
             let unmountCMD = ["hdiutil", "unmount"];
             println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &volumePATH);
             let output = Command::new(&unmountCMD[0])
@@ -999,11 +992,8 @@ fn install_downloads(downloadNAME: &str) {
         
     }
 
-//this is next, then ./ installs on linux
-    //for all zip
-    //Zip crate
-    //so the path logic from the is complete function
-    //can go above this and then we just operate on each file name like this
+    //need to do a pathfinding loop which can return the path of the setup script in bin in android studio
+    //the path of star should already be found above, just need to do an if contains .appimage and then ./ it and the studio
 }
 
 fn set_path() -> String {
@@ -1193,13 +1183,13 @@ mod tests {
         //still very proud of my first test, and glad
         //types are explicit
         if cfg!(windows){
-            //these return options to unwrap
+//this needs to be changed to dirs::home_dir()
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str().unwrap().to_owned();
             downloadsPATH += "\\Downloads";
             env::set_current_dir(&downloadsPATH);
         } else if cfg!(unix){
-            //these return options to unwrap
+//this needs to be changed to dirs::home_dir()
             let path = env::home_dir().unwrap();
             let mut downloadsPATH = path.to_str().unwrap().to_owned();
             downloadsPATH += "/Downloads";
@@ -1290,7 +1280,7 @@ mod tests {
     fn is_complete_switch_paths() -> String {
         let testPATH: String = { 
             if cfg!(windows){
-                //these yield options to unwrap
+//this needs to be changed to dirs::home_dir()
                 let path = env::home_dir().unwrap();
                 let mut testPATH = path.to_str()
                                     .unwrap()
@@ -1299,7 +1289,7 @@ mod tests {
                 testPATH
 
             } else if cfg!(unix){
-                //these yield options to unwrap
+//this needs to be changed to dirs::home_dir()
                 let path = env::home_dir().unwrap();
                 let mut testPATH = path.to_str()
                                     .unwrap()
