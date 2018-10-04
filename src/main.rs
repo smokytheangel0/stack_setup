@@ -841,7 +841,8 @@ fn setup_downloads(downloadNAME: &str) {
         };
         fs::create_dir_all(&workingPATH).expect("creating dirs failed");
         env::set_current_dir(&workingPATH).expect("setting cwd failed");
-        let fname = std::path::Path::new(&filePATH);
+        //filepath has an extra / at the end
+        let fname = std::path::Path::new(&filePATH[..len-1]);
         //windows panics right here
         println!("{:?}", &fname);
         let file = fs::File::open(&fname).expect("failed to open the file at filepath");
