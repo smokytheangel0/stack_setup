@@ -76,9 +76,11 @@ use std::env;
 use std::fs::ReadDir;
 use std::{thread, time};
 use std::process::Command;
-use fs_extra::dir::copy;
+use fs_extra::dir::move_dir_with_progress;
 use std::path::Path;
 use dirs::home_dir;
+use fs_extra::dir::TransitProcess;
+use fs_extra::dir::CopyOptions;
 
 
 //#region py_check_dirs
@@ -413,16 +415,14 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
 
     let downloadsPATH: String = {
         if cfg!(windows){
-//change to dirs::home_dir()
-            let path = env::home_dir().unwrap();
+            let path = dirs::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
                                         .to_owned();
             downloadsPATH += "\\Downloads\\";
             downloadsPATH
         }else if cfg!(unix){
-//change to dirs::home_dir()
-            let path = env::home_dir().unwrap();
+            let path = dirs::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
                                         .to_owned();
@@ -567,16 +567,14 @@ fn setup_downloads(downloadNAME: &str) {
 
     let downloadsPATH: String = {
         if cfg!(windows){
-//change to dirs::home_dir()
-            let path = env::home_dir().unwrap();
+            let path = dirs::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
                                         .to_owned();
             downloadsPATH += "\\Downloads\\";
             downloadsPATH
         }else if cfg!(unix){
-//change to dirs::home_dir()
-            let path = env::home_dir().unwrap();
+            let path = dirs::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
                                         .to_owned();
@@ -647,16 +645,14 @@ fn setup_downloads(downloadNAME: &str) {
         let workingPATH: String = {
             if cfg!(windows){
                 if downloadNAME == "co_demo0".to_string() {
-//needs to change to dirs::home_dir()
-                    let path = env::home_dir().unwrap();
+                    let path = dirs::home_dir().unwrap();
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
                                                 .to_owned();
                     workingPATH += "\\Desktop\\Code\\";
                     workingPATH
                 } else {
-//needs to change to dirs::home_dir()
-                    let path = env::home_dir().unwrap();
+                    let path = dirs::home_dir().unwrap();
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
                                                 .to_owned();
@@ -666,8 +662,7 @@ fn setup_downloads(downloadNAME: &str) {
                 }
             }else if cfg!(unix){
                 if downloadNAME == "co_demo0".to_string() {
-//needs to change to dirs::home_dir()
-                    let path = env::home_dir().unwrap();
+                    let path = dirs::home_dir().unwrap();
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
                                                 .to_owned();
@@ -675,8 +670,7 @@ fn setup_downloads(downloadNAME: &str) {
                     workingPATH
 
                 } else {
-//need to start using dirs::home_dir as env::home_dir() is deprecated
-                    let path = env::home_dir().unwrap();
+                    let path = dirs::home_dir().unwrap();
                     let mut workingPATH = path.to_str()
                                                 .unwrap()
                                                 .to_owned();
@@ -744,6 +738,26 @@ fn setup_downloads(downloadNAME: &str) {
     }
 
     if cfg!(target_os = "macos") {
+        let mut folderPATH = "".to_string();
+        let movedPATH = {
+            if downloadNAME == "flutter".to_string() {
+                let homePATH = dirs::home_dir().unwrap();
+                let mut movedPATH = homePATH.to_str()
+                                            .unwrap()
+                                            .to_owned();
+                movedPATH += "/Desktop/SDKs/";
+                movedPATH
+            } else {
+                let homePATH = dirs::home_dir().unwrap();
+                let mut movedPATH = homePATH.to_str()
+                                            .unwrap()
+                                            .to_owned();
+                movedPATH += "/Desktop/Code/";
+                movedPATH
+            }
+        };
+        
+
         let foldersInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets foldersInDownloads broke");
         for folderNAME in foldersInDownloads {
             let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
@@ -751,16 +765,19 @@ fn setup_downloads(downloadNAME: &str) {
                                             .into_string()
                                             .expect("the post string result which sets folderNAME has broken")
                                             .to_owned();
-            
-            let mut downloadCHARS: Vec<char> = downloadNAME.chars().collect();
-            downloadCHARS[0] = downloadCHARS[0].to_uppercase().nth(0).expect("downloadCHARS first index is out of bounds");
-            let upperNAME: String = downloadCHARS.into_iter().collect();
             //names are the same as the zip names, no upper case
             //this could probably be condensed with the other and branch by ending with /
-            if folderNAME.contains(&upperNAME) {   
+            if folderNAME.contains(&downloadNAME) {   
                 folderPATH = format!("{}{}", &downloadsPATH, &folderNAME);
             }
         }
+        let options = CopyOptions::new();
+        let handle = |process_info: TransitProcess| {
+            println!("{}", process_info.total_bytes);
+            fs_extra::dir::TransitProcessResult::ContinueOrAbort
+        };
+        move_dir_with_progress(&folderPATH, &movedPATH, &options, handle).expect("unable to copy mac repo folders");
+
     }    
 //tests first might have made this a quicker process, cargo test and burn the vm on fail, rinse, repeat
     //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
@@ -792,16 +809,14 @@ fn install_downloads(downloadNAME: &str) {
 
     let downloadsPATH: String = {
         if cfg!(windows){
-//this needs to be changed to dirs::home_dir()
-            let path = env::home_dir().unwrap();
+            let path = dirs::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
                                         .to_owned();
             downloadsPATH += "\\Downloads\\";
             downloadsPATH
         }else if cfg!(unix){
-//this needs to be changed to dirs::home_dir()
-            let path = env::home_dir().unwrap();
+            let path = dirs::home_dir().unwrap();
             let mut downloadsPATH = path.to_str()
                                         .unwrap()
                                         .to_owned();
@@ -1183,14 +1198,12 @@ mod tests {
         //still very proud of my first test, and glad
         //types are explicit
         if cfg!(windows){
-//this needs to be changed to dirs::home_dir()
-            let path = env::home_dir().unwrap();
+            let path = dirs::home_dir().unwrap();
             let mut downloadsPATH = path.to_str().unwrap().to_owned();
             downloadsPATH += "\\Downloads";
             env::set_current_dir(&downloadsPATH);
         } else if cfg!(unix){
-//this needs to be changed to dirs::home_dir()
-            let path = env::home_dir().unwrap();
+            let path = dirs::home_dir().unwrap();
             let mut downloadsPATH = path.to_str().unwrap().to_owned();
             downloadsPATH += "/Downloads";
             env::set_current_dir(&downloadsPATH);
@@ -1280,8 +1293,7 @@ mod tests {
     fn is_complete_switch_paths() -> String {
         let testPATH: String = { 
             if cfg!(windows){
-//this needs to be changed to dirs::home_dir()
-                let path = env::home_dir().unwrap();
+                let path = dirs::home_dir().unwrap();
                 let mut testPATH = path.to_str()
                                     .unwrap()
                                     .to_owned();
@@ -1289,8 +1301,7 @@ mod tests {
                 testPATH
 
             } else if cfg!(unix){
-//this needs to be changed to dirs::home_dir()
-                let path = env::home_dir().unwrap();
+                let path = dirs::home_dir().unwrap();
                 let mut testPATH = path.to_str()
                                     .unwrap()
                                     .to_owned();
