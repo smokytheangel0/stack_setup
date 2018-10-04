@@ -639,8 +639,208 @@ fn setup_downloads(downloadNAME: &str) {
             }
         }
     }
+    let len = filePATH.len();
+//this spends alot of time doing something but does not end up creating a folder and extracting to it
+    if filePATH[len-3..] == "zip".to_string() ||
+       filePATH[len-4..len-1] == "zip".to_string() {
+        //this extracts to the same path as the binary...means we probably need to cwd to the appropriate folders
+        let workingPATH: String = {
+            if cfg!(windows){
+                if originalNAME == "co_demo0".to_string() {
+                    //these both yield options to unwrap
+                    let path = env::home_dir().unwrap();
+                    let mut workingPATH = path.to_str()
+                                                .unwrap()
+                                                .to_owned();
+                    workingPATH += "\\Desktop\\Code\\";
+                    workingPATH
+                } else {
+                    //these both yield options to unwrap
+                    let path = env::home_dir().unwrap();
+                    let mut workingPATH = path.to_str()
+                                                .unwrap()
+                                                .to_owned();
+                    workingPATH += "\\Desktop\\SDKs\\";
+                    workingPATH
 
+                }
+            }else if cfg!(unix){
+                if originalNAME == "co_demo0".to_string() {
+                    //these both yield options to unwrap
+                    let path = env::home_dir().unwrap();
+                    let mut workingPATH = path.to_str()
+                                                .unwrap()
+                                                .to_owned();
+                    workingPATH += "/Desktop/Code/";
+                    workingPATH
 
+                } else {
+                    //these both yield options to unwrap
+//need to start using dirs::home_dir as env::home_dir() is deprecated
+                    let path = env::home_dir().unwrap();
+                    let mut workingPATH = path.to_str()
+                                                .unwrap()
+                                                .to_owned();
+                    workingPATH += "/Desktop/SDKs/";
+                    workingPATH
+
+                }
+            } else {
+                "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
+            }
+        };
+        fs::create_dir_all(&workingPATH).expect("creating dirs failed");
+        env::set_current_dir(&workingPATH).expect("setting cwd failed");
+        //filepath has an extra / at the end and a quote at the beginnnig
+        //the problem was probably just that one of the quotes was missing
+        let fname = std::path::Path::new(&filePATH[1..len-1]);
+        //windows panics right here
+        println!("{:?}", &fname);
+        let file = fs::File::open(&fname).expect("failed to open the file at filepath");
+
+        let mut archive = zip::ZipArchive::new(file).expect("failed to make an archive in memory from file");
+
+        for i in 0..archive.len() {
+            let mut file = archive.by_index(i).unwrap();
+            let outpath = file.sanitized_name();
+
+            {
+                let comment = file.comment();
+                if !comment.is_empty() {
+                    println!("File {} comment: {}", i, comment);
+                }
+            }
+
+            if (&*file.name()).ends_with('/') {
+                println!("File {} extracted to \"{}\"", i, outpath.as_path().display());
+                fs::create_dir_all(&outpath).expect("failed to create directories");
+            } else {
+                println!("File {} extracted to \"{}\" ({} bytes)", i, outpath.as_path().display(), file.size());
+                if let Some(p) = outpath.parent() {
+                    if !p.exists() {
+                        fs::create_dir_all(&p).expect("failed to extract file");
+                    }
+                }
+                let mut outfile = fs::File::create(&outpath).expect("failed to create outfile");
+                io::copy(&mut file, &mut outfile).expect("failed to copy outfile to output dir");
+            }
+
+            // Get and Set permissions
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+
+                if let Some(mode) = file.unix_mode() {
+                    fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
+                }
+            }  
+        }
+    }
+    
+//tests first might have made this a quicker process, cargo test and burn the vm on fail, rinse, repeat
+    //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
+    //for the non directory names, which should match a vec of them
+    //this as well as checking dirs that have stuff extracted to them, like co_demo and flutter
+    //MAC:
+    //  "/Applications/Android Studio.app"
+    //  "/Applications/StarUML.app"
+    //  "/Applications/Visual Studio Code.app"
+    //  --git doesnt show up in the applications folder
+    //  possibly "/usr/local/git/uninstall.sh"
+
+    //WIN:
+    //  "C:\Program Files\Android\Android Studio\"
+    //  all the rest ought to be in Program Files or (x86)
+    //  we dont have enough space on the black book to check
+    //  so we will try on mums pc
+
+    //LIN:
+    //  "/opt/android-studio/"
+    //  ~/.config/StarUML/
+    //  VSCode:
+    //      /usr/bin/code
+    //      /usr/share/code/
+}
+
+fn install_downloads(downloadNAME: &str) {
+    let originalNAME = downloadNAME;
+
+    let downloadsPATH: String = {
+        if cfg!(windows){
+            //these both yield options to unwrap
+            let path = env::home_dir().unwrap();
+            let mut downloadsPATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
+            downloadsPATH += "\\Downloads\\";
+            downloadsPATH
+        }else if cfg!(unix){
+            //these both yield options to unwrap
+            let path = env::home_dir().unwrap();
+            let mut downloadsPATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
+            downloadsPATH += "/Downloads/";
+            downloadsPATH
+        } else {
+            "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
+        }
+    };
+
+    let alternateGIT: &str = {
+        if cfg!(target_os = "windows") {
+            if downloadNAME == "git".to_string() {
+                "Git"
+            } else {
+                "None"
+            }
+        } else {
+            "None"
+        }
+    };
+
+    let alternateCODE: &str = {
+        if cfg!(target_os = "linux") {
+            if downloadNAME == "VSCode".to_string() {
+                "code_"
+            } else {
+                "None"
+            }
+        } else if cfg!(target_os = "macos") {
+            if downloadNAME == "VSCode".to_string() {
+                "Visual Studio Code"
+            } else {
+                "None"
+            }
+        } else {
+            "None"
+        }
+    };
+    
+    println!("downloadNAME is: {:?}", downloadNAME);
+    let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
+    let mut filePATH: String = "None".to_string();
+    for fileNAME in filesInDownloads {
+        let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
+                                        .file_name()
+                                        .into_string()
+                                        .expect("the post string result which sets fileNAME has broken")
+                                        .to_owned();
+        
+        if fileNAME.contains(&downloadNAME) ||
+           fileNAME.contains(&alternateCODE)||
+           fileNAME.contains(&alternateGIT)
+        {   
+            //never finds git during execution
+            filePATH = {
+                if cfg!(target_os = "windows") {
+                    format!("'{}{}'", &downloadsPATH, &fileNAME)
+                } else {
+                    format!("{}{}", &downloadsPATH, &fileNAME)
+                }
+            }
+        }
+    }
 
     //safari unpacks zips by default
     //i think this is going to be the most platform diverse function by far
@@ -797,135 +997,14 @@ fn setup_downloads(downloadNAME: &str) {
     //Zip crate
     //so the path logic from the is complete function
     //can go above this and then we just operate on each file name like this
-    
-//this spends alot of time doing something but does not end up creating a folder and extracting to it
-    if filePATH[len-3..] == "zip".to_string() ||
-       filePATH[len-4..len-1] == "zip".to_string() {
-        //this extracts to the same path as the binary...means we probably need to cwd to the appropriate folders
-        let workingPATH: String = {
-            if cfg!(windows){
-                if originalNAME == "co_demo0".to_string() {
-                    //these both yield options to unwrap
-                    let path = env::home_dir().unwrap();
-                    let mut workingPATH = path.to_str()
-                                                .unwrap()
-                                                .to_owned();
-                    workingPATH += "\\Desktop\\Code\\";
-                    workingPATH
-                } else {
-                    //these both yield options to unwrap
-                    let path = env::home_dir().unwrap();
-                    let mut workingPATH = path.to_str()
-                                                .unwrap()
-                                                .to_owned();
-                    workingPATH += "\\Desktop\\SDKs\\";
-                    workingPATH
-
-                }
-            }else if cfg!(unix){
-                if originalNAME == "co_demo0".to_string() {
-                    //these both yield options to unwrap
-                    let path = env::home_dir().unwrap();
-                    let mut workingPATH = path.to_str()
-                                                .unwrap()
-                                                .to_owned();
-                    workingPATH += "/Desktop/Code/";
-                    workingPATH
-
-                } else {
-                    //these both yield options to unwrap
-//need to start using dirs::home_dir as env::home_dir() is deprecated
-                    let path = env::home_dir().unwrap();
-                    let mut workingPATH = path.to_str()
-                                                .unwrap()
-                                                .to_owned();
-                    workingPATH += "/Desktop/SDKs/";
-                    workingPATH
-
-                }
-            } else {
-                "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
-            }
-        };
-        fs::create_dir_all(&workingPATH).expect("creating dirs failed");
-        env::set_current_dir(&workingPATH).expect("setting cwd failed");
-        //filepath has an extra / at the end and a quote at the beginnnig
-        //the problem was probably just that one of the quotes was missing
-        let fname = std::path::Path::new(&filePATH[1..len-1]);
-        //windows panics right here
-        println!("{:?}", &fname);
-        let file = fs::File::open(&fname).expect("failed to open the file at filepath");
-
-        let mut archive = zip::ZipArchive::new(file).expect("failed to make an archive in memory from file");
-
-        for i in 0..archive.len() {
-            let mut file = archive.by_index(i).unwrap();
-            let outpath = file.sanitized_name();
-
-            {
-                let comment = file.comment();
-                if !comment.is_empty() {
-                    println!("File {} comment: {}", i, comment);
-                }
-            }
-
-            if (&*file.name()).ends_with('/') {
-                println!("File {} extracted to \"{}\"", i, outpath.as_path().display());
-                fs::create_dir_all(&outpath).expect("failed to create directories");
-            } else {
-                println!("File {} extracted to \"{}\" ({} bytes)", i, outpath.as_path().display(), file.size());
-                if let Some(p) = outpath.parent() {
-                    if !p.exists() {
-                        fs::create_dir_all(&p).expect("failed to extract file");
-                    }
-                }
-                let mut outfile = fs::File::create(&outpath).expect("failed to create outfile");
-                io::copy(&mut file, &mut outfile).expect("failed to copy outfile to output dir");
-            }
-
-            // Get and Set permissions
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-
-                if let Some(mode) = file.unix_mode() {
-                    fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
-                }
-            }  
-        }
-    }
-    
-//tests first might have made this a quicker process, cargo test and burn the vm on fail, rinse, repeat
-    //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
-    //for the non directory names, which should match a vec of them
-    //this as well as checking dirs that have stuff extracted to them, like co_demo and flutter
-    //MAC:
-    //  "/Applications/Android Studio.app"
-    //  "/Applications/StarUML.app"
-    //  "/Applications/Visual Studio Code.app"
-    //  --git doesnt show up in the applications folder
-    //  possibly "/usr/local/git/uninstall.sh"
-
-    //WIN:
-    //  "C:\Program Files\Android\Android Studio\"
-    //  all the rest ought to be in Program Files or (x86)
-    //  we dont have enough space on the black book to check
-    //  so we will try on mums pc
-
-    //LIN:
-    //  "/opt/android-studio/"
-    //  ~/.config/StarUML/
-    //  VSCode:
-    //      /usr/bin/code
-    //      /usr/share/code/
 }
 
-fn create_directories() -> String {
+fn set_path() -> String {
     let errorBOX = String::from("");
     errorBOX
 }
 
-fn set_path() -> String {
+fn setup_xcode() -> String {
     let errorBOX = String::from("");
     errorBOX
 }
@@ -935,18 +1014,10 @@ fn show_licences() -> String {
     errorBOX
 }
 
-fn create_package() -> String {
-    //this misleadingly named thing is where
-    //we just integrate the contents of co_demo with
-    //a new locally created flutter project
-
-    //it turns out that .idea and .packages have local paths
-    //but are git ignored normally so removing them from the repo
-    //might mean that it runs without this step
+fn background_test() -> String {
     let errorBOX = String::from("");
     errorBOX
 }
-
 enum DownloadStatus {
     NotStarted,
     InProgress,
@@ -964,8 +1035,22 @@ fn main() {
     ].iter().cloned().collect();
 
     for downloadNAME in downloadMAP.clone().keys() {
-        let answerBOX = setup_downloads(&downloadNAME);
+        setup_downloads(&downloadNAME);
     }
+
+    let mut downloadMAP: IndexMap<String, String> = [
+        ("StarUML".to_string(),  "None".to_string()),
+        ("git".to_string(),      "None".to_string()),
+        ("co_demo0".to_string(), "None".to_string()),
+        ("flutter".to_string(),  "None".to_string()),
+        ("VSCode".to_string(),   "None".to_string()),
+        ("android".to_string(),  "None".to_string())    
+    ].iter().cloned().collect();
+
+    for downloadNAME in downloadMAP.clone().keys() {
+        install_downloads(&downloadNAME);
+    }
+
     /*
     let path = env::home_dir().unwrap();
     let mut testPATH = path.to_str()
@@ -1623,32 +1708,6 @@ mod tests {
         }
     }
 
-    /*
-    #[test]
-    fn setup_downloads_error_msg(){
-
-    }
-
-    #[test]
-    fn create_directories_error_msg(){
-
-    }
-
-    #[test]
-    fn set_path_error_msg(){
-
-    }
-
-    #[test]
-    fn show_licences_error_msg(){
-
-    }
-
-    #[test]
-    fn create_package_error_msg(){
-
-    }
-    */
     #[test]
     fn start_downloads_linux_apt(){
         if cfg!(target_os = "linux"){
