@@ -639,6 +639,7 @@ fn setup_downloads(downloadNAME: &str) {
             }
         }
     }
+    println!("filePATH right after the pathfinding loop: {:?}", &filePATH);
     let len = filePATH.len();
     if filePATH[len-3..] == "zip".to_string() ||
        filePATH[len-4..len-1] == "zip".to_string() {
@@ -736,7 +737,7 @@ fn setup_downloads(downloadNAME: &str) {
             }  
         }
     }
-
+    println!("filePATH before the / branch {:?}", &filePATH);
     if cfg!(target_os = "macos") {
         if filePATH[len-1..] == "/".to_string() {
             let mut folderPATH = "".to_string();
@@ -991,7 +992,8 @@ fn install_downloads(downloadNAME: &str) {
                 println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
             }
         }
-
+        println!("originalNAME right before the unmount block: {:?}", &originalNAME);
+        println!("downloadNAME right before the unmount block: {:?}", &downloadNAME);
         if originalNAME != "VSCode".to_string() ||
             originalNAME != "git".to_string() {
             let unmountCMD = ["hdiutil", "unmount"];
