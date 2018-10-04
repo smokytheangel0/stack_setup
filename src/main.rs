@@ -693,7 +693,14 @@ fn setup_downloads(downloadNAME: &str) {
         env::set_current_dir(&workingPATH).expect("setting cwd failed");
         //filepath has an extra / at the end and a quote at the beginnnig
         //the problem was probably just that one of the quotes was missing
-        let fname = std::path::Path::new(&filePATH[1..len-1]);
+        
+        let fname = {
+            if cfg!(target_os = "windows") {
+                std::path::Path::new(&filePATH[1..len-1])
+            } else {
+                std::path::Path::new(&filePATH)
+            }
+        };
         //windows panics right here
         println!("{:?}", &fname);
         let file = fs::File::open(&fname).expect("failed to open the file at filepath");
