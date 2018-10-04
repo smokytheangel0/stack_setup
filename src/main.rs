@@ -739,7 +739,7 @@ fn setup_downloads(downloadNAME: &str) {
     }
     println!("filePATH before the / branch {:?}", &filePATH);
     if cfg!(target_os = "macos") {
-        if filePATH[len-1..] == "/".to_string() {
+        if !filePATH.contains(&"."[..]) {
             let mut folderPATH = "".to_string();
             let movedPATH = {
                 if downloadNAME == "flutter".to_string() {
