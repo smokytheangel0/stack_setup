@@ -807,7 +807,7 @@ fn setup_downloads(downloadNAME: &str) {
 }
 
 fn install_downloads(downloadNAME: &str) {
-    let downloadNAME = downloadNAME;
+    let originalNAME = downloadNAME;
 
     let downloadsPATH: String = {
         if cfg!(windows){
@@ -992,8 +992,8 @@ fn install_downloads(downloadNAME: &str) {
             }
         }
 
-        if downloadNAME != "VSCode".to_string() ||
-            downloadNAME != "git".to_string() {
+        if originalNAME != "VSCode".to_string() ||
+            originalNAME != "git".to_string() {
             let unmountCMD = ["hdiutil", "unmount"];
             println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &volumePATH);
             let output = Command::new(&unmountCMD[0])
