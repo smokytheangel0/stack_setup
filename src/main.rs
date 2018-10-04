@@ -842,9 +842,9 @@ fn setup_downloads(downloadNAME: &str) {
         fs::create_dir_all(&workingPATH).expect("creating dirs failed");
         env::set_current_dir(&workingPATH).expect("setting cwd failed");
         let fname = std::path::Path::new(&filePATH);
-        let file = fs::File::open(&fname).unwrap();
+        let file = fs::File::open(&fname).expect("failed to open the file at filepath");
 
-        let mut archive = zip::ZipArchive::new(file).unwrap();
+        let mut archive = zip::ZipArchive::new(file).expect("failed to make an archive in memory from file");
 
         for i in 0..archive.len() {
             let mut file = archive.by_index(i).unwrap();
@@ -859,16 +859,16 @@ fn setup_downloads(downloadNAME: &str) {
 
             if (&*file.name()).ends_with('/') {
                 println!("File {} extracted to \"{}\"", i, outpath.as_path().display());
-                fs::create_dir_all(&outpath).unwrap();
+                fs::create_dir_all(&outpath).expect("failed to create directories");
             } else {
                 println!("File {} extracted to \"{}\" ({} bytes)", i, outpath.as_path().display(), file.size());
                 if let Some(p) = outpath.parent() {
                     if !p.exists() {
-                        fs::create_dir_all(&p).unwrap();
+                        fs::create_dir_all(&p).expect("failed to extract file");
                     }
                 }
-                let mut outfile = fs::File::create(&outpath).unwrap();
-                io::copy(&mut file, &mut outfile).unwrap();
+                let mut outfile = fs::File::create(&outpath).expect("failed to create outfile");
+                io::copy(&mut file, &mut outfile).expect("failed to copy outfile to output dir");
             }
 
             // Get and Set permissions
