@@ -140,11 +140,11 @@ fn check_dirs() -> i8 {
 /// def start_downloads(downloadNAME):
 ///     targetOS = platform.uname()[0]
 ///     testLIST = [
-///         "None",
-///         "None",
-///         "None",
-///         "None",
-///         "None"
+///         ".None",
+///         ".None",
+///         ".None",
+///         ".None",
+///         ".None"
 ///     ]
 ///
 ///     if targetOS is "Windows":
@@ -198,11 +198,11 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
 
     let mut testLIST = vec![
-        "None".to_string(),
-        "None".to_string(),
-        "None".to_string(),
-        "None".to_string(),
-        "None".to_string()
+        ".None".to_string(),
+        ".None".to_string(),
+        ".None".to_string(),
+        ".None".to_string(),
+        ".None".to_string()
     ];
 
     let vsVersion: &str = {
@@ -316,7 +316,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 /// #outBOX is String
 /// def is_complete(downloadNAME, &testPATH):
 ///     targetOS = platform.uname()[0]
-///     outBOX = "None"
+///     outBOX = ".None"
 ///
 ///     if targetOS is "Windows":
 ///         downloadsPATH = str(Path.home())
@@ -348,22 +348,22 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 ///         if downloadNAME is "git":
 ///             alternateGIT = "Git"
 ///         else:
-///             alternateGIT = "None"
+///             alternateGIT = ".None"
 ///     else:
-///         alternateGIT = "None"
+///         alternateGIT = ".None"
 ///    
 ///     if targetOS is "Linux":
 ///         if downloadNAME is "VSCode":
 ///             alternateCODE = "code_"
 ///         else:
-///             alternateCODE = "None"
+///             alternateCODE = ".None"
 ///     else if targetOS is "Darwin":
 ///         if downloadNAME is "VSCode":
 ///             alternateCODE = "Visual Studio Code"
 ///         else:
-///             alternateCODE = "None"
+///             alternateCODE = ".None"
 ///     else:
-///         alternateCODE = "None"
+///         alternateCODE = ".None"
 ///
 ///     unconfirmed = 0
 ///     for fileNAME in filesInDownloads:
@@ -393,9 +393,9 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 ///                     return False
 ///        
 ///         else:
-///             found = "None"
+///             found = ".None"
 ///        
-///         if found is "None":
+///         if found is ".None":
 ///             continue
 ///         else:
 ///             break
@@ -411,7 +411,7 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
     //this function called from main and the associated tests
     //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
 
-    let outBOX: String = "None".to_string();
+    let outBOX: String = ".None".to_string();
 
     let downloadsPATH: String = {
         if cfg!(windows){
@@ -451,10 +451,10 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
             if downloadNAME == "git".to_string() {
                 "Git"
             } else {
-                "None"
+                ".None"
             }
         } else {
-            "None"
+            ".None"
         }
     };
 
@@ -463,16 +463,16 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
             if downloadNAME == "VSCode".to_string() {
                 "code_"
             } else {
-                "None"
+                ".None"
             }
         } else if cfg!(target_os = "macos") {
             if downloadNAME == "VSCode".to_string() {
                 "Visual Studio Code"
             } else {
-                "None"
+                ".None"
             }
         } else {
-            "None"
+            ".None"
         }
     };
 
@@ -539,12 +539,12 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
                 }
 
             } else {
-                "None".to_string();
+                ".None".to_string();
             }
-            "None".to_string()
+            ".None".to_string()
         };
     
-        if found == "None".to_string() {
+        if found == ".None".to_string() {
             continue
         } else {
             break
@@ -590,10 +590,10 @@ fn setup_downloads(downloadNAME: &str) {
             if downloadNAME == "git".to_string() {
                 "Git"
             } else {
-                "None"
+                ".None"
             }
         } else {
-            "None"
+            ".None"
         }
     };
 
@@ -602,22 +602,22 @@ fn setup_downloads(downloadNAME: &str) {
             if downloadNAME == "VSCode".to_string() {
                 "code_"
             } else {
-                "None"
+                ".None"
             }
         } else if cfg!(target_os = "macos") {
             if downloadNAME == "VSCode".to_string() {
                 "Visual Studio Code"
             } else {
-                "None"
+                ".None"
             }
         } else {
-            "None"
+            ".None"
         }
     };
     
     println!("downloadNAME is: {:?}", downloadNAME);
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
-    let mut filePATH: String = "None".to_string();
+    let mut filePATH: String = ".None".to_string();
     for fileNAME in filesInDownloads {
         let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
                                         .file_name()
@@ -758,23 +758,9 @@ fn setup_downloads(downloadNAME: &str) {
                 }
             };
             
-
-            let foldersInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets foldersInDownloads broke");
-            for folderNAME in foldersInDownloads {
-                let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
-                                                .file_name()
-                                                .into_string()
-                                                .expect("the post string result which sets folderNAME has broken")
-                                                .to_owned();
-                //names are the same as the zip names, no upper case
-                //this could probably be condensed with the other and branch by ending with /
-                if folderNAME.contains(&downloadNAME) {   
-                    folderPATH = format!("{}{}/", &downloadsPATH, &folderNAME);
-                }
-            }
             println!("folderPATH is: {:?}", &folderPATH);
             let options = CopyOptions::new();
-            move_dir(&folderPATH, &movedPATH, &options).expect("unable to copy mac repo folders");
+            move_dir(&filePATH, &movedPATH, &options).expect("unable to copy mac repo folders");
 
         }
     }    
@@ -831,10 +817,10 @@ fn install_downloads(downloadNAME: &str) {
             if downloadNAME == "git".to_string() {
                 "Git"
             } else {
-                "None"
+                ".None"
             }
         } else {
-            "None"
+            ".None"
         }
     };
 
@@ -843,22 +829,22 @@ fn install_downloads(downloadNAME: &str) {
             if downloadNAME == "VSCode".to_string() {
                 "code_"
             } else {
-                "None"
+                ".None"
             }
         } else if cfg!(target_os = "macos") {
             if downloadNAME == "VSCode".to_string() {
                 "Visual Studio Code"
             } else {
-                "None"
+                ".None"
             }
         } else {
-            "None"
+            ".None"
         }
     };
     
     println!("downloadNAME is: {:?}", downloadNAME);
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
-    let mut filePATH: String = "None".to_string();
+    let mut filePATH: String = ".None".to_string();
     for fileNAME in filesInDownloads {
         let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
                                         .file_name()
@@ -891,9 +877,9 @@ fn install_downloads(downloadNAME: &str) {
             } else if cfg!(target_os = "linux") {
                 ["sudo", "dpkg", "-i"]
             } else {
-                ["None",
-                 "None",
-                 "None"]
+                [".None",
+                 ".None",
+                 ".None"]
             }
         };
 
@@ -918,8 +904,8 @@ fn install_downloads(downloadNAME: &str) {
     if filePATH[len-3..len] == "dmg".to_string() ||
         filePATH[len-3..len] == "app".to_string() {
         
-        let mut volumePATH: String = "None".to_string();
-        let mut appPATH: String = "None".to_string();
+        let mut volumePATH: String = ".None".to_string();
+        let mut appPATH: String = ".None".to_string();
         if filePATH[len-3..len] == "dmg".to_string() {
             let mountCMD = ["hdiutil", "mount"];
             println!("cmd is: {:?} {:?}", mountCMD.join(" "), &filePATH);
@@ -1038,12 +1024,12 @@ enum DownloadStatus {
 
 fn main() {
     let mut downloadMAP: IndexMap<String, String> = [
-        ("StarUML".to_string(),  "None".to_string()),
-        ("git".to_string(),      "None".to_string()),
-        ("co_demo0".to_string(), "None".to_string()),
-        ("flutter".to_string(),  "None".to_string()),
-        ("VSCode".to_string(),   "None".to_string()),
-        ("android".to_string(),  "None".to_string())    
+        ("StarUML".to_string(),  ".None".to_string()),
+        ("git".to_string(),      ".None".to_string()),
+        ("co_demo0".to_string(), ".None".to_string()),
+        ("flutter".to_string(),  ".None".to_string()),
+        ("VSCode".to_string(),   ".None".to_string()),
+        ("android".to_string(),  ".None".to_string())    
     ].iter().cloned().collect();
 
     for downloadNAME in downloadMAP.clone().keys() {
@@ -1051,12 +1037,12 @@ fn main() {
     }
 
     let mut downloadMAP: IndexMap<String, String> = [
-        ("StarUML".to_string(),  "None".to_string()),
-        ("git".to_string(),      "None".to_string()),
-        ("co_demo0".to_string(), "None".to_string()),
-        ("flutter".to_string(),  "None".to_string()),
-        ("VSCode".to_string(),   "None".to_string()),
-        ("android".to_string(),  "None".to_string())    
+        ("StarUML".to_string(),  ".None".to_string()),
+        ("git".to_string(),      ".None".to_string()),
+        ("co_demo0".to_string(), ".None".to_string()),
+        ("flutter".to_string(),  ".None".to_string()),
+        ("VSCode".to_string(),   ".None".to_string()),
+        ("android".to_string(),  ".None".to_string())    
     ].iter().cloned().collect();
 
     for downloadNAME in downloadMAP.clone().keys() {
@@ -1077,15 +1063,15 @@ fn main() {
     check_dirs();
 
     let mut downloadMAP: IndexMap<String, String> = [
-        ("StarUML".to_string(),  "None".to_string()),
-        ("git".to_string(),      "None".to_string()),
-        ("co_demo0".to_string(), "None".to_string()),
-        ("flutter".to_string(),  "None".to_string()),
-        ("VSCode".to_string(),   "None".to_string()),
-        ("android".to_string(),  "None".to_string())    
+        ("StarUML".to_string(),  ".None".to_string()),
+        ("git".to_string(),      ".None".to_string()),
+        ("co_demo0".to_string(), ".None".to_string()),
+        ("flutter".to_string(),  ".None".to_string()),
+        ("VSCode".to_string(),   ".None".to_string()),
+        ("android".to_string(),  ".None".to_string())    
     ].iter().cloned().collect();
 
-    let _testPATH: String = "None".to_string();
+    let _testPATH: String = ".None".to_string();
     for downloadNAME in downloadMAP.clone().keys() {
         let answerBOX = is_complete(&downloadNAME, &_testPATH);
 
@@ -1103,7 +1089,7 @@ fn main() {
 
     'main: loop {
         for downloadNAME in downloadMAP.clone().keys() {
-            if downloadMAP[downloadNAME] == "None".to_string() {
+            if downloadMAP[downloadNAME] == ".None".to_string() {
                 if downloadNAME.to_owned() == "android".to_string() {
                     println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
                 } else {
@@ -1124,7 +1110,7 @@ fn main() {
                     thread::sleep(sleepTIME);
                 }
 
-                if !testLIST[4].contains("E: Failed") || !testLIST[4].contains("None") {
+                if !testLIST[4].contains("E: Failed") || !testLIST[4].contains(".None") {
                     downloadMAP.insert(downloadNAME.to_string(),"True".to_string());
                 }
             } else {
@@ -1161,7 +1147,7 @@ fn main() {
 
         } else if now.elapsed() > promptTIME {
             for downloadNAME in downloadMAP.clone().keys() {
-                if downloadMAP[downloadNAME] == "None".to_string() {
+                if downloadMAP[downloadNAME] == ".None".to_string() {
                     println!("the {} download has not started despite multiple attempts\n", downloadNAME.to_string())  
                 }
             }
@@ -1280,7 +1266,7 @@ mod tests {
 
         for index in 0..fileLIST.len() {
                 let downloadNAME = fileLIST.get(index).unwrap().to_string();
-                assert_eq!(start_downloads(&downloadNAME)[3], "None");
+                assert_eq!(start_downloads(&downloadNAME)[3], ".None");
         }
     }
     */
@@ -1394,11 +1380,11 @@ mod tests {
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
-        assert_eq!(testLIST[1], "None");
+        assert_eq!(testLIST[1], ".None");
         assert_eq!(testLIST[2], "True");
         assert_eq!(testLIST[3], "True");
         assert_eq!(testLIST[4], "True");
-        assert_eq!(testLIST[5], "None");
+        assert_eq!(testLIST[5], ".None");
     }
 
     #[test]
@@ -1720,7 +1706,7 @@ mod tests {
     fn start_downloads_linux_apt(){
         if cfg!(target_os = "linux"){
             let downloadNAME = "git".to_string();
-            assert_eq!(start_downloads(&downloadNAME)[3], "None");
+            assert_eq!(start_downloads(&downloadNAME)[3], ".None");
 
         }
     }
