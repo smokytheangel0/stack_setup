@@ -742,7 +742,7 @@ fn setup_downloads(downloadNAME: &str) {
                     movedPATH
                 }
             };
-
+            fs::create_dir_all(&movedPATH).expect("failed to create moved path dirs");
             let copyCMD = ["sudo", "mv"];
             let output = Command::new(&copyCMD[0])
                             .arg(&copyCMD[1])
