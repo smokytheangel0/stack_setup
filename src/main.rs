@@ -639,8 +639,12 @@ fn setup_downloads(downloadNAME: &str) {
         }
     }
     let len = filePATH.len();
+    let mut macZIP = 0;
     if filePATH[len-3..] == "zip".to_string() ||
        filePATH[len-4..len-1] == "zip".to_string() {
+        if cfg!(target_os = "macos") {
+            macZIP = 1;
+        }
         let workingPATH: String = {
             if cfg!(windows){
                 if downloadNAME == "co_demo0".to_string() {
@@ -723,7 +727,7 @@ fn setup_downloads(downloadNAME: &str) {
             }  
         }
     }
-    if cfg!(target_os = "macos") {
+    if cfg!(target_os = "macos") && macZIP == 0 {
         if !filePATH.contains(&"."[..]) {
             let movedPATH = {
                 if downloadNAME == "flutter".to_string() {
@@ -898,7 +902,7 @@ fn install_downloads(downloadNAME: &str) {
 
     }
 
-    if filePATH[len-3..len] == "dmg".to_string() ||
+    else if filePATH[len-3..len] == "dmg".to_string() ||
         filePATH[len-3..len] == "app".to_string() {
         
         let mut volumePATH: String = ".None".to_string();
@@ -948,10 +952,11 @@ fn install_downloads(downloadNAME: &str) {
             }
         }
 
-        if filePATH[len-3..len] == "app".to_string() {
-            appPATH = filePATH.clone();
-        }
         if !downloadNAME.contains(&"git"[..]) {
+            if filePATH[len-3..len] == "app".to_string() {
+                appPATH = filePATH.clone();
+            }
+
             let copyCMD = ["sudo", "cp", "-R"];
             let output = Command::new(&copyCMD[0])
                             .arg(&copyCMD[1])
@@ -967,8 +972,8 @@ fn install_downloads(downloadNAME: &str) {
                 println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
             }
         }
-        if !downloadNAME.contains("VSCode") ||
-            !downloadNAME.contains("git") {
+
+        if volumePATH != ".None".to_string() {
             let unmountCMD = ["hdiutil", "unmount"];
             println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &volumePATH);
             let output = Command::new(&unmountCMD[0])
@@ -982,6 +987,28 @@ fn install_downloads(downloadNAME: &str) {
             }
         }
         
+    } else {
+        if filePATH.contains(&"appimage"[..]) {
+            Command::new("./").arg(&filePATH)
+                            .output().expect("failed to execute appimage");
+        } else {
+            let workingPATH: String = {
+                if cfg!(unix){
+                        let path = dirs::home_dir().unwrap();
+                        let mut workingPATH = path.to_str()
+                                                    .unwrap()
+                                                    .to_owned();
+                        workingPATH += "/Desktop/SDKs/android-studio/bin/studio.sh";
+                        workingPATH
+                } else {
+                    "the console install of star and android only works on linux".to_string()
+                }
+            };
+            Command::new("./").arg(&workingPATH)
+                            .output().expect("failed to execute studio.sh");
+
+        }
+        //appimage and android studio go here
     }
 
     //need to do a pathfinding loop which can return the path of the setup script in bin in android studio
