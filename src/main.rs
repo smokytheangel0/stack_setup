@@ -839,6 +839,7 @@ fn install_downloads(downloadNAME: &str) {
     
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
     let mut filePATH: String = ".None".to_string();
+    let mut properNAME = ".None".to_string();
     for fileNAME in filesInDownloads {
         let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
                                         .file_name()
@@ -857,7 +858,8 @@ fn install_downloads(downloadNAME: &str) {
                 } else {
                     format!("{}{}", &downloadsPATH, &fileNAME)
                 }
-            }
+            };
+            properNAME = fileNAME;
         }
     }
 
@@ -955,7 +957,8 @@ fn install_downloads(downloadNAME: &str) {
     } else {
         if filePATH.contains(&"AppImage"[..]) {
             Command::new("chmod").arg("+x").arg(&filePATH).output().expect("failed to make AppImage executable");
-            let commandPATH = "./".to_string() + &filePATH;
+            env::set_current_dir(&downloadsPATH).expect("setting cwd failed");
+            let commandPATH = "./".to_string() + &properNAME;
             Command::new(commandPATH)
                             .output().expect("failed to execute appimage");
         } else {
