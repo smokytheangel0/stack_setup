@@ -990,8 +990,10 @@ fn install_downloads(downloadNAME: &str) {
         }
         
     } else {
-        if filePATH.contains(&"appimage"[..]) {
-            Command::new("./").arg(&filePATH)
+        if filePATH.contains(&"AppImage"[..]) {
+            Command::new("chmod").arg("+x").arg(&filePATH).output().expect("failed to make AppImage executable");
+            let commandPATH = "./".to_string() + &filePATH;
+            Command::new(commandPATH)
                             .output().expect("failed to execute appimage");
         } else {
             let workingPATH: String = {
@@ -1001,13 +1003,14 @@ fn install_downloads(downloadNAME: &str) {
                                                     .unwrap()
                                                     .to_owned();
                         workingPATH += "/Desktop/SDKs/android-studio/bin/studio.sh";
+                        
                         workingPATH
                 } else {
                     "the console install of star and android only works on linux".to_string()
                 }
             };
             Command::new("chmod").arg("+x").arg(&workingPATH).output().expect("failed to make sh executable");
-            Command::new("./").arg(&workingPATH)
+            Command::new("sh").arg(&workingPATH)
                             .output().expect("failed to execute studio.sh");
 
         }
