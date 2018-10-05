@@ -961,7 +961,7 @@ fn install_downloads(downloadNAME: &str) {
             let commandPATH = "./".to_string() + &properNAME;
             Command::new(commandPATH)
                             .output().expect("failed to execute appimage");
-        } else {
+        } else if filePATH.contains(&"android"[..]) {
             let workingPATH: String = {
                 if cfg!(unix){
                         let path = dirs::home_dir().unwrap();
@@ -979,6 +979,8 @@ fn install_downloads(downloadNAME: &str) {
             Command::new("sh").arg(&workingPATH)
                             .output().expect("failed to execute studio.sh");
 
+        } else {
+            return;
         }
         //appimage and android studio go here
     }
