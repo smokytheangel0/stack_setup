@@ -737,7 +737,6 @@ fn setup_downloads(downloadNAME: &str) {
             }  
         }
     }
-    println!("filePATH before the / branch {:?}", &filePATH);
     if cfg!(target_os = "macos") {
         if !filePATH.contains(&"."[..]) {
             let mut folderPATH = "".to_string();
@@ -773,6 +772,7 @@ fn setup_downloads(downloadNAME: &str) {
                     folderPATH = format!("{}{}/", &downloadsPATH, &folderNAME);
                 }
             }
+            println!("folderPATH is: {:?}", &folderPATH);
             let options = CopyOptions::new();
             let handle = |process_info: TransitProcess| {
                 println!("{}", process_info.total_bytes);
