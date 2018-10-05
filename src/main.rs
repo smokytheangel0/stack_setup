@@ -951,7 +951,7 @@ fn install_downloads(downloadNAME: &str) {
         if filePATH[len-3..len] == "app".to_string() {
             appPATH = filePATH.clone();
         }
-        if filePATH.contains(&".app"[..]) {
+        if !downloadNAME.contains(&"git"[..]) {
             let copyCMD = ["sudo", "cp", "-R"];
             let output = Command::new(&copyCMD[0])
                             .arg(&copyCMD[1])
@@ -967,10 +967,8 @@ fn install_downloads(downloadNAME: &str) {
                 println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
             }
         }
-        println!("originalNAME right before the unmount block: {:?}", &originalNAME);
-        println!("downloadNAME right before the unmount block: {:?}", &downloadNAME);
-        if originalNAME != "VSCode".to_string() ||
-            originalNAME != "git".to_string() {
+        if !downloadNAME.contains("VSCode") ||
+            !downloadNAME.contains("git") {
             let unmountCMD = ["hdiutil", "unmount"];
             println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &volumePATH);
             let output = Command::new(&unmountCMD[0])
