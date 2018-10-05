@@ -703,10 +703,8 @@ fn setup_downloads(downloadNAME: &str) {
             let outpath = file.sanitized_name();
 
             if (&*file.name()).ends_with('/') {
-                println!("File {} extracted to \"{}\"", i, outpath.as_path().display());
                 fs::create_dir_all(&outpath).expect("failed to create directories");
             } else {
-                println!("File {} extracted to \"{}\" ({} bytes)", i, outpath.as_path().display(), file.size());
                 if let Some(p) = outpath.parent() {
                     if !p.exists() {
                         fs::create_dir_all(&p).expect("failed to extract file");
@@ -755,15 +753,6 @@ fn setup_downloads(downloadNAME: &str) {
                             .output().expect("failed to execute mv cmd");
 
             //this returns success even if the operation is not permitted
-            if output.status.success() {
-                println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stdout).into_owned());
-            } else {
-                println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
-            }
-
-        
-        
-
             /*
             let options = CopyOptions::new();
             move_dir(&filePATH, &movedPATH, &options).expect("unable to copy mac repo folders");
@@ -896,12 +885,6 @@ fn install_downloads(downloadNAME: &str) {
                 panic!("failed to execute process: {}", e)
         });
 
-        if output.status.success() {
-            println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stdout).into_owned());
-        } else {
-            println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
-        }
-
     }
 
     else if filePATH[len-3..len] == "dmg".to_string() ||
@@ -911,15 +894,9 @@ fn install_downloads(downloadNAME: &str) {
         let mut appPATH: String = ".None".to_string();
         if filePATH[len-3..len] == "dmg".to_string() {
             let mountCMD = ["hdiutil", "mount"];
-            let output = Command::new(&mountCMD[0])
+            Command::new(&mountCMD[0])
                 .arg(&mountCMD[1]).arg(&filePATH)
                 .output().expect("failed to execute mount cmd");
-
-            if output.status.success() {
-                println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
-            } else {
-                println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
-            }
 
             if cfg!(target_os = "macos") {
                 let foldersInVolumes = fs::read_dir("/Volumes/").expect("the read_dir that sets foldersInVolumes broke");
@@ -960,33 +937,19 @@ fn install_downloads(downloadNAME: &str) {
             }
 
             let copyCMD = ["sudo", "cp", "-R"];
-            let output = Command::new(&copyCMD[0])
+            Command::new(&copyCMD[0])
                             .arg(&copyCMD[1])
                             .arg(&copyCMD[2])
                             .arg(&appPATH)
                             .arg("/Applications")
                             .output().expect("failed to execute copy cmd");
-
-            //this returns success even if the operation is not permitted
-            if output.status.success() {
-                println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stdout).into_owned());
-            } else {
-                println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
-            }
         }
 
         if volumePATH != ".None".to_string() {
             let unmountCMD = ["hdiutil", "unmount"];
-            println!("cmd is: {:?} {:?}", unmountCMD.join(" "), &volumePATH);
-            let output = Command::new(&unmountCMD[0])
+            Command::new(&unmountCMD[0])
                 .arg(&unmountCMD[1]).arg(&volumePATH)
                 .output().expect("failed to execute unmount cmd");
-            
-            if output.status.success() {
-                println!("command successful, returns: {:?}", String::from_utf8_lossy(&output.stdout).into_owned());
-            } else {
-                println!("command failed, returns: {:?}", String::from_utf8_lossy(&output.stderr).into_owned());
-            }
         }
         
     } else {
