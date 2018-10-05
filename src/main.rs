@@ -731,14 +731,14 @@ fn setup_downloads(downloadNAME: &str) {
                     let mut movedPATH = homePATH.to_str()
                                                 .unwrap()
                                                 .to_owned();
-                    movedPATH += "/Desktop/SDKs/";
+                    movedPATH += "/Desktop/SDKs/flutter/";
                     movedPATH
                 } else {
                     let homePATH = dirs::home_dir().unwrap();
                     let mut movedPATH = homePATH.to_str()
                                                 .unwrap()
                                                 .to_owned();
-                    movedPATH += "/Desktop/Code/";
+                    movedPATH += "/Desktop/Code/co_demo0/";
                     movedPATH
                 }
             };
