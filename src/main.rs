@@ -275,7 +275,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     } else if downloadNAME == "git" && cfg!(target_os = "linux") {
         println!("if you see [sudo] please click\n and enter your password to install git !>");
         let output = Command::new("sudo")
-            .arg("apt").arg("install").arg("git").arg("libgconf-2-4")
+            .arg("apt").arg("install").arg("git")
             //this returns a result to unwrap
             //and this seems /ike a better way to handle this
             //than using expect, this one came verbatim from sO
@@ -887,7 +887,9 @@ fn install_downloads(downloadNAME: &str) {
                  "None"]
             }
         };
-
+        if cfg!(target_os = "linux") {
+            Command::new("sudo").arg("apt").arg("install").arg("libgconf-2-4");
+        }
         let output = Command::new(&setupCMD[0])
             .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH)
             .output().unwrap_or_else(|e| {
@@ -1004,6 +1006,7 @@ fn install_downloads(downloadNAME: &str) {
                     "the console install of star and android only works on linux".to_string()
                 }
             };
+            Command::new("chmod").arg("+x").arg(&workingPATH).output().expect("failed to make sh executable");
             Command::new("./").arg(&workingPATH)
                             .output().expect("failed to execute studio.sh");
 
