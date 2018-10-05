@@ -770,7 +770,7 @@ fn setup_downloads(downloadNAME: &str) {
                 //names are the same as the zip names, no upper case
                 //this could probably be condensed with the other and branch by ending with /
                 if folderNAME.contains(&downloadNAME) {   
-                    folderPATH = format!("{}{}", &downloadsPATH, &folderNAME);
+                    folderPATH = format!("{}{}/", &downloadsPATH, &folderNAME);
                 }
             }
             let options = CopyOptions::new();
