@@ -76,7 +76,7 @@ use std::env;
 use std::fs::ReadDir;
 use std::{thread, time};
 use std::process::Command;
-use fs_extra::dir::move_dir_with_progress;
+use fs_extra::dir::move_dir;
 use std::path::Path;
 use dirs::home_dir;
 use fs_extra::dir::TransitProcess;
@@ -774,11 +774,7 @@ fn setup_downloads(downloadNAME: &str) {
             }
             println!("folderPATH is: {:?}", &folderPATH);
             let options = CopyOptions::new();
-            let handle = |process_info: TransitProcess| {
-                println!("{}", process_info.total_bytes);
-                fs_extra::dir::TransitProcessResult::ContinueOrAbort
-            };
-            move_dir_with_progress(&folderPATH, &movedPATH, &options, handle).expect("unable to copy mac repo folders");
+            move_dir(&folderPATH, &movedPATH, &options).expect("unable to copy mac repo folders");
 
         }
     }    
