@@ -67,7 +67,6 @@ extern crate webbrowser;
 extern crate indexmap;
 use indexmap::IndexMap;
 extern crate zip;
-extern crate fs_extra;
 extern crate dirs;
 
 use std::fs;
@@ -76,11 +75,7 @@ use std::env;
 use std::fs::ReadDir;
 use std::{thread, time};
 use std::process::Command;
-use fs_extra::dir::move_dir;
-use std::path::Path;
 use dirs::home_dir;
-use fs_extra::dir::TransitProcess;
-use fs_extra::dir::CopyOptions;
 
 
 //#region py_check_dirs
@@ -250,15 +245,6 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
         webbrowser::open(&umlURL)
                     .expect("there was an error opening the star uml webpage in your browser");
         return testLIST;
-    } else if downloadNAME == "co_demo0" {
-        webbrowser::open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
-                    .expect("there was an error opening the co_demo web page in your browser");
-        return testLIST;
-
-    } else if downloadNAME == "flutter" {
-        webbrowser::open("https://github.com/flutter/flutter/archive/master.zip")
-                    .expect("there was an error opening the flutter web page in your browser");
-        return testLIST;
 
     } else if downloadNAME == "VSCode" {
         let vsURL: String = format!("https://code.visualstudio.com/docs/?dv={}", vsVersion); 
@@ -270,26 +256,6 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     } else if downloadNAME == "git" && !cfg!(target_os = "linux") {
         webbrowser::open(gitURL)
                     .expect("there was an error opening git in your browser");
-        return testLIST;
-
-    } else if downloadNAME == "git" && cfg!(target_os = "linux") {
-        println!("if you see [sudo] please click\n and enter your password to install git !>");
-        let output = Command::new("sudo")
-            .arg("apt").arg("install").arg("git")
-            //this returns a result to unwrap
-            //and this seems /ike a better way to handle this
-            //than using expect, this one came verbatim from sO
-            .output().unwrap_or_else(|e| {
-                panic!("failed to execute process: {}", e)
-        });
-
-        if output.status.success() {
-            let errorBOX = String::from_utf8_lossy(&output.stderr).into_owned();
-            testLIST[4] = errorBOX;
-        } else {
-            let errorBOX = String::from_utf8_lossy(&output.stderr).into_owned();
-            testLIST[4] = errorBOX;
-        }
         return testLIST;
 
     } else if downloadNAME == "android" {
@@ -496,9 +462,6 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
         //android studio on safari does not show the list of dls,
         //and opens at the bottom of the page but the link is at top
         //besides that though it works now on mac
-        if downloadNAME.contains(&"android"[..]) {
-            let debugBOX = 0;
-        }
         let found: String = {
             if fileNAME.contains(&downloadNAME) || 
                 fileNAME.contains(&"Unconfirmed"[..]) || 
@@ -558,12 +521,10 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
     }
 }
 
-//this should be cut into two functions at least
-//extract should run first
-//copy on mac (this and extract could be called setup_downloads)
-//then install (this could be called install_downloads)
-fn setup_downloads(downloadNAME: &str) {
-    let downloadNAME = downloadNAME;
+//this now only needs to support unzipping android-studio on linux,
+//the flutter and co_demo must be cloned after installing git and the like
+fn extract_studio() {
+    let downloadNAME = "android".to_string();
 
     let downloadsPATH: String = {
         if cfg!(windows){
@@ -584,36 +545,6 @@ fn setup_downloads(downloadNAME: &str) {
             "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
         }
     };
-
-    let alternateGIT: &str = {
-        if cfg!(target_os = "windows") {
-            if downloadNAME == "git".to_string() {
-                "Git"
-            } else {
-                ".None"
-            }
-        } else {
-            ".None"
-        }
-    };
-
-    let alternateCODE: &str = {
-        if cfg!(target_os = "linux") {
-            if downloadNAME == "VSCode".to_string() {
-                "code_"
-            } else {
-                ".None"
-            }
-        } else if cfg!(target_os = "macos") {
-            if downloadNAME == "VSCode".to_string() {
-                "Visual Studio Code"
-            } else {
-                ".None"
-            }
-        } else {
-            ".None"
-        }
-    };
     
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
     let mut filePATH: String = ".None".to_string();
@@ -624,75 +555,29 @@ fn setup_downloads(downloadNAME: &str) {
                                         .expect("the post string result which sets fileNAME has broken")
                                         .to_owned();
         
-        if fileNAME.contains(&downloadNAME) ||
-           fileNAME.contains(&alternateCODE)||
-           fileNAME.contains(&alternateGIT)
+        if fileNAME.contains(&downloadNAME)
         {   
             //never finds git during execution
             filePATH = {
-                if cfg!(target_os = "windows") {
-                    format!("'{}{}'", &downloadsPATH, &fileNAME)
-                } else {
-                    format!("{}{}", &downloadsPATH, &fileNAME)
-                }
+                format!("{}{}", &downloadsPATH, &fileNAME)                
             }
         }
     }
     let len = filePATH.len();
-    let mut macZIP = 0;
-    if filePATH[len-3..] == "zip".to_string() ||
-       filePATH[len-4..len-1] == "zip".to_string() {
-        if cfg!(target_os = "macos") {
-            macZIP = 1;
-        }
-        let workingPATH: String = {
-            if cfg!(windows){
-                if downloadNAME == "co_demo0".to_string() {
-                    let path = dirs::home_dir().unwrap();
-                    let mut workingPATH = path.to_str()
-                                                .unwrap()
-                                                .to_owned();
-                    workingPATH += "\\Desktop\\Code\\";
-                    workingPATH
-                } else {
-                    let path = dirs::home_dir().unwrap();
-                    let mut workingPATH = path.to_str()
-                                                .unwrap()
-                                                .to_owned();
-                    workingPATH += "\\Desktop\\SDKs\\";
-                    workingPATH
-
-                }
-            }else if cfg!(unix){
-                if downloadNAME == "co_demo0".to_string() {
-                    let path = dirs::home_dir().unwrap();
-                    let mut workingPATH = path.to_str()
-                                                .unwrap()
-                                                .to_owned();
-                    workingPATH += "/Desktop/Code/";
-                    workingPATH
-
-                } else {
-                    let path = dirs::home_dir().unwrap();
-                    let mut workingPATH = path.to_str()
-                                                .unwrap()
-                                                .to_owned();
-                    workingPATH += "/Desktop/SDKs/";
-                    workingPATH
-
-                }
-            } else {
-                "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
-            }
+    if filePATH[len-3..] == "zip".to_string() {
+        let workingPATH: String = {            
+            let path = dirs::home_dir().unwrap();
+            let mut workingPATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
+            workingPATH += "/Desktop/SDKs/";
+            workingPATH
         };
+
         fs::create_dir_all(&workingPATH).expect("creating dirs failed");
         env::set_current_dir(&workingPATH).expect("setting cwd failed");
         let fname = {
-            if cfg!(target_os = "windows") {
-                std::path::Path::new(&filePATH[1..len-1])
-            } else {
-                std::path::Path::new(&filePATH)
-            }
+            std::path::Path::new(&filePATH)
         };
         let file = fs::File::open(&fname).expect("failed to open the file at filepath");
 
@@ -725,70 +610,9 @@ fn setup_downloads(downloadNAME: &str) {
             }  
         }
     }
-    if cfg!(target_os = "macos") && macZIP == 0 {
-        if !filePATH.contains(&"."[..]) {
-            let movedPATH = {
-                //this creates the parent dir "*-master"
-                //so it doesnt need explicit flutter/co_demo0 folders
-                if downloadNAME == "flutter".to_string() {
-                    let homePATH = dirs::home_dir().unwrap();
-                    let mut movedPATH = homePATH.to_str()
-                                                .unwrap()
-                                                .to_owned();
-                    movedPATH += "/Desktop/SDKs/";
-                    movedPATH
-                } else {
-                    let homePATH = dirs::home_dir().unwrap();
-                    let mut movedPATH = homePATH.to_str()
-                                                .unwrap()
-                                                .to_owned();
-                    movedPATH += "/Desktop/Code/";
-                    movedPATH
-                }
-            };
-            fs::create_dir_all(&movedPATH).expect("failed to create moved path dirs");
-            let copyCMD = ["sudo", "mv"];
-            let output = Command::new(&copyCMD[0])
-                            .arg(&copyCMD[1])
-                            .arg(&filePATH)
-                            .arg(&movedPATH)
-                            .output().expect("failed to execute mv cmd");
-
-            //this returns success even if the operation is not permitted
-            /*
-            let options = CopyOptions::new();
-            move_dir(&filePATH, &movedPATH, &options).expect("unable to copy mac repo folders");
-            */
-        }
-    }    
-//tests first might have made this a quicker process, cargo test and burn the vm on fail, rinse, repeat
-    //maybe for tests we check the installation's program files/applications/wherever ubuntu puts them
-    //for the non directory names, which should match a vec of them
-    //this as well as checking dirs that have stuff extracted to them, like co_demo and flutter
-    //MAC:
-    //  "/Applications/Android Studio.app"
-    //  "/Applications/StarUML.app"
-    //  "/Applications/Visual Studio Code.app"
-    //  --git doesnt show up in the applications folder
-    //  possibly "/usr/local/git/uninstall.sh"
-
-    //WIN:
-    //  "C:\Program Files\Android\Android Studio\"
-    //  all the rest ought to be in Program Files or (x86)
-    //  we dont have enough space on the black book to check
-    //  so we will try on mums pc
-
-    //LIN:
-    //  "/opt/android-studio/"
-    //  ~/.config/StarUML/
-    //  VSCode:
-    //      /usr/bin/code
-    //      /usr/share/code/
 }
 
 fn install_downloads(downloadNAME: &str) {
-    let originalNAME = downloadNAME;
-
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = dirs::home_dir().unwrap();
@@ -881,9 +705,9 @@ fn install_downloads(downloadNAME: &str) {
             }
         };
         if cfg!(target_os = "linux") {
-            Command::new("sudo").arg("apt").arg("install").arg("libgconf-2-4");
+            Command::new("sudo").arg("apt").arg("install").arg("libgconf-2-4").arg("git");
         }
-        let output = Command::new(&setupCMD[0])
+        Command::new(&setupCMD[0])
             .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH)
             .output().unwrap_or_else(|e| {
                 panic!("failed to execute process: {}", e)
@@ -984,11 +808,12 @@ fn install_downloads(downloadNAME: &str) {
         } else {
             return;
         }
-        //appimage and android studio go here
     }
+}
 
-    //need to do a pathfinding loop which can return the path of the setup script in bin in android studio
-    //the path of star should already be found above, just need to do an if contains .appimage and then ./ it and the studio
+fn clone_repos() -> String {
+    let errorBOX = "".to_string();
+    errorBOX
 }
 
 fn set_path() -> String {
@@ -1017,7 +842,7 @@ enum DownloadStatus {
 }
 
 fn main() {
-    let path = env::home_dir().unwrap();
+    let path = dirs::home_dir().unwrap();
     let mut testPATH = path.to_str()
                         .unwrap()
                         .to_owned();
@@ -1092,9 +917,6 @@ fn main() {
                 let sleepTIME = time::Duration::from_secs(1);
                 thread::sleep(sleepTIME);
                 let answerBOX = is_complete(&downloadNAME, &_testPATH);
-                if downloadNAME == "android" {
-                    let thisBOX = 1;
-                }
                 downloadMAP.insert(downloadNAME.to_string(), answerBOX);
             }
         }
@@ -1120,15 +942,15 @@ fn main() {
             }
         }
     }
-    let sleepTIME = time::Duration::from_secs(60);
-    thread::sleep(sleepTIME);
-    for downloadNAME in downloadMAP.clone().keys() {
-        setup_downloads(&downloadNAME);
+    if cfg!(target_os = "linux"){
+        extract_studio();
     }
     for downloadNAME in downloadMAP.clone().keys() {
         install_downloads(&downloadNAME);
     }
-
+    println!("{}", &"install complete"[..]);
+    let sleepTIME = time::Duration::from_secs(60);
+    thread::sleep(sleepTIME);
 
 }
 
@@ -1671,7 +1493,7 @@ mod tests {
 
         for index in 0..fileLIST.len() {
                 let downloadNAME = fileLIST.get(index).unwrap().to_string();
-                assert_eq!(setup_downloads(&downloadNAME), ());
+                assert_eq!(extract_studio(&downloadNAME), ());
         }
     }
 
