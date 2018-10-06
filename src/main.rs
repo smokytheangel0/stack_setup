@@ -816,7 +816,9 @@ fn install_downloads(downloadNAME: &str) {
     //install brew
 }
 
-fn clone_repos() -> String {
+fn clone_repos(downloadNAME: &str) -> String {
+    let errorBOX = "".to_string();
+
     let sdkPATH = {
         if cfg!(target_os = "windows"){
             let path = dirs::home_dir().unwrap();
@@ -830,8 +832,9 @@ fn clone_repos() -> String {
             let mut sdkPATH = path.to_str()
                                   .unwrap()
                                   .to_owned();
-            sdkPATH += "/Desktop/SDKs/"
+            sdkPATH += "/Desktop/SDKs/";
             sdkPATH
+        }
     };
 
     let codePATH = {
@@ -854,27 +857,18 @@ fn clone_repos() -> String {
 
     if downloadNAME == "flutter".to_string() {
         fs::create_dir_all(&sdkPATH).expect("failed to create SDK dir");
-        fs::set_current_dir(&sdkPATH).expect("failed to set SDK dir as cwd");
+        env::set_current_dir(&sdkPATH).expect("failed to set SDK dir as cwd");
         Command::new("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
+        return errorBOX
     } else if downloadNAME == "co_demo0".to_string() {
         fs::create_dir_all(&codePATH).expect("failed to create Code dir");
-        fs::set_current_dir(&sdkPATH).expect("failed to set Code dir as cwd");
-        Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0").output().expect("failed to clone co_demo0 repo");
+        env::set_current_dir(&sdkPATH).expect("failed to set Code dir as cwd");
+        Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
+        return errorBOX
     } else {
-        return;
+        return errorBOX
     }
 
-
-
-    //if flutter create SDK dir,
-    //set it as cwd,
-    //clone
-
-    //if co_demo0 create Code dir,
-    //set it as cwd
-    //clone
-    let errorBOX = "".to_string();
-    errorBOX
 }
 
 fn set_path() -> String {
@@ -884,6 +878,12 @@ fn set_path() -> String {
     //if mac and linux:
     //see if android install set $ANDROID_HOME
     //if not, set to custom location
+
+    //MAC CORRECT PATH VALUES
+    //export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH
+    //export ANDROID_HOME=$HOME/Desktop/SDKs/android/
+    //export PATH=$ANDROID_HOME/tools:$PATH
+    //export PATH=$ANDROID_HOME/platform-tools:$PATH
     let errorBOX = String::from("");
     errorBOX
 }
@@ -1030,6 +1030,373 @@ fn main() {
 mod tests {
     use super::*;
 
+    #[test]
+    #[cfg(target_os = "macos")]
+    fn is_xcode_installed(){
+        let foldersInApplications = fs::read_dir("/Applications/").expect("the read_dir that sets foldersInApplications broke");
+        for folderNAME in foldersInApplications {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+            
+            if folderNAME.contains(&"Xcode"[..]) {
+                assert_eq!(true, true);
+                return
+            } else {
+                continue
+            }
+
+        }
+        assert_eq!(false, true)
+    }
+
+    /*
+    might need to have this piggyback off flutter doctor
+    #[test]
+    #[cfg(target_os = "macos")]
+    fn xcode_license_accepted(){
+
+    }
+    */
+
+    #[test]
+    fn is_flutter_extracted(){
+        let sdkPATH = {
+            if cfg!(target_os = "windows"){
+                let path = dirs::home_dir().unwrap();
+                let mut sdkPATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                sdkPATH += "\\Desktop\\SDKs\\";
+                sdkPATH
+            } else {
+                let path = dirs::home_dir().unwrap();
+                let mut sdkPATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                sdkPATH += "/Desktop/SDKs/";
+                sdkPATH
+            }
+        };
+
+        if cfg!(target_os = "macos"){
+
+            let foldersInSDKs = fs::read_dir(&sdkPATH).expect("No flutter repo folder found");
+            for folderNAME in foldersInSDKs {
+                let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                                .file_name()
+                                                .into_string()
+                                                .expect("the post string result which sets folderNAME has broken")
+                                                .to_owned();
+                
+                if folderNAME.contains(&"flutter"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+
+            }
+            assert_eq!(false, true)
+        }
+    }
+
+    #[test]
+    fn is_flutter_on_path(){
+        let flutterPATH = {
+            if cfg!(target_os = "windows"){
+                let path = dirs::home_dir().unwrap();
+                let mut flutterPATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                flutterPATH += "\\Desktop\\SDKs\\flutter\\bin";
+                flutterPATH
+            } else {
+                let path = dirs::home_dir().unwrap();
+                let mut flutterPATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                flutterPATH += "/Desktop/SDKs/flutter/bin";
+                flutterPATH
+            }
+        };
+        //if unix
+        //cat ~/.bash_profile, assert_eq!(stdout.contains(&flutterPATH), true)
+        //else if windows
+        //something something registry same^^
+        assert_eq!(false, true);
+
+
+    }
+
+    #[test]
+    fn is_android_installed(){
+        let androidFOLDER = {
+            if cfg!(target_os = "windows"){
+                //might use path prefix to make this drive agnostic
+                let androidFOLDER = "C:\\Program Files\\".to_owned();
+                androidFOLDER
+            } else if cfg!(target_os = "macos") {
+                let androidFOLDER = "/Applications/".to_owned();
+                androidFOLDER
+
+            }else {
+                let path = dirs::home_dir().unwrap();
+                let mut androidFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                androidFOLDER += "/Desktop/SDKs/";
+                androidFOLDER
+            }
+        };
+        let programFOLDERS = fs::read_dir(&androidFOLDER).expect("No android app folder found");
+        for folderNAME in programFOLDERS {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+            if cfg!(target_os = "windows"){
+                if folderNAME.contains(&"None"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            } else if cfg!(target_os = "macos") {
+                if folderNAME.contains(&"Android Studio"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            } else {
+                if folderNAME.contains(&"None"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            }
+
+        }
+        assert_eq!(false, true);
+    }
+
+    #[test]
+    fn is_android_on_path(){
+        assert_eq!(false, true);
+    }
+
+    #[test]
+    fn android_license_accepted(){
+        assert_eq!(false, true);
+    }
+
+    #[test]
+    fn is_staruml_installed(){
+        let starFOLDER = {
+            if cfg!(target_os = "windows"){
+                //might use path prefix to make this drive agnostic
+                let starFOLDER = "C:\\Program Files\\".to_owned();
+                starFOLDER
+            } else if cfg!(target_os = "macos") {
+                let starFOLDER = "/Applications/".to_owned();
+                starFOLDER
+
+            }else {
+                let path = dirs::home_dir().unwrap();
+                let mut starFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                starFOLDER += "/Downloads/";
+                starFOLDER
+            }
+        };
+        let programFOLDERS = fs::read_dir(&starFOLDER).expect("No star app folder found");
+        for folderNAME in programFOLDERS {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+            if cfg!(target_os = "windows"){
+                if folderNAME.contains(&"None"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            } else if cfg!(target_os = "macos") {
+                if folderNAME.contains(&"StarUML"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            } else {
+                if folderNAME.contains(&"StarUML"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            }
+
+        }
+        assert_eq!(false, true);
+
+    }
+
+    #[test]
+    fn is_git_installed(){
+        let gitFOLDER = {
+            if cfg!(target_os = "windows"){
+                //might use path prefix to make this drive agnostic
+                let gitFOLDER = "C:\\Program Files\\".to_owned();
+                gitFOLDER
+            } else {
+                let gitFOLDER = "/usr/bin/".to_owned();
+                gitFOLDER
+            }
+        };
+        let programFOLDERS = fs::read_dir(&gitFOLDER).expect("No git app folder found");
+        for folderNAME in programFOLDERS {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+            if cfg!(target_os = "windows"){
+                if folderNAME.contains(&"Git"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            } else if cfg!(target_os = "macos") {
+                if folderNAME.contains(&"git"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            } else {
+                if folderNAME.contains(&"git"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            }
+
+        }
+        assert_eq!(false, true);
+
+    }
+
+    #[test]
+    fn is_vs_installed(){
+        let vsFOLDER = {
+            if cfg!(target_os = "windows"){
+                //might use path prefix to make this drive agnostic
+                let vsFOLDER = "C:\\Program Files\\".to_owned();
+                vsFOLDER
+            } else if cfg!(target_os = "macos") {
+                let vsFOLDER = "/Applications/".to_owned();
+                vsFOLDER
+
+            }else {
+                let path = dirs::home_dir().unwrap();
+                let mut vsFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                vsFOLDER += "/usr/bin/";
+                vsFOLDER
+            }
+        };
+        let programFOLDERS = fs::read_dir(&vsFOLDER).expect("No vscode app folder found");
+        for folderNAME in programFOLDERS {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+            if cfg!(target_os = "windows"){
+                if folderNAME.contains(&"None"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            } else if cfg!(target_os = "macos") {
+                if folderNAME.contains(&"Visual Studio Code"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            } else {
+                if folderNAME.contains(&"code"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            }
+
+        }
+        assert_eq!(false, true);
+
+    }
+
+    #[test]
+    fn is_co_demo_extracted(){
+        let coFOLDER = {
+            if cfg!(target_os = "windows"){
+                let path = dirs::home_dir().unwrap();
+                let mut coFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                coFOLDER += "\\Desktop\\Code\\";
+                coFOLDER
+            } else {
+                let path = dirs::home_dir().unwrap();
+                let mut coFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                coFOLDER += "/Desktop/Code/";
+                coFOLDER
+            }
+        };
+        let programFOLDERS = fs::read_dir(&coFOLDER).expect("No co_demo repo folder found");
+        for folderNAME in programFOLDERS {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+
+                if folderNAME.contains(&"co_demo0"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+
+        }
+        assert_eq!(false, true);
+
+    }
+
+    #[test]
+    fn does_doctor_return_well(){
+        assert_eq!(false, true);
+    }
+
+    /*
     /*
     #[test]
     fn main_(){
@@ -1577,5 +1944,6 @@ mod tests {
 
         }
     }
+    */
 
 }
