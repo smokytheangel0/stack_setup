@@ -374,6 +374,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 /// 
 //#endregion
 fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
+    println!("checking to see if the {} is complete", &downloadNAME);
     //this function called from main and the associated tests
     //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
 
@@ -524,6 +525,7 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
 //this now only needs to support unzipping android-studio on linux,
 //the flutter and co_demo must be cloned after installing git and the like
 fn extract_studio() {
+    println!("extracting android studio");
     let downloadNAME = "android".to_string();
 
     let downloadsPATH: String = {
@@ -613,6 +615,7 @@ fn extract_studio() {
 }
 
 fn install_downloads(downloadNAME: &str) {
+    println!("starting the {} installer", &downloadNAME);
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = dirs::home_dir().unwrap();
@@ -842,16 +845,6 @@ enum DownloadStatus {
 }
 
 fn main() {
-    let path = dirs::home_dir().unwrap();
-    let mut testPATH = path.to_str()
-                        .unwrap()
-                        .to_owned();
-    println!("first stage of testpath: \n {}", testPATH);
-    testPATH += "\\Desktop\\share\\test_data\\";
-    println!("second stage of testpath: \n {}", testPATH);
-    testPATH += "all_True";
-    println!("the third stage of testpath: \n {}", testPATH);
-    //this comes out all right
     check_dirs();
 
     let mut downloadMAP: IndexMap<String, String> = [
