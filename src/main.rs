@@ -728,19 +728,21 @@ fn setup_downloads(downloadNAME: &str) {
     if cfg!(target_os = "macos") && macZIP == 0 {
         if !filePATH.contains(&"."[..]) {
             let movedPATH = {
+                //this creates the parent dir "*-master"
+                //so it doesnt need explicit flutter/co_demo0 folders
                 if downloadNAME == "flutter".to_string() {
                     let homePATH = dirs::home_dir().unwrap();
                     let mut movedPATH = homePATH.to_str()
                                                 .unwrap()
                                                 .to_owned();
-                    movedPATH += "/Desktop/SDKs/flutter/";
+                    movedPATH += "/Desktop/SDKs/";
                     movedPATH
                 } else {
                     let homePATH = dirs::home_dir().unwrap();
                     let mut movedPATH = homePATH.to_str()
                                                 .unwrap()
                                                 .to_owned();
-                    movedPATH += "/Desktop/Code/co_demo0/";
+                    movedPATH += "/Desktop/Code/";
                     movedPATH
                 }
             };
