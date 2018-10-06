@@ -1015,33 +1015,6 @@ enum DownloadStatus {
 }
 
 fn main() {
-    let mut downloadMAP: IndexMap<String, String> = [
-        ("StarUML".to_string(),  "None".to_string()),
-        ("git".to_string(),      "None".to_string()),
-        ("co_demo0".to_string(), "None".to_string()),
-        ("flutter".to_string(),  "None".to_string()),
-        ("VSCode".to_string(),   "None".to_string()),
-        ("android".to_string(),  "None".to_string())    
-    ].iter().cloned().collect();
-
-    for downloadNAME in downloadMAP.clone().keys() {
-        setup_downloads(&downloadNAME);
-    }
-
-    let mut downloadMAP: IndexMap<String, String> = [
-        ("StarUML".to_string(),  "None".to_string()),
-        ("git".to_string(),      "None".to_string()),
-        ("co_demo0".to_string(), "None".to_string()),
-        ("flutter".to_string(),  "None".to_string()),
-        ("VSCode".to_string(),   "None".to_string()),
-        ("android".to_string(),  "None".to_string())    
-    ].iter().cloned().collect();
-
-    for downloadNAME in downloadMAP.clone().keys() {
-        install_downloads(&downloadNAME);
-    }
-
-    /*
     let path = env::home_dir().unwrap();
     let mut testPATH = path.to_str()
                         .unwrap()
@@ -1147,7 +1120,13 @@ fn main() {
     }
     let sleepTIME = time::Duration::from_secs(60);
     thread::sleep(sleepTIME);
-    */
+    for downloadNAME in downloadMAP.clone().keys() {
+        setup_downloads(&downloadNAME);
+    }
+    for downloadNAME in downloadMAP.clone().keys() {
+        install_downloads(&downloadNAME);
+    }
+
 
 }
 
