@@ -934,11 +934,11 @@ fn install_downloads(downloadNAME: &str) {
                 }
             }
         }
+        if filePATH[len-3..len] == "app".to_string() {
+            appPATH = filePATH.clone();
+        }
 
         if !downloadNAME.contains(&"git"[..]) {
-            if filePATH[len-3..len] == "app".to_string() {
-                appPATH = filePATH.clone();
-            }
 
             let copyCMD = ["sudo", "cp", "-R"];
             Command::new(&copyCMD[0])
