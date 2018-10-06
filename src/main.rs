@@ -812,25 +812,104 @@ fn install_downloads(downloadNAME: &str) {
             return;
         }
     }
+    //if mac, launch android studio to set path
+    //install brew
 }
 
 fn clone_repos() -> String {
+    let sdkPATH = {
+        if cfg!(target_os = "windows"){
+            let path = dirs::home_dir().unwrap();
+            let mut sdkPATH = path.to_str()
+                                  .unwrap()
+                                  .to_owned();
+            sdkPATH += "\\Desktop\\SDKs\\";
+            sdkPATH
+        } else {
+            let path = dirs::home_dir().unwrap();
+            let mut sdkPATH = path.to_str()
+                                  .unwrap()
+                                  .to_owned();
+            sdkPATH += "/Desktop/SDKs/"
+            sdkPATH
+    };
+
+    let codePATH = {
+        if cfg!(target_os = "windows"){
+            let path = dirs::home_dir().unwrap();
+            let mut codePATH = path.to_str()
+                                   .unwrap()
+                                   .to_owned();
+            codePATH += "\\Desktop\\Code\\";
+            codePATH
+        } else {
+            let path = dirs::home_dir().unwrap();
+            let mut codePATH = path.to_str()
+                                   .unwrap()
+                                   .to_owned();
+            codePATH += "/Desktop/Code/";
+            codePATH
+        }
+    };
+
+    if downloadNAME == "flutter".to_string() {
+        fs::create_dir_all(&sdkPATH).expect("failed to create SDK dir");
+        fs::set_current_dir(&sdkPATH).expect("failed to set SDK dir as cwd");
+        Command::new("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
+    } else if downloadNAME == "co_demo0".to_string() {
+        fs::create_dir_all(&codePATH).expect("failed to create Code dir");
+        fs::set_current_dir(&sdkPATH).expect("failed to set Code dir as cwd");
+        Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0").output().expect("failed to clone co_demo0 repo");
+    } else {
+        return;
+    }
+
+
+
+    //if flutter create SDK dir,
+    //set it as cwd,
+    //clone
+
+    //if co_demo0 create Code dir,
+    //set it as cwd
+    //clone
     let errorBOX = "".to_string();
     errorBOX
 }
 
 fn set_path() -> String {
+    //echo new path to ~/.bash_profile
+    //source ~/.bash_profile
+    //if windows figure out registry :P
+    //if mac and linux:
+    //see if android install set $ANDROID_HOME
+    //if not, set to custom location
     let errorBOX = String::from("");
     errorBOX
 }
 
 fn setup_xcode() -> String {
+    //ask user if they have apple ID
+    //prompt user to open mac store or open from here
+    //spin check xcode or other determining location to
+    //see if its done and remind like android if not done
+
+    //MUST HAVE LATEST MACOS FOR XCODE
     let errorBOX = String::from("");
     errorBOX
 }
 
 fn show_licences() -> String {
+    //show android licences
+    //if mac show xcode licence
     let errorBOX = String::from("");
+    errorBOX
+}
+
+fn flutter_doctor() -> String {
+    //see what flutter doctor looks like from stdout and stderror
+    //
+    let errorBOX = "".to_string();
     errorBOX
 }
 
