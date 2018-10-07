@@ -881,9 +881,7 @@ fn clone_repos(downloadNAME: &str) -> String {
 
 }
 
-fn set_path() -> String {
-    // dont write with echo, use:
-    /*
+fn set_path() {
     #[cfg(unix)]
     {
         let path = dirs::home_dir().unwrap();
@@ -899,13 +897,13 @@ fn set_path() -> String {
                             .unwrap();
 
         if cfg!(target_os = "linux"){
-            writeln!(file, "export ANDROID_HOME=$HOME/Android/Sdk");
+            writeln!(file, "export ANDROID_HOME=$HOME/Android/Sdk").expect("failed to write linux android_home");
         } else if cfg!(target_os = "macos") {
-            writeln!(file, "export ANDROID_HOME=$HOME/Library/Android/Sdk");
+            writeln!(file, "export ANDROID_HOME=$HOME/Library/Android/Sdk").expect("failed to write mac android_home");
         }
-        writeln!(file, "export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH");
-        writeln!(file, "export PATH=$ANDROID_HOME/tools:$PATH");
-        writeln!(file, "export PATH=$ANDROID_HOME/platform-tools:$PATH");
+        writeln!(file, "export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH").expect("failed to write unix flutter path");
+        writeln!(file, "export PATH=$ANDROID_HOME/tools:$PATH").expect("failed to write unix tools path");
+        writeln!(file, "export PATH=$ANDROID_HOME/platform-tools:$PATH").expect("failed to write unix platform tools path");
         Command::new("source").arg(&homePATH).output().expect("failed to refresh bash_profile");
     }
     #[cfg(windows)]
@@ -920,25 +918,6 @@ fn set_path() -> String {
         Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
         Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
     }
-    */
-    //for windows use command setx PATH and then set PATH for flutter
-    //need to concatenate previous path manually %Path% doesnt work
-    //%USERPROFILE% also does not expand, so the test specifies %USERPROFILE% instead of the full path
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
-    //android home needs its own Var
-    //
-    //
-
-    //restart
-    let errorBOX = String::from("");
-    errorBOX
 }
 
 fn setup_xcode() -> String {
@@ -1073,7 +1052,11 @@ fn main() {
     for downloadNAME in downloadMAP.clone().keys() {
         install_downloads(&downloadNAME);
     }
-    println!("{}", &"install complete"[..]);
+    for downloadNAME in downloadMAP.clone().keys() {
+        clone_repos(&downloadNAME);
+    }
+    set_path();
+    println!("{}", &"install, clone and paths complete"[..]);
     let sleepTIME = time::Duration::from_secs(60);
     thread::sleep(sleepTIME);
 
