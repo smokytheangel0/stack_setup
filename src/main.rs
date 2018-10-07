@@ -1240,16 +1240,16 @@ mod tests {
                 let androidPATH = "$HOME/Android/Sdk".to_owned();
                 let androidPATHs = [
                                     androidPATH, 
-                                    "$ANDROID_HOME/tools".to_owned(), 
-                                    "$ANDROID_HOME/platform-tools".to_owned()
+                                    "$ANDROID_HOME/tools:$PATH".to_owned(), 
+                                    "$ANDROID_HOME/platform-tools:$PATH".to_owned()
                                     ];
                 androidPATHs
             } else {
                 let androidPATH = "$HOME/Library/Android/Sdk".to_owned();
                 let androidPATHs = [
                                     androidPATH, 
-                                    "$ANDROID_HOME/tools".to_owned(), 
-                                    "$ANDROID_HOME/platform-tools".to_owned()
+                                    "$ANDROID_HOME/tools:$PATH".to_owned(), 
+                                    "$ANDROID_HOME/platform-tools:$PATH".to_owned()
                                     ];
                 androidPATHs
             }
