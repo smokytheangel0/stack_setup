@@ -961,8 +961,6 @@ fn main() {
     let mut downloadMAP: IndexMap<String, String> = [
         ("StarUML".to_string(),  "None".to_string()),
         ("git".to_string(),      "None".to_string()),
-        ("co_demo0".to_string(), "None".to_string()),
-        ("flutter".to_string(),  "None".to_string()),
         ("VSCode".to_string(),   "None".to_string()),
         ("android".to_string(),  "None".to_string())    
     ].iter().cloned().collect();
@@ -1046,20 +1044,28 @@ fn main() {
             }
         }
     }
+
     if cfg!(target_os = "linux"){
         extract_studio();
     }
+
     for downloadNAME in downloadMAP.clone().keys() {
         install_downloads(&downloadNAME);
     }
-    for downloadNAME in downloadMAP.clone().keys() {
+
+    let mut cloneMAP: IndexMap<String, String> = [
+        ("co_demo0".to_string(), "False".to_string()),
+        ("flutter".to_string(),  "False".to_string()),
+    ].iter().cloned().collect();
+
+    for downloadNAME in cloneMAP.clone().keys() {
         clone_repos(&downloadNAME);
     }
+
     set_path();
     println!("{}", &"install, clone and paths complete"[..]);
     let sleepTIME = time::Duration::from_secs(60);
     thread::sleep(sleepTIME);
-
 }
 
 #[cfg(test)]
