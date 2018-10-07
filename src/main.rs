@@ -826,62 +826,67 @@ fn install_downloads(downloadNAME: &str) {
     //install brew
 }
 
-fn clone_repos(downloadNAME: &str) -> String {
-    let errorBOX = "".to_string();
+fn clone_repo(downloadNAME: &str) {
+    println!("cloning: {}", &downloadNAME);
+    
+    let clonePATH = {
+        if downloadNAME == "flutter".to_owned(){
+            if cfg!(target_os = "windows"){
+                let path = dirs::home_dir().unwrap();
+                let mut clonePATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                clonePATH += "\\Desktop\\SDKs";
+                clonePATH
+            } else {
+                let path = dirs::home_dir().unwrap();
+                let mut clonePATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                clonePATH += "/Desktop/SDKs";
+                clonePATH
+            }
 
-    let sdkPATH = {
-        if cfg!(target_os = "windows"){
-            let path = dirs::home_dir().unwrap();
-            let mut sdkPATH = path.to_str()
-                                  .unwrap()
-                                  .to_owned();
-            sdkPATH += "\\Desktop\\SDKs\\";
-            sdkPATH
         } else {
-            let path = dirs::home_dir().unwrap();
-            let mut sdkPATH = path.to_str()
-                                  .unwrap()
-                                  .to_owned();
-            sdkPATH += "/Desktop/SDKs/";
-            sdkPATH
-        }
-    };
-
-    let codePATH = {
-        if cfg!(target_os = "windows"){
-            let path = dirs::home_dir().unwrap();
-            let mut codePATH = path.to_str()
-                                   .unwrap()
-                                   .to_owned();
-            codePATH += "\\Desktop\\Code\\";
-            codePATH
-        } else {
-            let path = dirs::home_dir().unwrap();
-            let mut codePATH = path.to_str()
-                                   .unwrap()
-                                   .to_owned();
-            codePATH += "/Desktop/Code/";
-            codePATH
+            if cfg!(target_os = "windows"){
+                let path = dirs::home_dir().unwrap();
+                let mut clonePATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                clonePATH += "\\Desktop\\Code";
+                clonePATH
+            } else {
+                let path = dirs::home_dir().unwrap();
+                let mut clonePATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                clonePATH += "/Desktop/Code";
+                clonePATH
+            }
         }
     };
 
     if downloadNAME == "flutter".to_string() {
-        fs::create_dir_all(&sdkPATH).expect("failed to create SDK dir");
-        env::set_current_dir(&sdkPATH).expect("failed to set SDK dir as cwd");
+        fs::create_dir_all(&clonePATH).expect("failed to create SDK dir");
+        //probably fails on this
+        env::set_current_dir(&clonePATH).expect("failed to set SDK dir as cwd");
         Command::new("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
-        return errorBOX
+        return
     } else if downloadNAME == "co_demo0".to_string() {
-        fs::create_dir_all(&codePATH).expect("failed to create Code dir");
-        env::set_current_dir(&sdkPATH).expect("failed to set Code dir as cwd");
+        fs::create_dir_all(&clonePATH).expect("failed to create Code dir");
+        //fails on this because dir was not created
+        env::set_current_dir(&clonePATH).expect("failed to set Code dir as cwd");
         Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
-        return errorBOX
+        return
     } else {
-        return errorBOX
+        println!("{} is in the wrong function, it is in clone_repo(&downloadNAME)", &downloadNAME);
+        return
     }
 
 }
 
 fn set_path() {
+    println!("setting path!");
     #[cfg(unix)]
     {
         let path = dirs::home_dir().unwrap();
@@ -1059,7 +1064,7 @@ fn main() {
     ].iter().cloned().collect();
 
     for downloadNAME in cloneMAP.clone().keys() {
-        clone_repos(&downloadNAME);
+        clone_repo(&downloadNAME);
     }
 
     set_path();
