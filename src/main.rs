@@ -68,7 +68,6 @@ extern crate indexmap;
 use indexmap::IndexMap;
 extern crate zip;
 extern crate dirs;
-extern crate winreg;
 
 use std::fs;
 use std::io;
@@ -77,8 +76,17 @@ use std::fs::ReadDir;
 use std::{thread, time};
 use std::process::Command;
 use dirs::home_dir;
-use winreg::RegKey;
-use winreg::enums::*;
+use std::fs::OpenOptions;
+use std::io::prelude::*;
+
+#[cfg(windows)]
+    extern crate winreg;
+#[cfg(windows)]
+    use winreg::RegKey;
+#[cfg(windows)]
+    use winreg::enums::*;
+
+
 
 //#region py_check_dirs
 ///the [check_dirs] function looks like this
@@ -874,28 +882,59 @@ fn clone_repos(downloadNAME: &str) -> String {
 }
 
 fn set_path() -> String {
-    //echo new path to ~/.bash_profile
-    //source ~/.bash_profile
-    //if windows figure out registry :P
-    //if mac and linux:
-    //set ANDROID_HOME location
+    // dont write with echo, use:
+    /*
+    #[cfg(unix)]
+    {
+        let path = dirs::home_dir().unwrap();
+        let mut homePATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+        homePATH += "/.bash_profile";
 
-    //MAC CORRECT PATH VALUES
-    //Command::new("echo").arg("export ANDROID_HOME=$HOME/Library/Android/Sdk").arg(">").arg("~/.bash_profile").output().expect("failed to set path to android home");
-    //LINUX CORRECT PATH VALUES
-    //Command::new("echo").arg("export ANDROID_HOME=$HOME/Android/Sdk/").arg(">").arg("~/.bash_profile").output().expect("failed to set android home in path");
-    //UNIX CORRECT PATH VALUES
-    //Command::new("echo").arg("export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH").arg(">").arg("~/.bash_profile").output().expect("failed to set flutter in path");
-    //Command::new("echo").arg("export PATH=$ANDROID_HOME/tools:$PATH").arg(">").arg("~/.bash_profile").output().expect("failed to set tools to path");
-    //Command::new("echo").arg("export PATH=$ANDROID_HOME/platform-tools:$PATH").arg(">").arg("~/.bash_profile").output().expect("failed to set platform tools in path");
+        let mut file = OpenOptions::new()
+                            .write(true)
+                            .append(true)
+                            .open(&homePATH)
+                            .unwrap();
 
+        if cfg!(target_os = "linux"){
+            writeln!(file, "export ANDROID_HOME=$HOME/Android/Sdk");
+        } else if cfg!(target_os = "macos") {
+            writeln!(file, "export ANDROID_HOME=$HOME/Library/Android/Sdk");
+        }
+        writeln!(file, "export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH");
+        writeln!(file, "export PATH=$ANDROID_HOME/tools:$PATH");
+        writeln!(file, "export PATH=$ANDROID_HOME/platform-tools:$PATH");
+        Command::new("source").arg(&homePATH).output().expect("failed to refresh bash_profile");
+    }
+    #[cfg(windows)]
+    {
+        let addPATH = "%USERPROFILE%\\Desktop\\SDKs\\flutter\\bin;%USERPROFILE\\AppData\\Local\\Android\\Sdk\\tools;%USERPROFILE\\AppData\\Local\\Android\\Sdk\\platform-tools;";
+        let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+        let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
+        let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
+        let newPATH = addPATH + oldPATH;
+        Command::new("powershell.exe").arg("setx").arg("Path").arg(&newPATH).output().expect("failed to set path");
+        Command::new("powershell.exe").arg("set").arg("Path").arg(&newPATH).output().expect("failed to set path");
+        Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
+        Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
+    }
+    */
     //for windows use command setx PATH and then set PATH for flutter
-    //Command::new("powershell.exe").arg("setx").arg("Path").arg("%HOMEPATH%\\Desktop\\SDKs\\flutter\\bin;%Path%").output().expect("failed to set path");
-    //Command::new("powershell.exe").arg("set").arg("Path").arg("%HOMEPATH%\\Desktop\\SDKs\\flutter\\bin;%Path%").output().expect("failed to set path");
+    //need to concatenate previous path manually %Path% doesnt work
+    //%USERPROFILE% also does not expand, so the test specifies %USERPROFILE% instead of the full path
+    //
+    //
+    //
+    //
+    //
+    //
+    //
 
     //android home needs its own Var
-    //Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg("%HOMEPATH\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
-    //Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg("%HOMEPATH\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
+    //
+    //
 
     //restart
     let errorBOX = String::from("");
@@ -1119,33 +1158,25 @@ mod tests {
 
     #[test]
     fn is_flutter_on_path(){
-        let flutterPATH = {
-            if cfg!(target_os = "windows"){
-                let path = dirs::home_dir().unwrap();
-                let mut flutterPATH = path.to_str()
-                                    .unwrap()
-                                    .to_owned();
-                flutterPATH += "\\Desktop\\SDKs\\flutter\\bin";
-                flutterPATH
-            } else {
-                let path = dirs::home_dir().unwrap();
-                let mut flutterPATH = path.to_str()
-                                    .unwrap()
-                                    .to_owned();
-                flutterPATH += "/Desktop/SDKs/flutter/bin";
-                flutterPATH
-            }
-        };
-        //if unix
-        //cat ~/.bash_profile, assert_eq!(stdout.contains(&flutterPATH), true)
-        //else if windows
-        //let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-        //let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
-        //let currentPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
-        //assert_eq!(currentPATH.contains("%HOMEPATH%\\Desktop\\SDKs\\flutter\\bin;"), true)
-        assert_eq!(false, true);
+        #[cfg(unix)]
+        {
+            let path = dirs::home_dir().unwrap();
+            let mut homePATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
+            homePATH += "/.bash_profile";
+            let output = Command::new("cat").arg(&homePATH).output().expect("could not cat bash_profile");
+            assert_eq!(String::from_utf8_lossy(&output.stdout).contains("$HOME/Desktop/SDKs/flutter/bin:$PATH"), true);
+        }
 
+        #[cfg(windows)]
+        {
+            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+            let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
+            let currentPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
+            assert_eq!(currentPATH.contains("%USERPROFILE%\\Desktop\\SDKs\\flutter\\bin;"), true)
 
+        }
     }
 
     #[test]
@@ -1204,7 +1235,58 @@ mod tests {
 
     #[test]
     fn is_android_on_path(){
-        assert_eq!(false, true);
+        let androidPATHs = {
+            if cfg!(target_os = "linux") {
+                let androidPATH = "$HOME/Android/Sdk".to_owned();
+                let androidPATHs = [
+                                    androidPATH, 
+                                    "$ANDROID_HOME/tools".to_owned(), 
+                                    "$ANDROID_HOME/platform-tools".to_owned()
+                                    ];
+                androidPATHs
+            } else {
+                let androidPATH = "$HOME/Library/Android/Sdk".to_owned();
+                let androidPATHs = [
+                                    androidPATH, 
+                                    "$ANDROID_HOME/tools".to_owned(), 
+                                    "$ANDROID_HOME/platform-tools".to_owned()
+                                    ];
+                androidPATHs
+            }
+        };
+        
+        #[cfg(unix)]
+        {
+            let path = dirs::home_dir().unwrap();
+            let mut homePATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
+            homePATH += "/.bash_profile";
+            let output = Command::new("cat").arg(&homePATH).output().expect("could not cat bash_profile");
+            println!("androidPATH is: {}", &androidPATHs[0]);
+            println!("currentPATH is: {}", String::from_utf8_lossy(&output.stdout));
+            assert_eq!(String::from_utf8_lossy(&output.stdout).contains(&androidPATHs[0]), true);
+            assert_eq!(String::from_utf8_lossy(&output.stdout).contains(&androidPATHs[1]), true);
+            assert_eq!(String::from_utf8_lossy(&output.stdout).contains(&androidPATHs[2]), true);
+
+        }
+
+        #[cfg(windows)]
+        {
+            //ANDROID_HOME
+            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+            let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
+            let currentPATH: String = environment.get_value("ANDROID_HOME").expect("could not open Path value for flutter");
+            assert_eq!(currentPATH.contains("%USERPROFILE\\AppData\\Local\\Android\\Sdk;"), true);
+            //tools on Path
+            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+            let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
+            let currentPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
+            assert_eq!(currentPATH.contains("%USERPROFILE\\AppData\\Local\\Android\\Sdk\\tools;"), true);
+            assert_eq!(currentPATH.contains("%USERPROFILE\\AppData\\Local\\Android\\Sdk\\platform-tools;"), true);            
+
+        }
+
     }
 
     #[test]
