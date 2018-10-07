@@ -463,16 +463,10 @@ fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
                                         .into_string()
                                         .expect("the post string result which sets fileNAME has broken")
                                         .to_owned();
+                                    
+        //to ignore previous crdownloads, flag the first run, if any are found, keep its number
+        //then add a branch inside unconfirmed branch that ignores that number and only returns true from a new number
 
-        //firefox works on mac
-
-
-        //safari uses .download only so should be safe matching
-        //it also appears to unpack zips by default
-        //it also changes the name on vscode so it dont match
-        //android studio on safari does not show the list of dls,
-        //and opens at the bottom of the page but the link is at top
-        //besides that though it works now on mac
         let found: String = {
             if fileNAME.contains(&downloadNAME) || 
                 fileNAME.contains(&"Unconfirmed"[..]) || 
@@ -1073,6 +1067,9 @@ fn main() {
     thread::sleep(sleepTIME);
 }
 
+//the tests all fail properly on mac
+//but the git, vs, and flutter extracted tests pass on linux on a bare install (see image)
+//windows is untested
 #[cfg(test)]
 mod tests {
     use super::*;
