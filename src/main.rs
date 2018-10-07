@@ -1408,11 +1408,7 @@ mod tests {
                 vsFOLDER
 
             }else {
-                let path = dirs::home_dir().unwrap();
-                let mut vsFOLDER = path.to_str()
-                                    .unwrap()
-                                    .to_owned();
-                vsFOLDER += "/usr/bin/";
+                let vsFOLDER = "/usr/bin/".to_owned();
                 vsFOLDER
             }
         };
@@ -1496,7 +1492,6 @@ mod tests {
     }
 
     /*
-    /*
     #[test]
     fn main_(){
         //this test should include placing the files from test in
@@ -1506,7 +1501,7 @@ mod tests {
         //actually I dont think I can test main without running the whole thing
         //so maybe this is material for an integration test
     }
-    */
+
 
     #[test]
     fn check_dirs_error_msg(){
@@ -1532,7 +1527,7 @@ mod tests {
 
         assert_eq!(check_dirs(), 0);
     }
-
+    
     #[test]
     fn start_downloads_vs_switch() {
         //this works in linux, mac and windows
@@ -1577,9 +1572,8 @@ mod tests {
             assert_eq!(start_downloads(&downloadNAME)[2], "we currently only support Mac OS, Windows 10, and Ubuntu")
         }
     }
-
-
-    /*
+    
+    
     #[test]
     //THIS TEST SHOULD NOT BE RUN EVERYTIME
     //IT OPENS FIVE TABS IN THE BROWSER
@@ -1602,7 +1596,7 @@ mod tests {
                 assert_eq!(start_downloads(&downloadNAME)[3], "None");
         }
     }
-    */
+
 
     // start_downloads_linux_apt is at the bottom cos it brings up the sudo prompt
             //at this rate we should just feed in the path before things get too confusing
