@@ -68,6 +68,7 @@ extern crate indexmap;
 use indexmap::IndexMap;
 extern crate zip;
 extern crate dirs;
+extern crate winreg;
 
 use std::fs;
 use std::io;
@@ -76,7 +77,8 @@ use std::fs::ReadDir;
 use std::{thread, time};
 use std::process::Command;
 use dirs::home_dir;
-
+use winreg::RegKey;
+use winreg::enums::*;
 
 //#region py_check_dirs
 ///the [check_dirs] function looks like this
@@ -188,7 +190,7 @@ fn check_dirs() -> i8 {
 ///```
 /// 
 //#endregion
-fn start_downloads(downloadNAME: &str) -> Vec<String> {  
+fn start_downloads(downloadNAME: &str) -> Vec<String> { 
     //this function called from main and the associated tests
     //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
 
@@ -876,14 +878,26 @@ fn set_path() -> String {
     //source ~/.bash_profile
     //if windows figure out registry :P
     //if mac and linux:
-    //see if android install set $ANDROID_HOME
-    //if not, set to custom location
+    //set ANDROID_HOME location
 
     //MAC CORRECT PATH VALUES
-    //export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH
-    //export ANDROID_HOME=$HOME/Desktop/SDKs/android/
-    //export PATH=$ANDROID_HOME/tools:$PATH
-    //export PATH=$ANDROID_HOME/platform-tools:$PATH
+    //Command::new("echo").arg("export ANDROID_HOME=$HOME/Library/Android/Sdk").arg(">").arg("~/.bash_profile").output().expect("failed to set path to android home");
+    //LINUX CORRECT PATH VALUES
+    //Command::new("echo").arg("export ANDROID_HOME=$HOME/Android/Sdk/").arg(">").arg("~/.bash_profile").output().expect("failed to set android home in path");
+    //UNIX CORRECT PATH VALUES
+    //Command::new("echo").arg("export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH").arg(">").arg("~/.bash_profile").output().expect("failed to set flutter in path");
+    //Command::new("echo").arg("export PATH=$ANDROID_HOME/tools:$PATH").arg(">").arg("~/.bash_profile").output().expect("failed to set tools to path");
+    //Command::new("echo").arg("export PATH=$ANDROID_HOME/platform-tools:$PATH").arg(">").arg("~/.bash_profile").output().expect("failed to set platform tools in path");
+
+    //for windows use command setx PATH and then set PATH for flutter
+    //Command::new("powershell.exe").arg("setx").arg("Path").arg("%HOMEPATH%\\Desktop\\SDKs\\flutter\\bin;%Path%").output().expect("failed to set path");
+    //Command::new("powershell.exe").arg("set").arg("Path").arg("%HOMEPATH%\\Desktop\\SDKs\\flutter\\bin;%Path%").output().expect("failed to set path");
+
+    //android home needs its own Var
+    //Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg("%HOMEPATH\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
+    //Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg("%HOMEPATH\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
+
+    //restart
     let errorBOX = String::from("");
     errorBOX
 }
@@ -1125,7 +1139,10 @@ mod tests {
         //if unix
         //cat ~/.bash_profile, assert_eq!(stdout.contains(&flutterPATH), true)
         //else if windows
-        //something something registry same^^
+        //let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+        //let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
+        //let currentPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
+        //assert_eq!(currentPATH.contains("%HOMEPATH%\\Desktop\\SDKs\\flutter\\bin;"), true)
         assert_eq!(false, true);
 
 
@@ -1159,7 +1176,7 @@ mod tests {
                                             .expect("the post string result which sets folderNAME has broken")
                                             .to_owned();
             if cfg!(target_os = "windows"){
-                if folderNAME.contains(&"None"[..]) {
+                if folderNAME.contains(&"Android Studio"[..]) {
                     assert_eq!(true, true);
                     return
                 } else {
@@ -1173,7 +1190,7 @@ mod tests {
                     continue
                 }
             } else {
-                if folderNAME.contains(&"None"[..]) {
+                if folderNAME.contains(&"android-studio"[..]) {
                     assert_eq!(true, true);
                     return
                 } else {
