@@ -1093,7 +1093,7 @@ mod tests {
             }
 
         }
-        assert_eq!(false, true)
+        panic!("xCode installation not found");
     }
 
     /*
@@ -1143,7 +1143,7 @@ mod tests {
                 }
 
             }
-            assert_eq!(false, true)
+            panic!("the flutter folder was not found");
         }
     }
 
@@ -1221,7 +1221,7 @@ mod tests {
             }
 
         }
-        assert_eq!(false, true);
+        panic!("the android studio installation was not found");
     }
 
     #[test]
@@ -1336,8 +1336,7 @@ mod tests {
             }
 
         }
-        assert_eq!(false, true);
-
+        panic!("starUML installation not found");
     }
 
     #[test]
@@ -1383,7 +1382,7 @@ mod tests {
             }
 
         }
-        assert_eq!(false, true);
+        panic!("git installation not found");
 
     }
 
@@ -1434,8 +1433,7 @@ mod tests {
             }
 
         }
-        assert_eq!(false, true);
-
+        panic!("the VSCode folder installation was not found");
     }
 
     #[test]
@@ -1473,7 +1471,7 @@ mod tests {
                 }
 
         }
-        assert_eq!(false, true);
+        panic!("co_demo folder not found");
 
     }
 
