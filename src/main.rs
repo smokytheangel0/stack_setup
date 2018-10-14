@@ -1480,8 +1480,9 @@ mod tests {
         assert_eq!(false, true);
     }
 
-    /*
+    
     #[test]
+    #[ignore]
     fn main_(){
         //this test should include placing the files from test in
         //downloads and seeing if it completes correctly with or without
@@ -1564,6 +1565,7 @@ mod tests {
     
     
     #[test]
+    #[ignore]
     //THIS TEST SHOULD NOT BE RUN EVERYTIME
     //IT OPENS FIVE TABS IN THE BROWSER
     //AND STARTS FIVE DOWNLOADS
@@ -1592,6 +1594,8 @@ mod tests {
             //if we do these as macro parameterized tests then it will be much shorter
 
             //these entirely fail directory discovery in windows
+    #[test]
+    #[ignore]
     fn is_complete_switch_paths() -> String {
         let testPATH: String = { 
             if cfg!(windows){
@@ -1619,6 +1623,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn is_complete_switch_all_true() {
         //cannot find all_True directory
         let fileLIST: Vec<String> = vec!(
@@ -1662,6 +1667,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn is_complete_switch_two_none() {
         //test passes on mac
         let fileLIST: Vec<String> = vec!(
@@ -1704,6 +1710,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn is_complete_switch_one_false_chrome() {
         //test passes on mac
         let fileLIST: Vec<String> = vec!(
@@ -1746,6 +1753,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn is_complete_switch_one_false_edge() {
         //test passes on win
         let fileLIST: Vec<String> = vec!(
@@ -1788,6 +1796,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn is_complete_switch_one_false_firefox() {
         //test passes on mac and win
         let fileLIST: Vec<String> = vec!(
@@ -1831,6 +1840,7 @@ mod tests {
 
 
     #[test]
+    #[ignore]
     fn is_complete_switch_one_false_opera() {
         //cannot find opera directory
         let fileLIST: Vec<String> = vec!(
@@ -1874,6 +1884,7 @@ mod tests {
     }
     
     #[test]
+    #[ignore]
     fn is_complete_switch_one_false_safari() {
         //test passes on mac and win
         let fileLIST: Vec<String> = vec!(
@@ -1916,6 +1927,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn is_complete_switch_one_false_yandex() {
         //this one needs logic work
         //test passes on win
@@ -1960,6 +1972,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn is_complete_switch_one_false_uc() {
         //test passes on win
         let fileLIST: Vec<String> = vec!(
@@ -2002,6 +2015,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn setup_downloads_filepath() {
         let fileLIST = [
                         "StarUML".to_string(),                
@@ -2026,6 +2040,5 @@ mod tests {
 
         }
     }
-    */
 
 }
