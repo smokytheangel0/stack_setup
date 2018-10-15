@@ -1,3 +1,27 @@
+// Copyright 2012-2017 The Rust Project Developers. See the COPYRIGHT
+// file at the top-level directory of this distribution and at
+// http://rust-lang.org/COPYRIGHT.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
+macro_rules! cfg_if {
+    ($(
+        if #[cfg($($meta:meta),*)] { $($it:item)* }
+    ) else * else {
+        $($it2:item)*
+    }) => {
+        __cfg_if_items! {
+            () ;
+            $( ( ($($meta),*) ($($it)*) ), )*
+            ( () ($($it2)*) ),
+        }
+    }
+}
+
 // Copyright 2018 PacNGO
 // 
 // Licensed using a modified Apache License, Version 0.1.0 (the "License");
@@ -12,6 +36,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//could be
+    /*at the top-level directory of this distribution*/
+
 
 //using snake_case for boxes as well as functions
 //contradicts our attempted python and dart practice
@@ -22,6 +49,8 @@
 
 
 ///TODO
+/// cargo install cargo-deb
+///
 /// RE: LINUX BROWSER COMPATIBILITY
 /// use a grep a ps command on linux to see if
 /// the browser is already running and then ask
@@ -58,6 +87,7 @@
 ///     ON WIN:
 /// 
 ///     ON LIN:
+///         
 /// 
 
 //so far ~500 lines of function code
