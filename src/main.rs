@@ -1,27 +1,3 @@
-// Copyright 2012-2017 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
-// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
-
-macro_rules! cfg_if {
-    ($(
-        if #[cfg($($meta:meta),*)] { $($it:item)* }
-    ) else * else {
-        $($it2:item)*
-    }) => {
-        __cfg_if_items! {
-            () ;
-            $( ( ($($meta),*) ($($it)*) ), )*
-            ( () ($($it2)*) ),
-        }
-    }
-}
-
 // Copyright 2018 PacNGO
 // 
 // Licensed using a modified Apache License, Version 0.1.0 (the "License");
@@ -983,6 +959,29 @@ enum DownloadStatus {
     InProgress,
     Complete
 }
+// Copyright 2012-2017 The Rust Project Developers. See the COPYRIGHT
+// file at the top-level directory of this distribution and at
+// http://rust-lang.org/COPYRIGHT.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
+macro_rules! cfg_if {
+    ($(
+        if #[cfg($($meta:meta),*)] { $($it:item)* }
+    ) else * else {
+        $($it2:item)*
+    }) => {
+        __cfg_if_items! {
+            () ;
+            $( ( ($($meta),*) ($($it)*) ), )*
+            ( () ($($it2)*) ),
+        }
+    }
+}
 
 fn main() {
     check_dirs();
@@ -1082,7 +1081,7 @@ fn main() {
         install_downloads(&downloadNAME);
     }
 
-    let mut cloneMAP: IndexMap<String, String> = [
+    let cloneMAP: IndexMap<String, String> = [
         ("co_demo0".to_string(), "False".to_string()),
         ("flutter".to_string(),  "False".to_string()),
     ].iter().cloned().collect();
@@ -1535,12 +1534,12 @@ mod tests {
             let path = dirs::home_dir().unwrap();
             let mut downloadsPATH = path.to_str().unwrap().to_owned();
             downloadsPATH += "\\Downloads";
-            env::set_current_dir(&downloadsPATH);
+            env::set_current_dir(&downloadsPATH).expect("could not set working directory to downloadsPATH");
         } else if cfg!(unix){
             let path = dirs::home_dir().unwrap();
             let mut downloadsPATH = path.to_str().unwrap().to_owned();
             downloadsPATH += "/Downloads";
-            env::set_current_dir(&downloadsPATH);
+            env::set_current_dir(&downloadsPATH).expect("could not set working directory to downloadsPATH");
         }else{
             panic!("we currently only support Mac OS, Windows 10, and Ubuntu");
         }
@@ -1562,20 +1561,6 @@ mod tests {
             assert_eq!(start_downloads(&downloadNAME)[0], "we currently only support Mac OS, Windows 10, and Ubuntu")
         }
         //need a cleanup func to erase the DL'd VSCode
-    }
-
-    #[test]
-    fn start_downloads_git_switch() {
-        //this works in linux, mac and windows
-        let downloadNAME = "git".to_string();
-        if cfg!(target_os = "macos")  {
-            assert_eq!(start_downloads(&downloadNAME)[1], "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect")
-        } else if cfg!(target_os = "windows") {
-            assert_eq!(start_downloads(&downloadNAME)[1], "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe")
-        } else {
-            assert_eq!(start_downloads(&downloadNAME)[1], "git browser install currently only supports Mac OS and Windows 10")
-        }
-        //need a cleanup func to erase the DL'd git
     }
 
     #[test]
@@ -1605,9 +1590,6 @@ mod tests {
         //like no internet access, slow internet, firewalls, proxies etc
         let fileLIST = [
                         "StarUML".to_string(),                
-                        "git".to_string(),
-                        "co_demo0".to_string(), 
-                        "flutter".to_string(),
                         "VSCode".to_string(),
                         "android".to_string()
                     ];
@@ -1624,8 +1606,7 @@ mod tests {
             //if we do these as macro parameterized tests then it will be much shorter
 
             //these entirely fail directory discovery in windows
-    #[test]
-    #[ignore]
+
     fn is_complete_switch_paths() -> String {
         let testPATH: String = { 
             if cfg!(windows){
@@ -1648,8 +1629,7 @@ mod tests {
                 "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
             }
         };
-        return testPATH
-        
+        return testPATH        
     }
 
     #[test]
@@ -2042,24 +2022,6 @@ mod tests {
         assert_eq!(testLIST[4], "True");
         assert_eq!(testLIST[5], "False");
 
-    }
-
-    #[test]
-    #[ignore]
-    fn setup_downloads_filepath() {
-        let fileLIST = [
-                        "StarUML".to_string(),                
-                        "git".to_string(),
-                        "co_demo0".to_string(), 
-                        "flutter".to_string(),
-                        "VSCode".to_string(),
-                        "android".to_string()
-                    ];
-
-        for index in 0..fileLIST.len() {
-                let downloadNAME = fileLIST.get(index).unwrap().to_string();
-                assert_eq!(extract_studio(&downloadNAME), ());
-        }
     }
 
     #[test]
