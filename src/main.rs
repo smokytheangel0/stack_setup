@@ -1370,8 +1370,13 @@ mod tests {
         let gitFOLDER = {
             if cfg!(target_os = "windows"){
                 //might use path prefix to make this drive agnostic
-                let gitFOLDER = "C:\\Program Files\\".to_owned();
+                let path = dirs::home_dir().unwrap();
+                let mut gitFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                gitFOLDER += "\\AppData\\Local\\Programs\\";
                 gitFOLDER
+                
             } else {
                 let gitFOLDER = "/usr/bin/".to_owned();
                 gitFOLDER
