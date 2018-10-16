@@ -1410,8 +1410,13 @@ mod tests {
         let vsFOLDER = {
             if cfg!(target_os = "windows"){
                 //might use path prefix to make this drive agnostic
-                let vsFOLDER = "C:\\Program Files\\".to_owned();
+                let path = dirs::home_dir().unwrap();
+                let mut vsFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                vsFOLDER += "\\AppData\\Local\\Programs\\";
                 vsFOLDER
+
             } else if cfg!(target_os = "macos") {
                 let vsFOLDER = "/Applications/".to_owned();
                 vsFOLDER
@@ -1429,7 +1434,7 @@ mod tests {
                                             .expect("the post string result which sets folderNAME has broken")
                                             .to_owned();
             if cfg!(target_os = "windows"){
-                if folderNAME.contains(&"None"[..]) {
+                if folderNAME.contains(&"Microsoft VS Code"[..]) {
                     assert_eq!(true, true);
                     return
                 } else {
@@ -2015,6 +2020,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn start_downloads_linux_apt(){
         if cfg!(target_os = "linux"){
             let downloadNAME = "git".to_string();
