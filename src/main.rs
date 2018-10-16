@@ -81,7 +81,6 @@ use std::env;
 use std::fs::ReadDir;
 use std::{thread, time};
 use std::process::Command;
-use dirs::home_dir;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 
@@ -917,7 +916,7 @@ fn set_path() {
         let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
-        let newPATH = addPATH + oldPATH;
+        let newPATH = oldPATH + &addPATH;
         Command::new("powershell.exe").arg("setx").arg("Path").arg(&newPATH).output().expect("failed to set path");
         Command::new("powershell.exe").arg("set").arg("Path").arg(&newPATH).output().expect("failed to set path");
         Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
