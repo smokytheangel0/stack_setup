@@ -1339,7 +1339,7 @@ mod tests {
                                             .expect("the post string result which sets folderNAME has broken")
                                             .to_owned();
             if cfg!(target_os = "windows"){
-                if folderNAME.contains(&"None"[..]) {
+                if folderNAME.contains(&"StarUML"[..]) {
                     assert_eq!(true, true);
                     return
                 } else {
