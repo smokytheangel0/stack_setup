@@ -931,7 +931,8 @@ fn git_install_complete() -> String {
             let mut gitFOLDER = path.to_str()
                                 .unwrap()
                                 .to_owned();
-            gitFOLDER += "\\AppData\\Local\\Programs\\";
+            //gitFOLDER += "\\AppData\\Local\\Programs\\";
+            gitFOLDER = "C:\\Program Files\\".to_owned();
             gitFOLDER
 
         } else {
@@ -1429,7 +1430,8 @@ mod tests {
                 let mut gitFOLDER = path.to_str()
                                     .unwrap()
                                     .to_owned();
-                gitFOLDER += "\\AppData\\Local\\Programs\\";
+                //gitFOLDER += "\\AppData\\Local\\Programs\\";
+                gitFOLDER = "C:\\Program Files\\".to_owned();
                 gitFOLDER
 
             } else {
@@ -1437,6 +1439,7 @@ mod tests {
                 gitFOLDER
             }
         };
+
         
         for _iteration in 0..1 {
             println!("searching {}", &gitFOLDER);
