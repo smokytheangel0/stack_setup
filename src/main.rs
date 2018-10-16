@@ -717,7 +717,7 @@ fn install_downloads(downloadNAME: &str) {
             }
         };
         if cfg!(target_os = "linux") {
-            Command::new("sudo").arg("apt").arg("install").arg("libgconf-2-4").arg("git");
+            Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("git");
         }
         Command::new(&setupCMD[0])
             .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH)
