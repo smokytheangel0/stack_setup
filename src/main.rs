@@ -51,7 +51,7 @@
 /// want to try out lldb on there even though it might not work
 /// for now am using panic macros to reveal var contents during runtime
 ///
-/// RE: is_complete spin check is using an entire core...
+/// RE: download_complete spin check is using an entire core...
 ///
 /// RE: windows quote bullshit
 /// it seems to me like it would be better to handle these in an isolated manner that
@@ -286,7 +286,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 }
 
 //#region py_is_complete
-///this is what the [is_complete] function is in python
+///this is what the [download_complete] function is in python
 ///```python
 /// [replace all 'is not' with '!=']
 /// [replace all 'is' with '==']
@@ -295,7 +295,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 /// from pathlib import Path
 /// TEST_FLAG = False
 /// #outBOX is String
-/// def is_complete(downloadNAME, &testPATH):
+/// def download_complete(downloadNAME, &testPATH):
 ///     targetOS = platform.uname()[0]
 ///     outBOX = "None"
 ///
@@ -388,7 +388,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 /// ```
 /// 
 //#endregion
-fn is_complete(downloadNAME: &str, testPATH: &str) -> String {
+fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
     println!("checking to see if the {} is complete", &downloadNAME);
     //this function called from main and the associated tests
     //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
@@ -923,6 +923,55 @@ fn set_path() {
         Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
     }
 }
+fn git_install_complete() -> String {
+    let mut gitFOLDER = {
+        if cfg!(target_os = "windows"){
+            //might use path prefix to make this drive agnostic
+            let path = dirs::home_dir().unwrap();
+            let mut gitFOLDER = path.to_str()
+                                .unwrap()
+                                .to_owned();
+            gitFOLDER += "\\AppData\\Local\\Programs\\";
+            gitFOLDER
+
+        } else {
+            let gitFOLDER = "/usr/bin/".to_owned();
+            gitFOLDER
+        }
+    };
+        for _iteration in 0..1 {
+            println!("searching {}", &gitFOLDER);
+            let programFOLDERS = fs::read_dir(&gitFOLDER).expect("No git app folder found");
+            for folderNAME in programFOLDERS {
+                let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                                .file_name()
+                                                .into_string()
+                                                .expect("the post string result which sets folderNAME has broken")
+                                                .to_owned();
+                if cfg!(target_os = "windows"){
+                    if folderNAME.contains(&"Git"[..]) {
+                        return "True".to_owned()
+                    } else {
+                        continue
+                    }
+                } else {
+                    if folderNAME == &"git"[..] {
+                        return "True".to_owned()
+                    } else {
+                        continue
+                    }
+                }
+
+            }
+            if cfg!(target_os = "windows") {
+                gitFOLDER = "C:\\Program Files\\".to_owned();
+                continue;
+            } else {
+                break;
+            }
+        }
+    return "False".to_owned()
+}
 
 fn setup_xcode() -> String {
     //ask user if they have apple ID
@@ -994,7 +1043,7 @@ fn main() {
 
     let _testPATH: String = "None".to_string();
     for downloadNAME in downloadMAP.clone().keys() {
-        let answerBOX = is_complete(&downloadNAME, &_testPATH);
+        let answerBOX = download_complete(&downloadNAME, &_testPATH);
 
         if answerBOX == "True".to_string() {
             println!("{} is already complete!\n", downloadNAME)
@@ -1045,7 +1094,7 @@ fn main() {
             } else  {
                 let sleepTIME = time::Duration::from_secs(1);
                 thread::sleep(sleepTIME);
-                let answerBOX = is_complete(&downloadNAME, &_testPATH);
+                let answerBOX = download_complete(&downloadNAME, &_testPATH);
                 downloadMAP.insert(downloadNAME.to_string(), answerBOX);
             }
         }
@@ -1078,8 +1127,13 @@ fn main() {
 
     for downloadNAME in downloadMAP.clone().keys() {
         install_downloads(&downloadNAME);
+//might want to check if each install is complete before continuing
+//only on windows though, this will spread out all the admin prompts
     }
-
+    while git_install_complete() == "False"{
+        let sleepTIME = time::Duration::from_secs(20);
+        thread::sleep(sleepTIME);
+    }
     let cloneMAP: IndexMap<String, String> = [
         ("co_demo0".to_string(), "False".to_string()),
         ("flutter".to_string(),  "False".to_string()),
@@ -1369,7 +1423,7 @@ mod tests {
     fn is_git_installed(){
         let gitFOLDER = {
             if cfg!(target_os = "windows"){
-                //might use path prefix to make this drive agnostic
+                //this could be either AppData or Program Files
                 let path = dirs::home_dir().unwrap();
                 let mut gitFOLDER = path.to_str()
                                     .unwrap()
@@ -1382,29 +1436,39 @@ mod tests {
                 gitFOLDER
             }
         };
-        let programFOLDERS = fs::read_dir(&gitFOLDER).expect("No git app folder found");
-        for folderNAME in programFOLDERS {
-            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
-                                            .file_name()
-                                            .into_string()
-                                            .expect("the post string result which sets folderNAME has broken")
-                                            .to_owned();
-            if cfg!(target_os = "windows"){
-                if folderNAME.contains(&"Git"[..]) {
-                    assert_eq!(true, true);
-                    return
+        
+        for _iteration in 0..1 {
+            println!("searching {}", &gitFOLDER);
+            let programFOLDERS = fs::read_dir(&gitFOLDER).expect("No git app folder found");
+            for folderNAME in programFOLDERS {
+                let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                                .file_name()
+                                                .into_string()
+                                                .expect("the post string result which sets folderNAME has broken")
+                                                .to_owned();
+                if cfg!(target_os = "windows"){
+                    if folderNAME.contains(&"Git"[..]) {
+                        assert_eq!(true, true);
+                        return
+                    } else {
+                        continue
+                    }
                 } else {
-                    continue
+                    if folderNAME == &"git"[..] {
+                        assert_eq!(true, true);
+                        return
+                    } else {
+                        continue
+                    }
                 }
-            } else {
-                if folderNAME == &"git"[..] {
-                    assert_eq!(true, true);
-                    return
-                } else {
-                    continue
-                }
-            }
 
+            }
+            if cfg!(target_os = "windows") {
+                let gitFOLDER = "C:\\Program Files\\".to_owned();
+                continue;
+            } else {
+                break;
+            }
         }
         panic!("git installation not found");
 
@@ -1663,7 +1727,7 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&downloadNAME, &testPATH);
+            let outBOX = download_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
         }
         
@@ -1708,7 +1772,7 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&downloadNAME, &testPATH);
+            let outBOX = download_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -1750,7 +1814,7 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&downloadNAME, &testPATH);
+            let outBOX = download_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -1793,7 +1857,7 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&downloadNAME, &testPATH);
+            let outBOX = download_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -1836,7 +1900,7 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&downloadNAME, &testPATH);
+            let outBOX = download_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -1880,7 +1944,7 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&downloadNAME, &testPATH);
+            let outBOX = download_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -1888,7 +1952,7 @@ mod tests {
         assert_eq!(testLIST[2], "True");
         assert_eq!(testLIST[3], "True");
         assert_eq!(testLIST[4], "True");
-        //returns true instead of false, havent added identifier to is_complete logic yet
+        //returns true instead of false, havent added identifier to download_complete logic yet
         assert_eq!(testLIST[5], "False");
 
     }
@@ -1924,7 +1988,7 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&downloadNAME, &testPATH);
+            let outBOX = download_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -1968,7 +2032,7 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&downloadNAME, &testPATH);
+            let outBOX = download_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -2012,7 +2076,7 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = is_complete(&downloadNAME, &testPATH);
+            let outBOX = download_complete(&downloadNAME, &testPATH);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
