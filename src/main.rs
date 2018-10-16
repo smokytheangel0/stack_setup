@@ -1154,26 +1154,24 @@ mod tests {
             }
         };
 
-        if cfg!(target_os = "macos"){
 
-            let foldersInSDKs = fs::read_dir(&sdkPATH).expect("No flutter repo folder found");
-            for folderNAME in foldersInSDKs {
-                let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
-                                                .file_name()
-                                                .into_string()
-                                                .expect("the post string result which sets folderNAME has broken")
-                                                .to_owned();
-                
-                if folderNAME.contains(&"flutter"[..]) {
-                    assert_eq!(true, true);
-                    return
-                } else {
-                    continue
-                }
-
+        let foldersInSDKs = fs::read_dir(&sdkPATH).expect("No flutter repo folder found");
+        for folderNAME in foldersInSDKs {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+            
+            if folderNAME.contains(&"flutter"[..]) {
+                assert_eq!(true, true);
+                return
+            } else {
+                continue
             }
-            panic!("the flutter folder was not found");
+
         }
+        panic!("the flutter folder was not found");
     }
 
     #[test]
@@ -1394,15 +1392,8 @@ mod tests {
                 } else {
                     continue
                 }
-            } else if cfg!(target_os = "macos") {
-                if folderNAME.contains(&"git"[..]) {
-                    assert_eq!(true, true);
-                    return
-                } else {
-                    continue
-                }
             } else {
-                if folderNAME.contains(&"git"[..]) {
+                if folderNAME == &"git"[..] {
                     assert_eq!(true, true);
                     return
                 } else {
@@ -1453,7 +1444,7 @@ mod tests {
                     continue
                 }
             } else {
-                if folderNAME.contains(&"code"[..]) {
+                if folderNAME == &"code"[..] {
                     assert_eq!(true, true);
                     return
                 } else {
