@@ -939,37 +939,38 @@ fn git_install_complete() -> String {
             gitFOLDER
         }
     };
-        for _iteration in 0..1 {
-            println!("searching {}", &gitFOLDER);
-            let programFOLDERS = fs::read_dir(&gitFOLDER).expect("No git app folder found");
-            for folderNAME in programFOLDERS {
-                let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
-                                                .file_name()
-                                                .into_string()
-                                                .expect("the post string result which sets folderNAME has broken")
-                                                .to_owned();
-                if cfg!(target_os = "windows"){
-                    if folderNAME.contains(&"Git"[..]) {
-                        return "True".to_owned()
-                    } else {
-                        continue
-                    }
+    for _iteration in 0..1 {
+        println!("searching {}", &gitFOLDER);
+        let programFOLDERS = fs::read_dir(&gitFOLDER).expect("No git app folder found");
+        for folderNAME in programFOLDERS {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+            if cfg!(target_os = "windows"){
+                if folderNAME.contains(&"Git"[..]) {
+                    return "True".to_owned()
                 } else {
-                    if folderNAME == &"git"[..] {
-                        return "True".to_owned()
-                    } else {
-                        continue
-                    }
+                    continue
                 }
-
-            }
-            if cfg!(target_os = "windows") {
-                gitFOLDER = "C:\\Program Files\\".to_owned();
-                continue;
             } else {
-                break;
+                if folderNAME == &"git"[..] {
+                    return "True".to_owned()
+                } else {
+                    continue
+                }
             }
+
         }
+        gitFOLDER = {
+            if cfg!(target_os = "windows") {
+                "C:\\Program Files\\".to_owned()
+            } else {
+                gitFOLDER
+            }
+        };
+    }
     return "False".to_owned()
 }
 
@@ -1421,7 +1422,7 @@ mod tests {
 
     #[test]
     fn is_git_installed(){
-        let gitFOLDER = {
+        let mut gitFOLDER = {
             if cfg!(target_os = "windows"){
                 //this could be either AppData or Program Files
                 let path = dirs::home_dir().unwrap();
@@ -1463,12 +1464,13 @@ mod tests {
                 }
 
             }
-            if cfg!(target_os = "windows") {
-                let gitFOLDER = "C:\\Program Files\\".to_owned();
-                continue;
-            } else {
-                break;
-            }
+            gitFOLDER = {
+                if cfg!(target_os = "windows") {
+                    "C:\\Program Files\\".to_owned()
+                } else {
+                    gitFOLDER
+                }
+            };
         }
         panic!("git installation not found");
 
