@@ -56,6 +56,9 @@
 /// RE: windows quote bullshit
 /// it seems to me like it would be better to handle these in an isolated manner that
 /// doesnt affect the rest of the code, so we dont have to len around it nonstop
+/// 
+/// RE: lin firefox
+/// need to detect firefox as default and then remove all waits on the DLs
 
 /// SETUP_DOWNLOADS NOTES:
 ///     ON MAC:
@@ -717,13 +720,16 @@ fn install_downloads(downloadNAME: &str) {
             }
         };
         if cfg!(target_os = "linux") {
-            Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("git");
+            let output = Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("git").output().expect("failed to install libgconf-2-4 and git");
+            println!("{}", String::from_utf8_lossy(&output.stdout));
         }
-        Command::new(&setupCMD[0])
+        let output = Command::new(&setupCMD[0])
             .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH)
             .output().unwrap_or_else(|e| {
                 panic!("failed to execute process: {}", e)
         });
+        println!("{}", String::from_utf8_lossy(&output.stdout));
+
 
     }
 
@@ -1423,6 +1429,8 @@ mod tests {
 
     #[test]
     fn is_git_installed(){
+        //we need to do this via the registry in windows only
+        //HKEY_LOCAL_MACHINE\SOFTWARE\GitForWindows match on result (err=> return false, ok()=> return true)
         let mut gitFOLDER = {
             if cfg!(target_os = "windows"){
                 //this could be either AppData or Program Files
