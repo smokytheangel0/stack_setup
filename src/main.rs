@@ -913,7 +913,7 @@ fn set_path() {
     #[cfg(windows)]
     {
         let addPATH = "%USERPROFILE%\\Desktop\\SDKs\\flutter\\bin;%USERPROFILE\\AppData\\Local\\Android\\Sdk\\tools;%USERPROFILE\\AppData\\Local\\Android\\Sdk\\platform-tools;";
-        let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+        let hklm = RegKey::predef(HKEY_CURRENT_USER);
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
         let newPATH = oldPATH + &addPATH;
@@ -1188,7 +1188,7 @@ mod tests {
 
         #[cfg(windows)]
         {
-            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+            let hklm = RegKey::predef(HKEY_CURRENT_USER);
             let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
             let currentPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
             assert_eq!(currentPATH.contains("%USERPROFILE%\\Desktop\\SDKs\\flutter\\bin;"), true)
@@ -1291,12 +1291,12 @@ mod tests {
         #[cfg(windows)]
         {
             //ANDROID_HOME
-            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+            let hklm = RegKey::predef(HKEY_CURRENT_USER);
             let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
             let currentPATH: String = environment.get_value("ANDROID_HOME").expect("could not open Path value for flutter");
             assert_eq!(currentPATH.contains("%USERPROFILE\\AppData\\Local\\Android\\Sdk;"), true);
             //tools on Path
-            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+            let hklm = RegKey::predef(HKEY_CURRENT_USER);
             let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
             let currentPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
             assert_eq!(currentPATH.contains("%USERPROFILE\\AppData\\Local\\Android\\Sdk\\tools;"), true);
