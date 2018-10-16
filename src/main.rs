@@ -1224,7 +1224,7 @@ mod tests {
                                             .expect("the post string result which sets folderNAME has broken")
                                             .to_owned();
             if cfg!(target_os = "windows"){
-                if folderNAME.contains(&"Android Studio"[..]) {
+                if folderNAME.contains(&"Android"[..]) {
                     assert_eq!(true, true);
                     return
                 } else {
@@ -1376,7 +1376,7 @@ mod tests {
                                     .to_owned();
                 gitFOLDER += "\\AppData\\Local\\Programs\\";
                 gitFOLDER
-                
+
             } else {
                 let gitFOLDER = "/usr/bin/".to_owned();
                 gitFOLDER
