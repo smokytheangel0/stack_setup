@@ -832,6 +832,7 @@ fn install_downloads(downloadNAME: &str) {
 }
 
 fn clone_repo(downloadNAME: &str) {
+    //this works in lin
     println!("cloning: {}", &downloadNAME);
     
     let clonePATH = {
@@ -932,6 +933,7 @@ fn set_path() {
 fn git_install_complete() -> String {
     #[cfg(windows)]
     {
+            //this works in win
             let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
             let environment = hklm.open_subkey("SOFTWARE\\GitForWindows");
             match environment {
