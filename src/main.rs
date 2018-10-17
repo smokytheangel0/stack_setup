@@ -929,7 +929,6 @@ fn set_path() {
         writeln!(file, "export PATH=$ANDROID_HOME/tools:$PATH").expect("failed to write unix tools path");
         writeln!(file, "export PATH=$ANDROID_HOME/platform-tools:$PATH").expect("failed to write unix platform tools path");
         println!("{:?}", &homePATH);
-        Command::new("sh source").arg(&homePATH).output().expect("failed to refresh bash_profile");
     }
     #[cfg(windows)]
     {
@@ -1030,11 +1029,55 @@ fn setup_xcode() -> String {
 fn show_licences() {
     //show android licences
     //if mac show xcode licence
-    Command::new("flutter").arg("doctor").arg("--android-licenses").output().expect("failed to run flutter doctor license command");
+    let binPATH = {
+        if cfg!(target_os = "windows"){
+            let path = dirs::home_dir().unwrap();
+            let mut binPATH = path.to_str()
+                                .unwrap()
+                                .to_owned();
+            binPATH += "'\\Desktop\\SDKs\\flutter\\bin\\flutter.exe'";
+            binPATH
+        } else {
+            let path = dirs::home_dir().unwrap();
+            let mut binPATH = path.to_str()
+                                .unwrap()
+                                .to_owned();
+            binPATH += "/Desktop/SDKs/flutter/bin/flutter";
+            binPATH
+        }
+    };
+
+    if cfg!(unix){
+        Command::new("sh").arg(&binPATH).arg("doctor").arg("--android-licenses").output().expect("failed to run flutter doctor license command");
+    } else {
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor --android-licenses'").output().expect("failed to run flutter doctor license command");
+    }
 }
 
 fn run_doctor() {
-    Command::new("flutter").arg("doctor").output().expect("failed to run flutter");
+    let binPATH = {
+        if cfg!(target_os = "windows"){
+            let path = dirs::home_dir().unwrap();
+            let mut binPATH = path.to_str()
+                                .unwrap()
+                                .to_owned();
+            binPATH += "'\\Desktop\\SDKs\\flutter\\bin\\flutter.exe'";
+            binPATH
+        } else {
+            let path = dirs::home_dir().unwrap();
+            let mut binPATH = path.to_str()
+                                .unwrap()
+                                .to_owned();
+            binPATH += "/Desktop/SDKs/flutter/bin/flutter";
+            binPATH
+        }
+    };
+
+    if cfg!(unix){
+        Command::new("sh").arg(&binPATH).arg("doctor").output().expect("failed to run flutter command");
+    } else {
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").output().expect("failed to run flutter command");
+    }
 }
 
 fn flutter_doctor() -> String {
