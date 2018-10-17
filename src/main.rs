@@ -922,11 +922,21 @@ fn set_path() {
     }
     #[cfg(windows)]
     {
-        let addPATH = format!("';{}\\Desktop\\SDKs\\flutter\\bin;{}\\AppData\\Local\\Android\\Sdk\\tools;{}\\AppData\\Local\\Android\\Sdk\\platform-tools;'", &homePATH, &homePATH, &homePATH);
+        let addPATH = format!(";{}\\Desktop\\SDKs\\flutter\\bin;{}\\AppData\\Local\\Android\\Sdk\\tools;{}\\AppData\\Local\\Android\\Sdk\\platform-tools;", &homePATH, &homePATH, &homePATH);
         let hklm = RegKey::predef(HKEY_CURRENT_USER);
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
-        let newPATH = oldPATH + &addPATH;
+        let mut outPATH = "".to_owned();
+        if oldPATH.contains("%USERPROFILE%") {
+            let pathVEC = oldPATH.split(";").collect();
+            for path in &pathVEC {
+                startINDEX = path.find("%").unwrap_or(0);
+                endINDEX = path.rfind("%").unwrap_or(path.len());
+                outPATH = path;
+                outPATH.replace_range(startINDEX..endINDEX, &homePATH);                
+            }
+        }
+        let newPATH = outPATH + &addPATH;
         println!("length of newPATH: {}", newPATH.len());
         let androidPATH = format!("{}\\AppData\\Local\\Android\\Sdk;", &homePATH);
         let output = Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
