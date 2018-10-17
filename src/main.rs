@@ -1135,8 +1135,8 @@ fn main() {
         thread::sleep(sleepTIME);
     }
     let cloneMAP: IndexMap<String, String> = [
-        ("co_demo0".to_string(), "False".to_string()),
-        ("flutter".to_string(),  "False".to_string()),
+        ("flutter".to_string(), "False".to_string()),
+        ("co_demo0".to_string(),  "False".to_string()),
     ].iter().cloned().collect();
 
     for downloadNAME in cloneMAP.clone().keys() {
