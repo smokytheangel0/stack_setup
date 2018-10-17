@@ -930,7 +930,7 @@ fn set_path() {
         if oldPATH.contains("%USERPROFILE%") {
             let pathVEC = oldPATH.split(";").collect();
             for path in &pathVEC.iter() {
-                let mut endINDEX: i32 = path.rfind("%").unwrap_or(path.len());
+                let mut endINDEX: usize = path.rfind("%").unwrap_or(path.len());
                 endINDEX += 1;
                 outPATH = path;
                 outPATH.replace_range(..endINDEX, &homePATH);                
