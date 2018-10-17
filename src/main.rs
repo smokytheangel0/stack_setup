@@ -947,7 +947,6 @@ fn set_path() {
             }
             let outPATH: String = cleanPATH.join(";");
             let outPATH = format!("{}{}", outPATH, addPATH);
-            println!("path to be set: {:?}", outPATH);
 
         } else {
             let outPATH: String = oldPATH + &addPATH;
@@ -959,6 +958,7 @@ fn set_path() {
         let output = Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));
+        println!("path to be set: {:?}", outPATH);
         let output = Command::new("powershell.exe").arg("setx").arg("Path").arg(&outPATH).output().expect("failed to set path");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));        
