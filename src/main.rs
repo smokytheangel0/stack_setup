@@ -939,7 +939,7 @@ fn set_path() {
             }
         }
         let cleanPATH: String = cleanPATH.join(";");
-        let newPATH = outPATH + &addPATH;
+        let newPATH = cleanPATH + &addPATH;
         println!("length of newPATH: {}", newPATH.len());
         let androidPATH = format!("{}\\AppData\\Local\\Android\\Sdk;", &homePATH);
         let output = Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
