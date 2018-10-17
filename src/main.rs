@@ -888,14 +888,22 @@ fn clone_repo(downloadNAME: &str) {
 
 fn set_path() {
     println!("setting path!");
+    let homePATH = {
+        if cfg!(unix){
+            let path = dirs::home_dir().unwrap();
+            let mut homePATH = path.to_str()
+                                        .unwrap()
+                                        .to_owned();
+            homePATH += "/.bash_profile";
+            homePATH
+        } else {
+            let path = dirs::home_dir().unwrap();
+            let homePATH = path.to_str().unwrap().to_owned();
+            homePATH
+        }
+    };
     #[cfg(unix)]
     {
-        let path = dirs::home_dir().unwrap();
-        let mut homePATH = path.to_str()
-                                    .unwrap()
-                                    .to_owned();
-        homePATH += "/.bash_profile";
-
         let mut file = OpenOptions::new()
                             .write(true)
                             .append(true)
@@ -914,16 +922,17 @@ fn set_path() {
     }
     #[cfg(windows)]
     {
-        let addPATH = "';%USERPROFILE%\\Desktop\\SDKs\\flutter\\bin;%USERPROFILE%\\AppData\\Local\\Android\\Sdk\\tools;%USERPROFILE%\\AppData\\Local\\Android\\Sdk\\platform-tools;'";
+        let addPATH = format!("';{}\\Desktop\\SDKs\\flutter\\bin;{}\\AppData\\Local\\Android\\Sdk\\tools;{}\\AppData\\Local\\Android\\Sdk\\platform-tools;'", &homePATH, &homePATH, &homePATH);
         let hklm = RegKey::predef(HKEY_CURRENT_USER);
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
         let newPATH = oldPATH + &addPATH;
         println!("length of newPATH: {}", newPATH.len());
-        let output = Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
+        let androidPATH = format!("{}\\AppData\\Local\\Android\\Sdk;", &homePATH);
+        let output = Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));
-        let output = Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
+        let output = Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));
         let output = Command::new("powershell.exe").arg("setx").arg("Path").arg(&newPATH).output().expect("failed to set path");
