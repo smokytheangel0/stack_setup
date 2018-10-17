@@ -708,28 +708,14 @@ fn install_downloads(downloadNAME: &str) {
     if filePATH[len-4..len-1] == "exe".to_string() ||
        filePATH[len-3..len] == "deb".to_string() 
     {
-        //im sure i think this is cool but its really limiting and only two ways useful now
-        let setupCMD = {
-            if cfg!(target_os = "windows") {
-                ["powershell.exe","Start-Process", "-FilePath"]
-            } else if cfg!(target_os = "linux") {
-                ["sudo", "dpkg", "-i"]
-            } else {
-                ["None",
-                 "None",
-                 "None"]
-            }
-        };
         if cfg!(target_os = "linux") {
             let output = Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("git").output().expect("failed to install libgconf-2-4 and git");
             println!("{}", String::from_utf8_lossy(&output.stdout));
+            let output = Command::new("sudo").arg("dpkg").arg("-i").arg(&filePATH).output().expect("failed to install vscode");
+            println!("{}", String::from_utf8_lossy(&output.stdout));
+        }else if cfg!(target_os = "windows") {
+            Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&filePATH).arg("-Wait");
         }
-        let output = Command::new(&setupCMD[0])
-            .arg(&setupCMD[1]).arg(&setupCMD[2]).arg(&filePATH)
-            .output().unwrap_or_else(|e| {
-                panic!("failed to execute process: {}", e)
-        });
-        println!("{}", String::from_utf8_lossy(&output.stdout));
 
 
     }
