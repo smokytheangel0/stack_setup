@@ -710,9 +710,7 @@ fn install_downloads(downloadNAME: &str) {
     {
         if cfg!(target_os = "linux") {
             let output = Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("git").output().expect("failed to install libgconf-2-4 and git");
-            println!("{}", String::from_utf8_lossy(&output.stdout));
             let output = Command::new("sudo").arg("dpkg").arg("-i").arg(&filePATH).output().expect("failed to install vscode");
-            println!("{}", String::from_utf8_lossy(&output.stdout));
         }else if cfg!(target_os = "windows") {
             Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&filePATH).arg("-Wait").output().expect("failed to open exe");
         }
