@@ -928,8 +928,8 @@ fn set_path() {
         writeln!(file, "export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH").expect("failed to write unix flutter path");
         writeln!(file, "export PATH=$ANDROID_HOME/tools:$PATH").expect("failed to write unix tools path");
         writeln!(file, "export PATH=$ANDROID_HOME/platform-tools:$PATH").expect("failed to write unix platform tools path");
-        println!("{}", &homePATH);
-        Command::new("source").arg(&homePATH).output().expect("failed to refresh bash_profile");
+        println!("{:?}", &homePATH);
+        Command::new("sh source").arg(&homePATH).output().expect("failed to refresh bash_profile");
     }
     #[cfg(windows)]
     {
