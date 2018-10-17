@@ -931,8 +931,14 @@ fn set_path() {
         if oldPATH.contains("%USERPROFILE%") {
             let pathVEC: Vec<&str> = oldPATH.split(";").collect();
             for path in &pathVEC {
+                println!("{}", &path);
                 let path = path.to_owned();
-                let mut endINDEX: usize = path.rfind("%").expect("did not find the value");
+                let errBOX = path.rfind("%");
+                match errBOX {
+                    Ok(val) => val,
+                    Error(err) => continue
+                }
+                let mut endINDEX: usize = val;
                 endINDEX += 1;
                 let mut outPATH = path.to_string();
                 outPATH.replace_range(..endINDEX, &homePATH);
