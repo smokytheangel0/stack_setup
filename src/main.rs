@@ -926,16 +926,18 @@ fn set_path() {
         let hklm = RegKey::predef(HKEY_CURRENT_USER);
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
-        let mut outPATH = "".to_owned();
+        let mut cleanPATH: Vec<String> = []; 
         if oldPATH.contains("%USERPROFILE%") {
             let pathVEC: Vec<String> = oldPATH.split(";").to_string().collect();
             for path in &pathVEC {
                 let mut endINDEX: usize = path.rfind("%").unwrap_or(path.len());
                 endINDEX += 1;
-                outPATH = path.to_string();
-                outPATH.replace_range(..endINDEX, &homePATH);                
+                let mut outPATH = path.to_string();
+                outPATH.replace_range(..endINDEX, &homePATH);
+                cleanPATH.push(&outPATH);          
             }
         }
+        let cleanPATH: String = cleanPATH.join(";");
         let newPATH = outPATH + &addPATH;
         println!("length of newPATH: {}", newPATH.len());
         let androidPATH = format!("{}\\AppData\\Local\\Android\\Sdk;", &homePATH);
