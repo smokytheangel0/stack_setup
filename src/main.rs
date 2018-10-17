@@ -946,7 +946,7 @@ fn set_path() {
                 cleanPATH.push(outPATH);          
             }
             let outPATH: String = cleanPATH.join(";");
-            let outPATH = format!("'{}{}'", outPATH, addPATH);
+            let outPATH = format!("{}{}", outPATH, addPATH);
             println!("path to be set: {:?}", outPATH);
 
         } else {
