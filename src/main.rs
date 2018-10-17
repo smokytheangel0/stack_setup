@@ -928,7 +928,7 @@ fn set_path() {
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
         let mut outPATH = "".to_owned();
         if oldPATH.contains("%USERPROFILE%") {
-            let pathVEC = oldPATH.split(";").collect();
+            let pathVEC: Vec<String> = oldPATH.split(";").collect();
             for path in &pathVEC.iter() {
                 let mut endINDEX: usize = path.rfind("%").unwrap_or(path.len());
                 endINDEX += 1;
