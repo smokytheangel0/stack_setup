@@ -904,7 +904,7 @@ fn set_path() {
                             .write(true)
                             .append(true)
                             .open(&homePATH)
-                            .unwrap();
+                            .expect("failed to open bash_profile");
 
         if cfg!(target_os = "linux"){
             writeln!(file, "export ANDROID_HOME=$HOME/Android/Sdk").expect("failed to write linux android_home");
