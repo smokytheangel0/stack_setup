@@ -863,11 +863,7 @@ fn clone_repo(downloadNAME: &str) {
         if cfg!(unix){
             Command::new("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
         } else {
-            let output = Command::new("powershell.exe").arg("$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')").output().expect("failed to set session path");
-            println!("{}", String::from_utf8_lossy(&output.stdout));
-            println!("{}", String::from_utf8_lossy(&output.stderr));
-
-            let output = Command::new("powershell.exe").arg("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
+            let output = Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("C:\\Program Files\\Git\\bin\\git.exe").arg("clone https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
             println!("{}", String::from_utf8_lossy(&output.stdout));
             println!("{}", String::from_utf8_lossy(&output.stderr));
         }
@@ -878,11 +874,7 @@ fn clone_repo(downloadNAME: &str) {
         if cfg!(unix){
             Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
         } else {
-            let output = Command::new("powershell.exe").arg("$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')").output().expect("failed to set session path");
-            println!("{}", String::from_utf8_lossy(&output.stdout));
-            println!("{}", String::from_utf8_lossy(&output.stderr));
-
-            let output = Command::new("powershell.exe").arg("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
+            let output = Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("C:\\Program Files\\Git\\bin\\git.exe").arg("clone https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
             println!("{}", String::from_utf8_lossy(&output.stdout));
             println!("{}", String::from_utf8_lossy(&output.stderr));
         }
@@ -927,8 +919,10 @@ fn set_path() {
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
         let newPATH = oldPATH + &addPATH;
+        //these do not set, possibly because the dir doesnt exist, but I don't know if thats a prereq
         Command::new("powershell.exe").arg("setx").arg("Path").arg(&newPATH).output().expect("failed to set path");
         Command::new("powershell.exe").arg("set").arg("Path").arg(&newPATH).output().expect("failed to set path");
+        //these work
         Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
         Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
     }
@@ -1453,7 +1447,7 @@ mod tests {
         {
             //this false positives, no good for seeing if vscode is installed
             let hklm = RegKey::predef(HKEY_CLASSES_ROOT);
-            let environment = hklm.open_subkey("vscode");
+            let environment = hklm.open_subkey("VSCodeSourceFile");
             match environment {
                 Result::Ok(val) => assert!(true),
                 Result::Err(err) => panic!("vscode was not found in the registry")
