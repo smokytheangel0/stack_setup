@@ -936,7 +936,7 @@ fn set_path() {
                 let errBOX = path.rfind("%");
                 match errBOX {
                     Ok(val) => val,
-                    Error(err) => continue
+                    Error(err) => {cleanPATH.push(path); continue}
                 }
                 let mut endINDEX: usize = val;
                 endINDEX += 1;
