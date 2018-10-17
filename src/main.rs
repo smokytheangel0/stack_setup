@@ -928,11 +928,11 @@ fn set_path() {
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
         let mut outPATH = "".to_owned();
         if oldPATH.contains("%USERPROFILE%") {
-            let pathVEC: Vec<String> = oldPATH.split(";").collect();
+            let pathVEC: Vec<String> = oldPATH.split(";").to_string().collect();
             for path in &pathVEC {
                 let mut endINDEX: usize = path.rfind("%").unwrap_or(path.len());
                 endINDEX += 1;
-                outPATH = path;
+                outPATH = path.to_string();
                 outPATH.replace_range(..endINDEX, &homePATH);                
             }
         }
