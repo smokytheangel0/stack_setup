@@ -919,6 +919,7 @@ fn set_path() {
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
         let newPATH = oldPATH + &addPATH;
+        println!("length of newPATH: {}", newPATH.len());
         //these do not set, possibly because the dir doesnt exist, but I don't know if thats a prereq
         Command::new("powershell.exe").arg("setx").arg("Path").arg(&newPATH).output().expect("failed to set path");
         Command::new("powershell.exe").arg("set").arg("Path").arg(&newPATH).output().expect("failed to set path");
