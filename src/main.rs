@@ -930,23 +930,18 @@ fn set_path() {
     }
 }
 fn git_install_complete() -> String {
-    let mut gitFOLDER = {
-        if cfg!(target_os = "windows"){
-            //might use path prefix to make this drive agnostic
-            let path = dirs::home_dir().unwrap();
-            let mut gitFOLDER = path.to_str()
-                                .unwrap()
-                                .to_owned();
-            //gitFOLDER += "\\AppData\\Local\\Programs\\";
-            gitFOLDER = "C:\\Program Files\\".to_owned();
-            gitFOLDER
-
-        } else {
-            let gitFOLDER = "/usr/bin/".to_owned();
-            gitFOLDER
-        }
-    };
-    for _iteration in 0..1 {
+    #[cfg(windows)]
+    {
+            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+            let environment = hklm.open_subkey("SOFTWARE\\GitForWindows");
+            match environment {
+                Result::Ok(val) => return "True".to_string(),
+                Result::Err(err) => return "False".to_string()
+            }
+    }
+    #[cfg(unix)]
+    {
+        let gitFOLDER = "/usr/bin/".to_owned();
         println!("searching {}", &gitFOLDER);
         let programFOLDERS = fs::read_dir(&gitFOLDER).expect("No git app folder found");
         for folderNAME in programFOLDERS {
@@ -955,30 +950,14 @@ fn git_install_complete() -> String {
                                             .into_string()
                                             .expect("the post string result which sets folderNAME has broken")
                                             .to_owned();
-            if cfg!(target_os = "windows"){
-                if folderNAME.contains(&"Git"[..]) {
-                    return "True".to_owned()
-                } else {
-                    continue
-                }
-            } else {
                 if folderNAME == &"git"[..] {
                     return "True".to_owned()
                 } else {
                     continue
                 }
-            }
-
         }
-        gitFOLDER = {
-            if cfg!(target_os = "windows") {
-                "C:\\Program Files\\".to_owned()
-            } else {
-                gitFOLDER
-            }
-        };
+        return "False".to_owned()
     }
-    return "False".to_owned()
 }
 
 fn setup_xcode() -> String {
@@ -1431,25 +1410,18 @@ mod tests {
     fn is_git_installed(){
         //we need to do this via the registry in windows only
         //HKEY_LOCAL_MACHINE\SOFTWARE\GitForWindows match on result (err=> return false, ok()=> return true)
-        let mut gitFOLDER = {
-            if cfg!(target_os = "windows"){
-                //this could be either AppData or Program Files
-                let path = dirs::home_dir().unwrap();
-                let mut gitFOLDER = path.to_str()
-                                    .unwrap()
-                                    .to_owned();
-                //gitFOLDER += "\\AppData\\Local\\Programs\\";
-                gitFOLDER = "C:\\Program Files\\".to_owned();
-                gitFOLDER
-
-            } else {
-                let gitFOLDER = "/usr/bin/".to_owned();
-                gitFOLDER
-            }
-        };
-
-        
-        for _iteration in 0..1 {
+        #[cfg(windows)]
+        {
+                let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+                let environment = hklm.open_subkey("SOFTWARE\\GitForWindows");
+                match environment {
+                    Result::Ok(val) => assert!(true),
+                    Result::Err(err) => panic!("git was not found in the registry")
+                }
+        }
+        #[cfg(unix)]
+        {
+            let gitFOLDER = "/usr/bin/".to_owned();
             println!("searching {}", &gitFOLDER);
             let programFOLDERS = fs::read_dir(&gitFOLDER).expect("No git app folder found");
             for folderNAME in programFOLDERS {
@@ -1458,32 +1430,15 @@ mod tests {
                                                 .into_string()
                                                 .expect("the post string result which sets folderNAME has broken")
                                                 .to_owned();
-                if cfg!(target_os = "windows"){
-                    if folderNAME.contains(&"Git"[..]) {
-                        assert_eq!(true, true);
-                        return
-                    } else {
-                        continue
-                    }
-                } else {
                     if folderNAME == &"git"[..] {
-                        assert_eq!(true, true);
+                        assert!(true);
                         return
                     } else {
                         continue
                     }
-                }
-
             }
-            gitFOLDER = {
-                if cfg!(target_os = "windows") {
-                    "C:\\Program Files\\".to_owned()
-                } else {
-                    gitFOLDER
-                }
-            };
+            panic!("git binary was not found in /usr/bin!");
         }
-        panic!("git installation not found");
 
     }
 
