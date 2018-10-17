@@ -926,15 +926,16 @@ fn set_path() {
         let hklm = RegKey::predef(HKEY_CURRENT_USER);
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
-        let mut cleanPATH: Vec<String> = []; 
+        let mut cleanPATH: Vec<String> = vec![]; 
         if oldPATH.contains("%USERPROFILE%") {
-            let pathVEC: Vec<String> = oldPATH.split(";").to_string().collect();
+            let pathVEC: Vec<&str> = oldPATH.split(";").collect();
             for path in &pathVEC {
+                let path = path.to_owned();
                 let mut endINDEX: usize = path.rfind("%").unwrap_or(path.len());
                 endINDEX += 1;
                 let mut outPATH = path.to_string();
                 outPATH.replace_range(..endINDEX, &homePATH);
-                cleanPATH.push(&outPATH);          
+                cleanPATH.push(outPATH);          
             }
         }
         let cleanPATH: String = cleanPATH.join(";");
