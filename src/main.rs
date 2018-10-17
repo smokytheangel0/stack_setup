@@ -934,11 +934,11 @@ fn set_path() {
                 println!("{}", &path);
                 let path = path.to_owned();
                 let errBOX = path.rfind("%");
+                let mut endINDEX: usize = 0;
                 match errBOX {
-                    Ok(val) => val,
-                    Error(err) => {cleanPATH.push(path); continue}
+                    Some(val) => endINDEX = val,
+                    None(err) => {cleanPATH.push(path.to_string()); continue}
                 }
-                let mut endINDEX: usize = val;
                 endINDEX += 1;
                 let mut outPATH = path.to_string();
                 outPATH.replace_range(..endINDEX, &homePATH);
