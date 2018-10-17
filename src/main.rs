@@ -929,7 +929,7 @@ fn set_path() {
         let mut outPATH = "".to_owned();
         if oldPATH.contains("%USERPROFILE%") {
             let pathVEC = oldPATH.split(";").collect();
-            for path in &pathVEC {
+            for path in &pathVEC.iter() {
                 let mut endINDEX: i32 = path.rfind("%").unwrap_or(path.len());
                 endINDEX += 1;
                 outPATH = path;
