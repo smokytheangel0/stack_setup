@@ -946,6 +946,7 @@ fn set_path() {
             }
         }
         let cleanPATH: String = cleanPATH.join(";");
+        let cleanPATH = format!("'{}'",cleanPATH);
         let newPATH = cleanPATH + &addPATH;
         println!("length of newPATH: {}", newPATH.len());
         let androidPATH = format!("{}\\AppData\\Local\\Android\\Sdk;", &homePATH);
