@@ -59,6 +59,12 @@
 /// 
 /// RE: lin firefox
 /// need to detect firefox as default and then remove all waits on the DLs
+/// 
+/// RE: security
+/// what would this do if there were already a malicious exe containing a matching name
+/// what does it do when there are previous unconfirmed dls
+/// what does it do when the binary requested goes out of date
+/// 
 
 /// SETUP_DOWNLOADS NOTES:
 ///     ON MAC:
@@ -1021,11 +1027,14 @@ fn setup_xcode() -> String {
     errorBOX
 }
 
-fn show_licences() -> String {
+fn show_licences() {
     //show android licences
     //if mac show xcode licence
-    let errorBOX = String::from("");
-    errorBOX
+    Command::new("flutter").arg("doctor").arg("--android-licenses").output().expect("failed to run flutter doctor license command");
+}
+
+fn run_doctor() {
+    Command::new("flutter").arg("doctor").output().expect("failed to run flutter");
 }
 
 fn flutter_doctor() -> String {
@@ -1182,6 +1191,8 @@ fn main() {
 
     set_path();
     println!("{}", &"install, clone and paths complete"[..]);
+    show_licences();
+    run_doctor();
     let sleepTIME = time::Duration::from_secs(60);
     thread::sleep(sleepTIME);
 }
