@@ -914,16 +914,24 @@ fn set_path() {
     }
     #[cfg(windows)]
     {
-        let addPATH = ";%USERPROFILE%\\Desktop\\SDKs\\flutter\\bin;%USERPROFILE%\\AppData\\Local\\Android\\Sdk\\tools;%USERPROFILE%\\AppData\\Local\\Android\\Sdk\\platform-tools;";
+        let addPATH = "';%USERPROFILE%\\Desktop\\SDKs\\flutter\\bin;%USERPROFILE%\\AppData\\Local\\Android\\Sdk\\tools;%USERPROFILE%\\AppData\\Local\\Android\\Sdk\\platform-tools;'";
         let hklm = RegKey::predef(HKEY_CURRENT_USER);
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
         let newPATH = oldPATH + &addPATH;
         println!("length of newPATH: {}", newPATH.len());
-        Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
-        Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
-        Command::new("powershell.exe").arg("setx").arg("Path").arg(&newPATH).output().expect("failed to set path");
-        Command::new("powershell.exe").arg("set").arg("Path").arg(&newPATH).output().expect("failed to set path");
+        let output = Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
+        println!("{}", String::from_utf8_lossy(&output.stdout));
+        println!("{}", String::from_utf8_lossy(&output.stderr));
+        let output = Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg("%USERPROFILE\\AppData\\Local\\Android\\Sdk;").output().expect("failed to make android_home var");
+        println!("{}", String::from_utf8_lossy(&output.stdout));
+        println!("{}", String::from_utf8_lossy(&output.stderr));
+        let output = Command::new("powershell.exe").arg("setx").arg("Path").arg(&newPATH).output().expect("failed to set path");
+        println!("{}", String::from_utf8_lossy(&output.stdout));
+        println!("{}", String::from_utf8_lossy(&output.stderr));        
+        let output = Command::new("powershell.exe").arg("set").arg("Path").arg(&newPATH).output().expect("failed to set path");
+        println!("{}", String::from_utf8_lossy(&output.stdout));
+        println!("{}", String::from_utf8_lossy(&output.stderr));        
 
     }
 }
