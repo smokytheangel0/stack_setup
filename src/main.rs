@@ -708,6 +708,7 @@ fn install_downloads(downloadNAME: &str) {
     if filePATH[len-4..len-1] == "exe".to_string() ||
        filePATH[len-3..len] == "deb".to_string() 
     {
+        //im sure i think this is cool but its really limiting and only two ways useful now
         let setupCMD = {
             if cfg!(target_os = "windows") {
                 ["powershell.exe","Start-Process", "-FilePath"]
@@ -876,12 +877,37 @@ fn clone_repo(downloadNAME: &str) {
         fs::create_dir_all(&clonePATH).expect("failed to create SDK dir");
         //probably fails on this
         env::set_current_dir(&clonePATH).expect("failed to set SDK dir as cwd");
+
+        if cfg!(target_os = "windows"){
+            Command::new("$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')")
+                .output().expect("failed to refresh powershell path");
+        } else {
+            let path = dirs::home_dir().unwrap();
+            let mut bashPATH = path.to_str()
+                                .unwrap()
+                                .to_owned();
+            bashPATH += "/.bash_profile";
+            Command::new("source").arg(&bashPATH).output().expect("failed to refresh bash_profile");
+        }
         Command::new("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
         return
     } else if downloadNAME == "co_demo0".to_string() {
         fs::create_dir_all(&clonePATH).expect("failed to create Code dir");
         //fails on this because dir was not created
         env::set_current_dir(&clonePATH).expect("failed to set Code dir as cwd");
+
+        if cfg!(target_os = "windows"){
+            Command::new("$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')")
+                .output().expect("failed to refresh powershell path");
+        } else {
+            let path = dirs::home_dir().unwrap();
+            let mut bashPATH = path.to_str()
+                                .unwrap()
+                                .to_owned();
+            bashPATH += "/.bash_profile";
+            Command::new("source").arg(&bashPATH).output().expect("failed to refresh bash_profile");
+        }
+
         Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
         return
     } else {
@@ -1414,12 +1440,12 @@ mod tests {
         //HKEY_LOCAL_MACHINE\SOFTWARE\GitForWindows match on result (err=> return false, ok()=> return true)
         #[cfg(windows)]
         {
-                let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-                let environment = hklm.open_subkey("SOFTWARE\\GitForWindows");
-                match environment {
-                    Result::Ok(val) => assert!(true),
-                    Result::Err(err) => panic!("git was not found in the registry")
-                }
+            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+            let environment = hklm.open_subkey("SOFTWARE\\GitForWindows");
+            match environment {
+                Result::Ok(val) => assert!(true),
+                Result::Err(err) => panic!("git was not found in the registry")
+            }
         }
         #[cfg(unix)]
         {
@@ -1446,57 +1472,54 @@ mod tests {
 
     #[test]
     fn is_vs_installed(){
-        let vsFOLDER = {
-            if cfg!(target_os = "windows"){
-                //might use path prefix to make this drive agnostic
-                let path = dirs::home_dir().unwrap();
-                let mut vsFOLDER = path.to_str()
-                                    .unwrap()
-                                    .to_owned();
-                vsFOLDER += "\\AppData\\Local\\Programs\\";
-                vsFOLDER
-
-            } else if cfg!(target_os = "macos") {
-                let vsFOLDER = "/Applications/".to_owned();
-                vsFOLDER
-
-            }else {
-                let vsFOLDER = "/usr/bin/".to_owned();
-                vsFOLDER
+        #[cfg(windows)]
+        {
+            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+            let environment = hklm.open_subkey("SOFTWARE\\Microsoft\\VisualStudio");
+            match environment {
+                Result::Ok(val) => assert!(true),
+                Result::Err(err) => panic!("vscode was not found in the registry")
             }
-        };
-        let programFOLDERS = fs::read_dir(&vsFOLDER).expect("No vscode app folder found");
-        for folderNAME in programFOLDERS {
-            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
-                                            .file_name()
-                                            .into_string()
-                                            .expect("the post string result which sets folderNAME has broken")
-                                            .to_owned();
-            if cfg!(target_os = "windows"){
-                if folderNAME.contains(&"Microsoft VS Code"[..]) {
-                    assert_eq!(true, true);
-                    return
-                } else {
-                    continue
-                }
-            } else if cfg!(target_os = "macos") {
-                if folderNAME.contains(&"Visual Studio Code"[..]) {
-                    assert_eq!(true, true);
-                    return
-                } else {
-                    continue
-                }
-            } else {
-                if folderNAME == &"code"[..] {
-                    assert_eq!(true, true);
-                    return
-                } else {
-                    continue
-                }
-            }
-
         }
-        panic!("the VSCode folder installation was not found");
+
+        #[cfg(unix)]
+        {
+            let vsFOLDER = {
+                if cfg!(target_os = "macos") {
+                    let vsFOLDER = "/Applications/".to_owned();
+                    vsFOLDER
+
+                }else {
+                    let vsFOLDER = "/usr/bin/".to_owned();
+                    vsFOLDER
+                }
+            };
+            let programFOLDERS = fs::read_dir(&vsFOLDER).expect("No vscode app folder found");
+            for folderNAME in programFOLDERS {
+                let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                                .file_name()
+                                                .into_string()
+                                                .expect("the post string result which sets folderNAME has broken")
+                                                .to_owned();
+                if cfg!(target_os = "macos") {
+                    if folderNAME.contains(&"Visual Studio Code"[..]) {
+                        assert_eq!(true, true);
+                        return
+                    } else {
+                        continue
+                    }
+                } else {
+                    if folderNAME == &"code"[..] {
+                        assert_eq!(true, true);
+                        return
+                    } else {
+                        continue
+                    }
+                }
+
+            }
+            panic!("the VSCode folder installation was not found");
+        }
     }
 
     #[test]
