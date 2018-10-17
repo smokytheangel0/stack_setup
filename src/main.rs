@@ -709,7 +709,7 @@ fn install_downloads(downloadNAME: &str) {
        filePATH[len-3..len] == "deb".to_string() 
     {
         if cfg!(target_os = "linux") {
-            let output = Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("git").output().expect("failed to install libgconf-2-4 and git");
+            let output = Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("git").arg("lib32stdc++6").output().expect("failed to install libgconf-2-4 and git");
             let output = Command::new("sudo").arg("dpkg").arg("-i").arg(&filePATH).output().expect("failed to install vscode");
         }else if cfg!(target_os = "windows") {
             Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&filePATH).arg("-Wait").output().expect("failed to open exe");
@@ -922,6 +922,7 @@ fn set_path() {
         writeln!(file, "export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH").expect("failed to write unix flutter path");
         writeln!(file, "export PATH=$ANDROID_HOME/tools:$PATH").expect("failed to write unix tools path");
         writeln!(file, "export PATH=$ANDROID_HOME/platform-tools:$PATH").expect("failed to write unix platform tools path");
+        println!("{}", &homePATH);
         Command::new("source").arg(&homePATH).output().expect("failed to refresh bash_profile");
     }
     #[cfg(windows)]
