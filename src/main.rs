@@ -863,7 +863,7 @@ fn clone_repo(downloadNAME: &str) {
         if cfg!(unix){
             Command::new("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
         } else {
-            let output = Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("'C:\\Program Files\\Git\\bin\\git.exe'").arg("'clone https://github.com/flutter/flutter.git'").output().expect("failed to clone flutter repo");
+            let output = Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("'C:\\Program Files\\Git\\bin\\git.exe'").arg("'clone https://github.com/flutter/flutter.git'").arg("-Wait").output().expect("failed to clone flutter repo");
             println!("{}", String::from_utf8_lossy(&output.stdout));
             println!("{}", String::from_utf8_lossy(&output.stderr));
         }
@@ -874,7 +874,7 @@ fn clone_repo(downloadNAME: &str) {
         if cfg!(unix){
             Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
         } else {
-            let output = Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("'C:\\Program Files\\Git\\bin\\git.exe'").arg("'clone https://github.com/smokytheangel0/co_demo0.git'").output().expect("failed to clone co_demo0 repo");
+            let output = Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("'C:\\Program Files\\Git\\bin\\git.exe'").arg("'clone https://github.com/smokytheangel0/co_demo0.git'").arg("-Wait").output().expect("failed to clone co_demo0 repo");
             println!("{}", String::from_utf8_lossy(&output.stdout));
             println!("{}", String::from_utf8_lossy(&output.stderr));
         }
@@ -914,7 +914,7 @@ fn set_path() {
     }
     #[cfg(windows)]
     {
-        let addPATH = "%USERPROFILE%\\Desktop\\SDKs\\flutter\\bin;%USERPROFILE\\AppData\\Local\\Android\\Sdk\\tools;%USERPROFILE\\AppData\\Local\\Android\\Sdk\\platform-tools;";
+        let addPATH = ";%USERPROFILE%\\Desktop\\SDKs\\flutter\\bin;%USERPROFILE%\\AppData\\Local\\Android\\Sdk\\tools;%USERPROFILE%\\AppData\\Local\\Android\\Sdk\\platform-tools;";
         let hklm = RegKey::predef(HKEY_CURRENT_USER);
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
