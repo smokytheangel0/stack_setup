@@ -1272,7 +1272,7 @@ mod tests {
             let hklm = RegKey::predef(HKEY_CURRENT_USER);
             let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
             let currentPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
-            assert_eq!(currentPATH.contains("%USERPROFILE%\\Desktop\\SDKs\\flutter\\bin;"), true)
+            assert_eq!(currentPATH.contains("Desktop\\SDKs\\flutter\\bin;"), true)
 
         }
     }
@@ -1375,13 +1375,13 @@ mod tests {
             let hklm = RegKey::predef(HKEY_CURRENT_USER);
             let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
             let currentPATH: String = environment.get_value("ANDROID_HOME").expect("could not open Path value for flutter");
-            assert_eq!(currentPATH.contains("%USERPROFILE\\AppData\\Local\\Android\\Sdk;"), true);
+            assert_eq!(currentPATH.contains("Android\\Sdk;"), true);
             //tools on Path
             let hklm = RegKey::predef(HKEY_CURRENT_USER);
             let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
             let currentPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
-            assert_eq!(currentPATH.contains("%USERPROFILE\\AppData\\Local\\Android\\Sdk\\tools;"), true);
-            assert_eq!(currentPATH.contains("%USERPROFILE\\AppData\\Local\\Android\\Sdk\\platform-tools;"), true);            
+            assert_eq!(currentPATH.contains("Android\\Sdk\\tools;"), true);
+            assert_eq!(currentPATH.contains("Android\\Sdk\\platform-tools;"), true);            
 
         }
 
