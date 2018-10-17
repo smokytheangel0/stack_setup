@@ -714,7 +714,7 @@ fn install_downloads(downloadNAME: &str) {
             let output = Command::new("sudo").arg("dpkg").arg("-i").arg(&filePATH).output().expect("failed to install vscode");
             println!("{}", String::from_utf8_lossy(&output.stdout));
         }else if cfg!(target_os = "windows") {
-            Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&filePATH).arg("-Wait");
+            Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&filePATH).arg("-Wait").output().expect("failed to open exe");
         }
 
 
@@ -1460,8 +1460,9 @@ mod tests {
     fn is_vs_installed(){
         #[cfg(windows)]
         {
-            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-            let environment = hklm.open_subkey("SOFTWARE\\Microsoft\\VisualStudio");
+            //this false positives, no good for seeing if vscode is installed
+            let hklm = RegKey::predef(HKEY_CLASSES_ROOT);
+            let environment = hklm.open_subkey("vscode");
             match environment {
                 Result::Ok(val) => assert!(true),
                 Result::Err(err) => panic!("vscode was not found in the registry")
