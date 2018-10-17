@@ -858,23 +858,26 @@ fn clone_repo(downloadNAME: &str) {
     };
 
     if downloadNAME == "flutter".to_string() {
+        //the git command runs on windows but did not actually clone anything
         fs::create_dir_all(&clonePATH).expect("failed to create SDK dir");
-        //probably fails on this
         env::set_current_dir(&clonePATH).expect("failed to set SDK dir as cwd");
         if cfg!(unix){
             Command::new("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
         } else {
-            Command::new("powershell.exe").arg("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
+            let output = Command::new("powershell.exe").arg("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
+            println!("{}", String::from_utf8_lossy(&output.stdout));
+            println!("{}", String::from_utf8_lossy(&output.stderr));
         }
         return
     } else if downloadNAME == "co_demo0".to_string() {
         fs::create_dir_all(&clonePATH).expect("failed to create Code dir");
-        //fails on this because dir was not created
         env::set_current_dir(&clonePATH).expect("failed to set Code dir as cwd");
         if cfg!(unix){
             Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
         } else {
-            Command::new("powershell.exe").arg("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
+            let output = Command::new("powershell.exe").arg("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
+            println!("{}", String::from_utf8_lossy(&output.stdout));
+            println!("{}", String::from_utf8_lossy(&output.stderr));
         }
         return
     } else {
