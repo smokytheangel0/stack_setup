@@ -937,7 +937,7 @@ fn set_path() {
                 let mut endINDEX: usize = 0;
                 match errBOX {
                     Some(val) => endINDEX = val,
-                    None(err) => {cleanPATH.push(path.to_string()); continue}
+                    None => {cleanPATH.push(path.to_string()); continue}
                 }
                 endINDEX += 1;
                 let mut outPATH = path.to_string();
