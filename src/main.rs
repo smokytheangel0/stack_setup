@@ -904,11 +904,15 @@ fn set_path() {
     };
     #[cfg(unix)]
     {
-        let mut file = OpenOptions::new()
+        //need to create if none found
+        //it returns a result to match
+        let mut file = match OpenOptions::new()
                             .write(true)
                             .append(true)
-                            .open(&homePATH)
-                            .expect("failed to open bash_profile");
+                            .open(&homePATH) {
+                                Ok(val) => val,
+                                Err(err) => OpenOptions::new().write(true).create_new(true).open(&homePATH).expect("could not create new bash_profile")
+                            };
 
         if cfg!(target_os = "linux"){
             writeln!(file, "export ANDROID_HOME=$HOME/Android/Sdk").expect("failed to write linux android_home");
@@ -927,6 +931,7 @@ fn set_path() {
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
         println!("oldPATH is: \n{}", &oldPATH);
+
         let mut cleanPATH: Vec<String> = vec![]; 
         let mut outPATH = "".to_string();
         if oldPATH.contains("%USERPROFILE%") {
@@ -934,9 +939,9 @@ fn set_path() {
             for path in &pathVEC {
                 println!("{}", &path);
                 let path = path.to_owned();
-                let errBOX = path.rfind("%");
+                let optBOX = path.rfind("%");
                 let mut endINDEX: usize = 0;
-                match errBOX {
+                match optBOX {
                     Some(val) => endINDEX = val,
                     None => {cleanPATH.push(path.to_string()); continue}
                 }
@@ -949,19 +954,23 @@ fn set_path() {
             outPATH = format!("'{}{}'", outPATH, addPATH);
 
         } else {
-            outPATH = oldPATH + &addPATH;
+            outPATH = format!("'{};{}'",oldPATH + &addPATH);
         }
         let androidPATH = format!("{}\\AppData\\Local\\Android\\Sdk;", &homePATH);
+
         let output = Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));
+
         let output = Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));
+
         println!("path to be set: {:?}", &outPATH);
         let output = Command::new("powershell.exe").arg("setx").arg("Path").arg(&outPATH).output().expect("failed to set path");
         println!("{}", String::from_utf8_lossy(&output.stdout));
-        println!("{}", String::from_utf8_lossy(&output.stderr));        
+        println!("{}", String::from_utf8_lossy(&output.stderr)); 
+
         let output = Command::new("powershell.exe").arg("set").arg("Path").arg(&outPATH).output().expect("failed to set path");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));        
