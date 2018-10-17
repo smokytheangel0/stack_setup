@@ -861,39 +861,21 @@ fn clone_repo(downloadNAME: &str) {
         fs::create_dir_all(&clonePATH).expect("failed to create SDK dir");
         //probably fails on this
         env::set_current_dir(&clonePATH).expect("failed to set SDK dir as cwd");
-        /*
-        if cfg!(target_os = "windows"){
-            Command::new("powershell.exe").arg("$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')")
-                .output().expect("failed to refresh powershell path");
+        if cfg!(unix){
+            Command::new("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
         } else {
-            let path = dirs::home_dir().unwrap();
-            let mut bashPATH = path.to_str()
-                                .unwrap()
-                                .to_owned();
-            bashPATH += "/.bash_profile";
-            Command::new("source").arg(&bashPATH).output().expect("failed to refresh bash_profile");
+            Command::new("powershell.exe").arg("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
         }
-        */
-        Command::new("powershell.exe").arg("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
         return
     } else if downloadNAME == "co_demo0".to_string() {
         fs::create_dir_all(&clonePATH).expect("failed to create Code dir");
         //fails on this because dir was not created
         env::set_current_dir(&clonePATH).expect("failed to set Code dir as cwd");
-
-        if cfg!(target_os = "windows"){
-            Command::new("powershell.exe").arg("$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')")
-                .output().expect("failed to refresh powershell path");
+        if cfg!(unix){
+            Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
         } else {
-            let path = dirs::home_dir().unwrap();
-            let mut bashPATH = path.to_str()
-                                .unwrap()
-                                .to_owned();
-            bashPATH += "/.bash_profile";
-            Command::new("source").arg(&bashPATH).output().expect("failed to refresh bash_profile");
+            Command::new("powershell.exe").arg("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
         }
-
-        Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
         return
     } else {
         println!("{} is in the wrong function, it is in clone_repo(&downloadNAME)", &downloadNAME);
