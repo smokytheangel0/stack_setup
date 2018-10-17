@@ -946,9 +946,8 @@ fn set_path() {
             }
         }
         let cleanPATH: String = cleanPATH.join(";");
-        let cleanPATH = format!("'{}'",cleanPATH);
-        let newPATH = cleanPATH + &addPATH;
-        println!("length of newPATH: {}", newPATH.len());
+        let cleanPATH = format!("'{}{}'",cleanPATH, addPATH);
+        println!("path to be set: {:?}", cleanPATH);
         let androidPATH = format!("{}\\AppData\\Local\\Android\\Sdk;", &homePATH);
         let output = Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
         println!("{}", String::from_utf8_lossy(&output.stdout));
@@ -956,10 +955,10 @@ fn set_path() {
         let output = Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));
-        let output = Command::new("powershell.exe").arg("setx").arg("Path").arg(&newPATH).output().expect("failed to set path");
+        let output = Command::new("powershell.exe").arg("setx").arg("Path").arg(&cleanPATH).output().expect("failed to set path");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));        
-        let output = Command::new("powershell.exe").arg("set").arg("Path").arg(&newPATH).output().expect("failed to set path");
+        let output = Command::new("powershell.exe").arg("set").arg("Path").arg(&cleanPATH).output().expect("failed to set path");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));        
 
