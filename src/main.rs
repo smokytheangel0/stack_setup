@@ -961,7 +961,7 @@ fn set_path() {
             outPATH = format!("'{}{}'", outPATH, addPATH);
 
         } else {
-            outPATH = format!("'{};{}'",oldPATH + &addPATH);
+            outPATH = format!("'{};{}'", oldPATH, addPATH);
         }
         let androidPATH = format!("{}\\AppData\\Local\\Android\\Sdk;", &homePATH);
 
@@ -1454,6 +1454,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn android_license_accepted(){
         assert_eq!(false, true);
     }
@@ -1641,6 +1642,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn does_doctor_return_well(){
         assert_eq!(false, true);
     }
