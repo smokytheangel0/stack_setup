@@ -1234,7 +1234,7 @@ fn main() {
     //need to make a test to see if the sdk is installed before running this,
     //as android studio has a run after install option
     if cfg!(target_os = "windows"){
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe").spawn().expect("could not start android studio at the absolute path");
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("'C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe'").spawn().expect("could not start android studio at the absolute path");
     }
 
     while git_install_complete() == "False"{
