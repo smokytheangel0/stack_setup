@@ -984,6 +984,7 @@ fn set_path() {
 
     }
 }
+
 fn git_install_complete() -> String {
     #[cfg(windows)]
     {
@@ -1097,6 +1098,7 @@ fn background_test() -> String {
     let errorBOX = String::from("");
     errorBOX
 }
+
 enum DownloadStatus {
     NotStarted,
     InProgress,
@@ -1152,45 +1154,49 @@ fn main() {
     let now = time::Instant::now();
     let promptTIME = time::Duration::from_secs(150);
 
-    'main: loop {
+    'download: loop {
         for downloadNAME in downloadMAP.clone().keys() {
             if downloadMAP[downloadNAME] == "None".to_string() {
-                if downloadNAME.to_owned() == "android".to_string() {
+
+                if downloadNAME == &"android".to_string() {
                     println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
                 } else if downloadNAME.to_owned() == "git" && cfg!(target_os = "linux") {
+                    //skip git on linux
                     continue                
                 }else {
                     println!("starting {} download now!\n", downloadNAME);
                 }
-                let testLIST = start_downloads(&downloadNAME);
+
+                start_downloads(&downloadNAME);
                 
                 println!("waiting for browser to download...\n");
 
+                //this whole thing could do with some cleanup
                 if downloadNAME.to_owned() == "android".to_string() {
                     let sleepTIME = time::Duration::from_secs(30);
                     thread::sleep(sleepTIME);
-                } else if downloadNAME.to_owned() == "git".to_string() {
+                } else if downloadNAME.to_owned() == "git".to_string() && !cfg!(target_os = "linux") {
                     let sleepTIME = time::Duration::from_secs(20);
                     thread::sleep(sleepTIME);
                 } else {
                     let sleepTIME = time::Duration::from_secs(5);
                     thread::sleep(sleepTIME);
                 }
-
-                if !testLIST[4].contains("E: Failed") || !testLIST[4].contains("None") {
-                    downloadMAP.insert(downloadNAME.to_string(),"True".to_string());
-                }
+                
             } else {
+                //if the key's value is True (already complete), skip
                 continue
             }
         }
 
         for downloadNAME in downloadMAP.clone().keys() {
             if downloadNAME.to_owned() == "git" && cfg!(target_os = "linux") {
+                //skip git on linux
                 continue
             } else  {
                 let sleepTIME = time::Duration::from_secs(1);
                 thread::sleep(sleepTIME);
+
                 let answerBOX = download_complete(&downloadNAME, &_testPATH);
                 downloadMAP.insert(downloadNAME.to_string(), answerBOX);
             }
@@ -1207,7 +1213,7 @@ fn main() {
 
         if completeNUM == downloadMAP.keys().len() {
             println!("\n\nall the downloads are complete!\n");
-            break 'main;
+            break 'download;
 
         } else if now.elapsed() > promptTIME {
             for downloadNAME in downloadMAP.clone().keys() {
@@ -1224,19 +1230,20 @@ fn main() {
 
     for downloadNAME in downloadMAP.clone().keys() {
         install_downloads(&downloadNAME);
-//might want to check if each install is complete before continuing
-//only on windows though, this will spread out all the admin prompts
     }
+
     //we have to run android studio once after installing to install the sdk
     //need to make a test to see if the sdk is installed before running this,
     //as android studio has a run after install option
     if cfg!(target_os = "windows"){
         Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe").spawn().expect("could not start android studio at the absolute path");
     }
+
     while git_install_complete() == "False"{
         let sleepTIME = time::Duration::from_secs(20);
         thread::sleep(sleepTIME);
     }
+
     let cloneMAP: IndexMap<String, String> = [
         ("flutter".to_string(), "False".to_string()),
         ("co_demo0".to_string(),  "False".to_string()),
@@ -1247,9 +1254,11 @@ fn main() {
     }
 
     set_path();
-    println!("{}", &"install, clone and paths complete"[..]);
+
     show_licences();
+
     run_doctor();
+
     let sleepTIME = time::Duration::from_secs(60);
     thread::sleep(sleepTIME);
 }
