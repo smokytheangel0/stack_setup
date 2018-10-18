@@ -188,8 +188,8 @@ fn check_dirs() -> i8 {
 ///     if downloadNAME is "StarUML":
 ///         umlURL = "http://staruml.io/download/releases/" + umlVersion
 ///         webbrowser.open(umlURL)
-///     elif downloadNAME is "co_demo0":
-///         webbrowser.open("https://github.com/smokytheangel0/co_demo0/archive/master.zip")
+///     elif downloadNAME is "co_demo1":
+///         webbrowser.open("https://github.com/smokytheangel0/co_demo1/archive/master.zip")
 ///     elif downloadNAME is "flutter":
 ///         webbrowser.open("https://github.com/flutter/flutter/archive/master.zip")
 ///    elif downloadNAME is "VSCode":
@@ -226,7 +226,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 
     let vsVersion: &str = {
         if cfg!(target_os = "windows") {
-            "win32"
+            "win64"
         } else if cfg!(target_os = "macos") {
             "osx"
         } else if cfg!(target_os = "linux") {
@@ -874,13 +874,13 @@ fn clone_repo(downloadNAME: &str) {
             println!("{}", String::from_utf8_lossy(&output.stderr));
         }
         return
-    } else if downloadNAME == "co_demo0".to_string() {
+    } else if downloadNAME == "co_demo1".to_string() {
         fs::create_dir_all(&clonePATH).expect("failed to create Code dir");
         env::set_current_dir(&clonePATH).expect("failed to set Code dir as cwd");
         if cfg!(unix){
-            Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo0.git").output().expect("failed to clone co_demo0 repo");
+            Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo1.git").output().expect("failed to clone co_demo1 repo");
         } else {
-            let output = Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("'C:\\Program Files\\Git\\bin\\git.exe'").arg("'clone https://github.com/smokytheangel0/co_demo1.git'").arg("-Wait").output().expect("failed to clone co_demo0 repo");
+            let output = Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("'C:\\Program Files\\Git\\bin\\git.exe'").arg("'clone https://github.com/smokytheangel0/co_demo1.git'").arg("-Wait").output().expect("failed to clone co_demo1 repo");
             println!("{}", String::from_utf8_lossy(&output.stdout));
             println!("{}", String::from_utf8_lossy(&output.stderr));
         }
@@ -1244,7 +1244,7 @@ fn main() {
 
     let cloneMAP: IndexMap<String, String> = [
         ("flutter".to_string(), "False".to_string()),
-        ("co_demo0".to_string(),  "False".to_string()),
+        ("co_demo1".to_string(),  "False".to_string()),
     ].iter().cloned().collect();
 
     for downloadNAME in cloneMAP.clone().keys() {
@@ -1460,13 +1460,13 @@ mod tests {
             let hklm = RegKey::predef(HKEY_CURRENT_USER);
             let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
             let currentPATH: String = environment.get_value("ANDROID_HOME").expect("could not open Path value for flutter");
-            assert_eq!(currentPATH.contains("Android\\Sdk;"), true);
+            assert_eq!(currentPATH.contains("AppData\\Local\\Android\\Sdk"), true);
             //tools on Path
             let hklm = RegKey::predef(HKEY_CURRENT_USER);
             let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
             let currentPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
-            assert_eq!(currentPATH.contains("Android\\Sdk\\tools;"), true);
-            assert_eq!(currentPATH.contains("Android\\Sdk\\platform-tools;"), true);            
+            assert_eq!(currentPATH.contains("AppData\\Local\\Android\\Sdk\\tools"), true);
+            assert_eq!(currentPATH.contains("AppData\\Local\\Android\\Sdk\\platform-tools"), true);            
 
         }
 
@@ -1648,7 +1648,7 @@ mod tests {
                                             .expect("the post string result which sets folderNAME has broken")
                                             .to_owned();
 
-                if folderNAME.contains(&"co_demo0"[..]) {
+                if folderNAME.contains(&"co_demo1"[..]) {
                     assert_eq!(true, true);
                     return
                 } else {
@@ -1796,7 +1796,7 @@ mod tests {
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
-            "co_demo0".to_string(), 
+            "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
             "android".to_string()
@@ -1840,7 +1840,7 @@ mod tests {
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
-            "co_demo0".to_string(), 
+            "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
             "android".to_string()
@@ -1883,7 +1883,7 @@ mod tests {
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
-            "co_demo0".to_string(), 
+            "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
             "android".to_string()
@@ -1926,7 +1926,7 @@ mod tests {
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
-            "co_demo0".to_string(), 
+            "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
             "android".to_string()
@@ -1969,7 +1969,7 @@ mod tests {
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
-            "co_demo0".to_string(), 
+            "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
             "android".to_string()
@@ -2013,7 +2013,7 @@ mod tests {
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
-            "co_demo0".to_string(), 
+            "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
             "android".to_string()
@@ -2057,7 +2057,7 @@ mod tests {
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
-            "co_demo0".to_string(), 
+            "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
             "android".to_string()
@@ -2101,7 +2101,7 @@ mod tests {
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
-            "co_demo0".to_string(), 
+            "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
             "android".to_string()
@@ -2145,7 +2145,7 @@ mod tests {
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
             "git".to_string(),
-            "co_demo0".to_string(), 
+            "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
             "android".to_string()
