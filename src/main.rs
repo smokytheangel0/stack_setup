@@ -1030,6 +1030,9 @@ fn setup_xcode() -> String {
 fn show_licences() {
     //show android licences
     //if mac show xcode licence
+
+    //this and the run doctor functionality should be enclosed in a sh and ps1 script
+    //this is because the paths no matter what we try, seem to never get refreshed properly
     let binPATH = {
         if cfg!(target_os = "windows"){
             let path = dirs::home_dir().unwrap();
@@ -1049,9 +1052,9 @@ fn show_licences() {
     };
     if cfg!(unix){
         env::set_current_dir(&binPATH).expect("unable to set dir to flutter bin");
-        Command::new("flutter").arg("doctor").arg("--android-licenses").output().expect("failed to run flutter doctor license command");
+        Command::new("flutter").arg("doctor").arg("--android-licenses").spawn().expect("failed to run flutter doctor license command");
     } else {
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor --android-licenses'").output().expect("failed to run flutter doctor license command");
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor --android-licenses'").spawn().expect("failed to run flutter doctor license command");
     }
 }
 
@@ -1076,9 +1079,9 @@ fn run_doctor() {
 
     if cfg!(unix){
         env::set_current_dir(&binPATH).expect("unable to set dir to flutter bin");
-        Command::new("flutter").arg("doctor").output().expect("failed to run flutter doctor license command");
+        Command::new("flutter").arg("doctor").spawn().expect("failed to run flutter doctor license command");
     } else {
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").output().expect("failed to run flutter command");
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").spawn().expect("failed to run flutter command");
     }
 }
 
