@@ -1102,6 +1102,8 @@ enum DownloadStatus {
     InProgress,
     Complete
 }
+
+
 // Copyright 2012-2017 The Rust Project Developers. See the COPYRIGHT
 // file at the top-level directory of this distribution and at
 // http://rust-lang.org/COPYRIGHT.
@@ -1190,7 +1192,9 @@ fn main() {
         for downloadNAME in downloadMAP.clone().keys() {
             if downloadNAME.to_owned() == "git" && cfg!(target_os = "linux") {
                 //skip git on linux
+                downloadMAP.insert(downloadNAME.to_string(), "True".to_string());
                 continue
+                
             } else  {
                 let sleepTIME = time::Duration::from_secs(1);
                 thread::sleep(sleepTIME);
@@ -1253,9 +1257,9 @@ fn main() {
 
     set_path();
 
-    show_licences();
+    //show_licences();
 
-    run_doctor();
+    //run_doctor();
 
     let sleepTIME = time::Duration::from_secs(60);
     thread::sleep(sleepTIME);
@@ -1759,10 +1763,6 @@ mod tests {
 
 
     // start_downloads_linux_apt is at the bottom cos it brings up the sudo prompt
-            //at this rate we should just feed in the path before things get too confusing
-            //if we do these as macro parameterized tests then it will be much shorter
-
-            //these entirely fail directory discovery in windows
 
     fn is_complete_switch_paths() -> String {
         let testPATH: String = { 
