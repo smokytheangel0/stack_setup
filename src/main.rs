@@ -1039,7 +1039,7 @@ fn show_licences() {
             let mut binPATH = path.to_str()
                                 .unwrap()
                                 .to_owned();
-            binPATH += "'\\Desktop\\SDKs\\flutter\\bin\\flutter.exe'";
+            binPATH += "'\\Desktop\\SDKs\\flutter\\bin\\flutter.bat'";
             binPATH
         } else {
             let path = dirs::home_dir().unwrap();
@@ -1065,7 +1065,7 @@ fn run_doctor() {
             let mut binPATH = path.to_str()
                                 .unwrap()
                                 .to_owned();
-            binPATH += "\\Desktop\\SDKs\\flutter\\bin\\flutter.exe";
+            binPATH += "\\Desktop\\SDKs\\flutter\\bin\\flutter.bat";
             binPATH = format!("'{}'", &binPATH);
             binPATH
         } else {
