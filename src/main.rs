@@ -1054,7 +1054,7 @@ fn show_licences() {
     if cfg!(unix){
         Command::new("bash").arg(&binPATH).arg("doctor").arg("--android-licenses").spawn().expect("failed to run flutter doctor license command");
     } else {
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor --android-licenses'").output().expect("failed to run flutter doctor license command");
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor --android-licenses'").spawn().expect("failed to run flutter doctor license command");
     }
 }
 
@@ -1081,7 +1081,7 @@ fn run_doctor() {
     if cfg!(unix){
         Command::new("bash").arg(&binPATH).arg("doctor").spawn().expect("failed to run flutter doctor command");
     } else {
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").output().expect("failed to run flutter command");
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").spawn().expect("failed to run flutter command");
     }
 }
 
