@@ -1157,7 +1157,9 @@ fn main() {
             if downloadMAP[downloadNAME] == "None".to_string() {
                 if downloadNAME.to_owned() == "android".to_string() {
                     println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
-                } else {
+                } else if downloadNAME.to_owned() == "git" && cfg!(target_os = "linux") {
+                    continue                
+                }else {
                     println!("starting {} download now!\n", downloadNAME);
                 }
                 let testLIST = start_downloads(&downloadNAME);
