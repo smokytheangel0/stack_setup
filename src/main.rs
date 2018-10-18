@@ -1065,7 +1065,8 @@ fn run_doctor() {
             let mut binPATH = path.to_str()
                                 .unwrap()
                                 .to_owned();
-            binPATH += "'\\Desktop\\SDKs\\flutter\\bin\\flutter.exe'";
+            binPATH += "\\Desktop\\SDKs\\flutter\\bin\\flutter.exe";
+            binPATH = format!("'{}'", &binPATH);
             binPATH
         } else {
             let path = dirs::home_dir().unwrap();
@@ -1223,6 +1224,12 @@ fn main() {
         install_downloads(&downloadNAME);
 //might want to check if each install is complete before continuing
 //only on windows though, this will spread out all the admin prompts
+    }
+    //we have to run android studio once after installing to install the sdk
+    //need to make a test to see if the sdk is installed before running this,
+    //as android studio has a run after install option
+    if cfg!(windows){
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe").output().expect("could not start android studio at the absolute path");
     }
     while git_install_complete() == "False"{
         let sleepTIME = time::Duration::from_secs(20);
