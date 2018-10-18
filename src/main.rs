@@ -1047,13 +1047,12 @@ fn show_licences() {
             let mut binPATH = path.to_str()
                                 .unwrap()
                                 .to_owned();
-            binPATH += "/Desktop/SDKs/flutter/bin/";
+            binPATH += "/Desktop/SDKs/flutter/bin/flutter";
             binPATH
         }
     };
     if cfg!(unix){
-        env::set_current_dir(&binPATH).expect("unable to set dir to flutter bin");
-        Command::new("flutter").arg("doctor").arg("--android-licenses").spawn().expect("failed to run flutter doctor license command");
+        Command::new("bash").arg(&binPATH).arg("doctor").arg("--android-licenses").spawn().expect("failed to run flutter doctor license command");
     } else {
         Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor --android-licenses'").output().expect("failed to run flutter doctor license command");
     }
@@ -1074,14 +1073,13 @@ fn run_doctor() {
             let mut binPATH = path.to_str()
                                 .unwrap()
                                 .to_owned();
-            binPATH += "/Desktop/SDKs/flutter/bin/";
+            binPATH += "/Desktop/SDKs/flutter/bin/flutter";
             binPATH
         }
     };
     println!("binPATH: {:?}", &binPATH);
     if cfg!(unix){
-        env::set_current_dir(&binPATH).expect("unable to set dir to flutter bin");
-        Command::new("flutter").arg("doctor").spawn().expect("failed to run flutter doctor license command");
+        Command::new("bash").arg(&binPATH).arg("doctor").spawn().expect("failed to run flutter doctor command");
     } else {
         Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").output().expect("failed to run flutter command");
     }
