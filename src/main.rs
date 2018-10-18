@@ -715,7 +715,7 @@ fn install_downloads(downloadNAME: &str) {
        filePATH[len-3..len] == "deb".to_string() 
     {
         if cfg!(target_os = "linux") {
-            let output = Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("git").arg("lib32stdc++6").output().expect("failed to install libgconf-2-4 and git");
+            let output = Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("lib32stdc++6").arg("git").output().expect("failed to install libgconf-2-4 and git");
             let output = Command::new("sudo").arg("dpkg").arg("-i").arg(&filePATH).output().expect("failed to install vscode");
         }else if cfg!(target_os = "windows") {
             Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&filePATH).arg("-Wait").output().expect("failed to open exe");
@@ -1052,7 +1052,7 @@ fn show_licences() {
         }
     };
     if cfg!(unix){
-        Command::new("bash").arg(&binPATH).arg("doctor").arg("--android-licenses").spawn().expect("failed to run flutter doctor license command");
+        Command::new("bash").arg(&binPATH).arg("doctor --android-licenses").spawn().expect("failed to run flutter doctor license command");
     } else {
         Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor --android-licenses'").spawn().expect("failed to run flutter doctor license command");
     }
@@ -1194,7 +1194,7 @@ fn main() {
                 //skip git on linux
                 downloadMAP.insert(downloadNAME.to_string(), "True".to_string());
                 continue
-                
+
             } else  {
                 let sleepTIME = time::Duration::from_secs(1);
                 thread::sleep(sleepTIME);
@@ -1257,9 +1257,9 @@ fn main() {
 
     set_path();
 
-    //show_licences();
+    show_licences();
 
-    //run_doctor();
+    run_doctor();
 
     let sleepTIME = time::Duration::from_secs(60);
     thread::sleep(sleepTIME);
