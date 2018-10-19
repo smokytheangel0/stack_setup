@@ -1193,10 +1193,10 @@ fn main() {
     println!("are you ready to start ?>");
     print!("y/N !> ");
     io::stdout().flush().ok().expect("Could not flush stdout");
-    let mut input = String::new();
-    let answerBOX = std::io::stdin().read_line(&mut input).expect("could not read the input #>").to_string();
-    println!("{:?}", &answerBOX);
-    if answerBOX.to_lowercase().contains("y") {
+    let mut inBOX = String::new();
+    std::io::stdin().read_line(&mut inBOX).expect("could not read the inBOX #>").to_string();
+    println!("{:?}", &inBOX);
+    if inBOX.to_lowercase().contains("y") {
         let now = time::Instant::now();
         let promptTIME = time::Duration::from_secs(150);
 
