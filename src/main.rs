@@ -1021,7 +1021,8 @@ fn android_install_complete() -> String {
                 androidFOLDER
             }
         };
-        let programFOLDERS = fs::read_dir(&androidFOLDER).expect("No android app folder found");
+
+        let programFOLDERS = fs::read_dir(&androidFOLDER).unwrap_or(return "False".to_string());
         for folderNAME in programFOLDERS {
             let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
                                             .file_name()
@@ -1174,9 +1175,9 @@ fn main() {
         let answerBOX = download_complete(&downloadNAME, &_testPATH);
 
         if answerBOX == "True" {
-            println!("{} is already complete!\n", downloadNAME)
+            println!("{} is already complete !>\n", downloadNAME)
         } else {
-            println!("{} has not yet been completed\n", downloadNAME)
+            println!("{} has not yet been completed !>\n", downloadNAME)
         }
 
         downloadMAP.insert(downloadNAME.to_string(), answerBOX);
@@ -1184,7 +1185,7 @@ fn main() {
     
 
     if cfg!(target_os = "windows") {
-        println!("This is where we go over a few things first\nif you are using Edge browser, you must accept each download as it comes up\notherw the downloads should begin automatically\nplease check back with this terminal periodically to see if there are instructions that precede the next step");
+        println!("This is where we go over a few things first\nif you are using Edge browser\n, you must accept each download as it comes up\notherw the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>/n/nsecond, please close the VSCode window if it opens..>");
     } else if cfg!(target_os = "macos") {
         println!("This is where we go over a few things first\nthis process may seem too fast as it opens a tab in your browser to download the items, \nthe android download you will have to select from the webpage, so keep an eye out for instructions in this terminal");
     } else if cfg!(target_os = "linux") {
