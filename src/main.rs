@@ -1257,6 +1257,8 @@ fn main() {
 
     set_path();
 
+    run_doctor();
+
     show_licences();
 
     run_doctor();
