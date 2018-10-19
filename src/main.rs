@@ -1,7 +1,7 @@
 // Copyright 2018 PacNGO
 // 
 // Licensed using a modified Apache License, Version 0.1.0 (the "License");
-// you may not use this file except in compliance with the License.
+// you may not use this fileBOX except in compliance with the License.
 // You may obtain a copy of the License 
 // 
 // 	in the root directory of the source repository that first laid a commit on it. 
@@ -26,11 +26,7 @@
 
 ///TODO
 /// cargo install cargo-deb
-///
-/// RE: LINUX BROWSER COMPATIBILITY
-/// use a grep a ps command on linux to see if
-/// the browser is already running and then ask
-/// the user to start their browser if its not
+/// or appimage
 /// 
 /// RE: pseudoPYTHON equality
 /// keep it updated
@@ -46,38 +42,30 @@
 /// create macro parameterized test as well
 /// 
 /// RE: win debugger
-/// need to set up a working msvc debugger on win
-/// and gitignore the launch.json file
-/// want to try out lldb on there even though it might not work
-/// for now am using panic macros to reveal var contents during runtime
+/// need to set up lldb for win (it is early in its development)
 ///
 /// RE: download_complete spin check is using an entire core...
-///
-/// RE: windows quote bullshit
-/// it seems to me like it would be better to handle these in an isolated manner that
-/// doesnt affect the rest of the code, so we dont have to len around it nonstop
 /// 
 /// RE: lin firefox
 /// need to detect firefox as default and then remove all waits on the DLs
+/// 
+/// RE: win edge
+/// need to detect edge and add more space between last download starting and next one opening
+/// could do this by detecting the new dl fileBOX before cracking open a new tab, and we can probably
+/// apply this to the rest of the browsers for the whole 3 different wait time phenomena that has infected this
 /// 
 /// RE: security
 /// what would this do if there were already a malicious exe containing a matching name
 /// what does it do when there are previous unconfirmed dls
 /// what does it do when the binary requested goes out of date
 /// 
-
-/// SETUP_DOWNLOADS NOTES:
-///     ON MAC:
-/// 
-///     ON WIN:
-/// 
-///     ON LIN:
-///         
+/// RE: crdownload 
+/// add a bit in which remembers the name of any previous crdownloads and blacklists them
 /// 
 
-//so far ~500 lines of function code
-// ~100 lines in main
-//and ~500 lines of test code
+//so far ~1127 lines of function code
+// ~139 lines in main
+//and ~923 lines of test code
 extern crate webbrowser;
 extern crate indexmap;
 use indexmap::IndexMap;
@@ -123,11 +111,8 @@ use std::io::prelude::*;
 /// 
 //#endregion
 fn check_dirs() -> i8 {
-    //this works in Windows
     let mut outBOX = 0;
 
-    //might definitely be a better way to do this
-    //this returns a result to the ok which returns an option
     let pathBuffer = env::current_dir().expect("the result from current_dir which sets the pathBuffer has broken");
     //this returns an option to unwrap
     let pathBOX = pathBuffer.to_str().unwrap();
@@ -172,7 +157,7 @@ fn check_dirs() -> i8 {
 ///         umlVersion = "StarUML%20Setup%203.0.2.exe"
 ///     elif targetOS is "Darwin":
 ///         vsVersion = "osx"
-///         gitURL = "https://sourceforge.net/projects/git-osx-installer/files/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+///         gitURL = "https://sourceforge.net/projects/git-osx-installer/folders/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
 ///         umlVersion = "StarUML-3.0.2.dmg"
 ///     elif targetOS is "Linux":
 ///         vsVersion = "linux64_deb"
@@ -213,9 +198,6 @@ fn check_dirs() -> i8 {
 /// 
 //#endregion
 fn start_downloads(downloadNAME: &str) -> Vec<String> { 
-    //this function called from main and the associated tests
-    //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
-
     let mut testLIST = vec![
         "None".to_string(),
         "None".to_string(),
@@ -242,7 +224,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 //version specific will break on update (current as of 2OCT)
             "https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/Git-2.19.0-64-bit.exe"
         } else if cfg!(target_os = "macos") {
-            "https://sourceforge.net/projects/git-osx-installer/files/git-2.19.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+            "https://sourceforge.net/projects/git-osx-installer/folders/git-2.19.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
         } else {
             "git browser install currently only supports Mac OS and Windows 10"
         }
@@ -399,9 +381,6 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 //#endregion
 fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
     println!("checking to see if the {} is complete", &downloadNAME);
-    //this function called from main and the associated tests
-    //confirmed working in Mac OS, Windows 10, and Ubuntu 18.04
-
     let outBOX: String = "None".to_string();
 
     let downloadsPATH: String = {
@@ -428,11 +407,8 @@ fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
         if cfg!(test) {
             //the directory returns err for
             //one_False_opera and all_True
-
-            //this returns a result to unwrap
             fs::read_dir(&testPATH).expect("the read_dir that sets filesInDownloads broke")
         } else {
-            //this returns a result to unwrap          
             fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke")
         }
     };
@@ -471,7 +447,6 @@ fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
     //how many unwraps can one rapper stack if
     //one rapper could stack unwraps delicately
     for fileNAME in filesInDownloads {
-        //these both return results to unwrap
         let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
                                         .file_name()
                                         .into_string()
@@ -487,8 +462,6 @@ fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
                 fileNAME.contains(&alternateGIT[..]) ||
                 fileNAME.contains(&alternateCODE[..]) 
             {
-                //panic!("the fileNAME is: \n{}", fileNAME);
-
                 if fileNAME.contains(&".partial"[..]) {
                     return "False".to_string();
                 } else if fileNAME.contains(&".opdownload"[..]) {
@@ -540,10 +513,9 @@ fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
     }
 }
 
-//this now only needs to support unzipping android-studio on linux,
-//the flutter and co_demo must be cloned after installing git and the like
 fn extract_studio() {
     println!("extracting android studio");
+
     let downloadNAME = "android".to_string();
 
     let downloadsPATH: String = {
@@ -583,6 +555,7 @@ fn extract_studio() {
             }
         }
     }
+    
     let len = filePATH.len();
     if filePATH[len-3..] == "zip".to_string() {
         let workingPATH: String = {            
@@ -596,27 +569,27 @@ fn extract_studio() {
 
         fs::create_dir_all(&workingPATH).expect("creating dirs failed");
         env::set_current_dir(&workingPATH).expect("setting cwd failed");
-        let fname = {
+        let pathBOX = {
             std::path::Path::new(&filePATH)
         };
-        let file = fs::File::open(&fname).expect("failed to open the file at filepath");
+        let fileBOX = fs::File::open(&pathBOX).expect("failed to open the fileBOX at filepath");
 
-        let mut archive = zip::ZipArchive::new(file).expect("failed to make an archive in memory from file");
+        let mut archive = zip::ZipArchive::new(fileBOX).expect("failed to make an archive in memory from fileBOX");
 
         for i in 0..archive.len() {
-            let mut file = archive.by_index(i).unwrap();
-            let outpath = file.sanitized_name();
+            let mut fileBOX = archive.by_index(i).unwrap();
+            let outPATH = fileBOX.sanitized_name();
 
-            if (&*file.name()).ends_with('/') {
-                fs::create_dir_all(&outpath).expect("failed to create directories");
+            if (&*fileBOX.name()).ends_with('/') {
+                fs::create_dir_all(&outPATH).expect("failed to create folder");
             } else {
-                if let Some(p) = outpath.parent() {
-                    if !p.exists() {
-                        fs::create_dir_all(&p).expect("failed to extract file");
+                if let Some(folders) = outPATH.parent() {
+                    if !folders.exists() {
+                        fs::create_dir_all(&folders).expect("failed to extract folders");
                     }
                 }
-                let mut outfile = fs::File::create(&outpath).expect("failed to create outfile");
-                io::copy(&mut file, &mut outfile).expect("failed to copy outfile to output dir");
+                let mut outFILE = fs::File::create(&outPATH).expect("failed to create outFILE");
+                io::copy(&mut fileBOX, &mut outFILE).expect("failed to copy outFILE to output dir");
             }
 
             // Get and Set permissions
@@ -624,8 +597,8 @@ fn extract_studio() {
             {
                 use std::os::unix::fs::PermissionsExt;
 
-                if let Some(mode) = file.unix_mode() {
-                    fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
+                if let Some(mode) = fileBOX.unix_mode() {
+                    fs::set_permissions(&outPATH, fs::Permissions::from_mode(mode)).unwrap();
                 }
             }  
         }
@@ -685,7 +658,7 @@ fn install_downloads(downloadNAME: &str) {
     };
     
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
-    let mut filePATH: String = ".None".to_string();
+    let mut filePATH = ".None".to_string();
     let mut properNAME = ".None".to_string();
     for fileNAME in filesInDownloads {
         let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
@@ -715,20 +688,18 @@ fn install_downloads(downloadNAME: &str) {
        filePATH[len-3..len] == "deb".to_string() 
     {
         if cfg!(target_os = "linux") {
-            let output = Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("lib32stdc++6").arg("git").output().expect("failed to install libgconf-2-4 and git");
-            let output = Command::new("sudo").arg("dpkg").arg("-i").arg(&filePATH).output().expect("failed to install vscode");
+            Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("lib32stdc++6").arg("git").output().expect("failed to install libgconf-2-4 and git");
+            Command::new("sudo").arg("dpkg").arg("-i").arg(&filePATH).output().expect("failed to install vscode");
         }else if cfg!(target_os = "windows") {
             Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&filePATH).arg("-Wait").output().expect("failed to open exe");
         }
-
-
     }
 
     else if filePATH[len-3..len] == "dmg".to_string() ||
-        filePATH[len-3..len] == "app".to_string() {
-        
-        let mut volumePATH: String = ".None".to_string();
-        let mut appPATH: String = ".None".to_string();
+        filePATH[len-3..len] == "app".to_string() {        
+        let mut volumePATH = ".None".to_string();
+        let mut appPATH = ".None".to_string();
+
         if filePATH[len-3..len] == "dmg".to_string() {
             let mountCMD = ["hdiutil", "mount"];
             Command::new(&mountCMD[0])
@@ -794,8 +765,8 @@ fn install_downloads(downloadNAME: &str) {
             Command::new("chmod").arg("+x").arg(&filePATH).output().expect("failed to make AppImage executable");
             env::set_current_dir(&downloadsPATH).expect("setting cwd failed");
             let commandPATH = "./".to_string() + &properNAME;
-            Command::new(commandPATH)
-                            .output().expect("failed to execute appimage");
+            Command::new(commandPATH).output().expect("failed to execute appimage");
+
         } else if filePATH.contains(&"android"[..]) {
             let workingPATH: String = {
                 if cfg!(unix){
@@ -811,8 +782,7 @@ fn install_downloads(downloadNAME: &str) {
                 }
             };
             Command::new("chmod").arg("+x").arg(&workingPATH).output().expect("failed to make sh executable");
-            Command::new("sh").arg(&workingPATH)
-                            .output().expect("failed to execute studio.sh");
+            Command::new("sh").arg(&workingPATH).output().expect("failed to execute studio.sh");
 
         } else {
             return;
@@ -823,7 +793,6 @@ fn install_downloads(downloadNAME: &str) {
 }
 
 fn clone_repo(downloadNAME: &str) {
-    //this works in lin
     println!("cloning: {}", &downloadNAME);
     
     let clonePATH = {
@@ -866,6 +835,7 @@ fn clone_repo(downloadNAME: &str) {
     if downloadNAME == "flutter".to_string() {
         fs::create_dir_all(&clonePATH).expect("failed to create SDK dir");
         env::set_current_dir(&clonePATH).expect("failed to set SDK dir as cwd");
+
         if cfg!(unix){
             Command::new("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
         } else {
@@ -874,9 +844,11 @@ fn clone_repo(downloadNAME: &str) {
             println!("{}", String::from_utf8_lossy(&output.stderr));
         }
         return
+
     } else if downloadNAME == "co_demo1".to_string() {
         fs::create_dir_all(&clonePATH).expect("failed to create Code dir");
         env::set_current_dir(&clonePATH).expect("failed to set Code dir as cwd");
+
         if cfg!(unix){
             Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo1.git").output().expect("failed to clone co_demo1 repo");
         } else {
@@ -885,11 +857,11 @@ fn clone_repo(downloadNAME: &str) {
             println!("{}", String::from_utf8_lossy(&output.stderr));
         }
         return
+
     } else {
         println!("{} is in the wrong function, it is in clone_repo(&downloadNAME)", &downloadNAME);
         return
     }
-
 }
 
 fn set_path() {
@@ -908,11 +880,12 @@ fn set_path() {
             homePATH
         }
     };
+
     #[cfg(unix)]
     {
         //need to create if none found
         //it returns a result to match
-        let mut file = match OpenOptions::new()
+        let mut fileBOX = match OpenOptions::new()
                             .write(true)
                             .append(true)
                             .open(&homePATH) {
@@ -921,16 +894,17 @@ fn set_path() {
                             };
 
         if cfg!(target_os = "linux"){
-            writeln!(file, "export ANDROID_HOME=$HOME/Android/Sdk").expect("failed to write linux android_home");
+            writeln!(fileBOX, "export ANDROID_HOME=$HOME/Android/Sdk").expect("failed to write linux android_home");
         } else if cfg!(target_os = "macos") {
-            writeln!(file, "export ANDROID_HOME=$HOME/Library/Android/Sdk").expect("failed to write mac android_home");
+            writeln!(fileBOX, "export ANDROID_HOME=$HOME/Library/Android/Sdk").expect("failed to write mac android_home");
         }
-        writeln!(file, "export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH").expect("failed to write unix flutter path");
-        writeln!(file, "export PATH=$ANDROID_HOME/tools:$PATH").expect("failed to write unix tools path");
-        writeln!(file, "export PATH=$ANDROID_HOME/platform-tools:$PATH").expect("failed to write unix platform tools path");
+        writeln!(fileBOX, "export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH").expect("failed to write unix flutter path");
+        writeln!(fileBOX, "export PATH=$ANDROID_HOME/tools:$PATH").expect("failed to write unix tools path");
+        writeln!(fileBOX, "export PATH=$ANDROID_HOME/platform-tools:$PATH").expect("failed to write unix platform tools path");
         Command::new("sudo").arg(".").arg(&homePATH).output().expect("failed to refresh bash_profile");
         println!("{:?}", &homePATH);
     }
+
     #[cfg(windows)]
     {
         let addPATH = format!("{}\\Desktop\\SDKs\\flutter\\bin;{}\\AppData\\Local\\Android\\Sdk\\tools;{}\\AppData\\Local\\Android\\Sdk\\platform-tools;", &homePATH, &homePATH, &homePATH);
@@ -981,7 +955,6 @@ fn set_path() {
         let output = Command::new("powershell.exe").arg("set").arg("Path").arg(&outPATH).output().expect("failed to set path");
         println!("{}", String::from_utf8_lossy(&output.stdout));
         println!("{}", String::from_utf8_lossy(&output.stderr));        
-
     }
 }
 
@@ -996,6 +969,7 @@ fn git_install_complete() -> String {
                 Result::Err(err) => return "False".to_string()
             }
     }
+
     #[cfg(unix)]
     {
         let gitFOLDER = "/usr/bin/".to_owned();
@@ -1051,6 +1025,7 @@ fn show_licences() {
             binPATH
         }
     };
+
     if cfg!(unix){
         Command::new("bash").arg(&binPATH).arg("doctor --android-licenses").spawn().expect("failed to run flutter doctor license command");
     } else {
@@ -1077,19 +1052,14 @@ fn run_doctor() {
             binPATH
         }
     };
+
     println!("binPATH: {:?}", &binPATH);
+
     if cfg!(unix){
         Command::new("bash").arg(&binPATH).arg("doctor").spawn().expect("failed to run flutter doctor command");
     } else {
         Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").spawn().expect("failed to run flutter command");
     }
-}
-
-fn flutter_doctor() -> String {
-    //see what flutter doctor looks like from stdout and stderror
-    //
-    let errorBOX = "".to_string();
-    errorBOX
 }
 
 fn background_test() -> String {
@@ -1105,13 +1075,13 @@ enum DownloadStatus {
 
 
 // Copyright 2012-2017 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
+// fileBOX at the top-level directory of this distribution and at
 // http://rust-lang.org/COPYRIGHT.
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
-// option. This file may not be copied, modified, or distributed
+// option. This fileBOX may not be copied, modified, or distributed
 // except according to those terms.
 
 macro_rules! cfg_if {
@@ -1235,10 +1205,12 @@ fn main() {
     }
 
     //we have to run android studio once after installing to install the sdk
-    //need to make a test to see if the sdk is installed before running this,
-    //as android studio has a run after install option
+    //need to make a func to see if the sdk is installed before running this,
+    //as android studio has a run after install option, which could also have been triggered
     if cfg!(target_os = "windows"){
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("'C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe'").spawn().expect("could not start android studio at the absolute path");
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath")
+                    .arg("'C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe'")
+                    .spawn().expect("could not start android studio at the absolute path");
     }
 
     while git_install_complete() == "False"{
@@ -1676,7 +1648,7 @@ mod tests {
     #[test]
     #[ignore]
     fn main_(){
-        //this test should include placing the files from test in
+        //this test should include placing the folders from test in
         //downloads and seeing if it completes correctly with or without
         //any of the items complete
 
