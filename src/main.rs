@@ -1089,10 +1089,8 @@ fn run_doctor() {
         }
     };
 
-    println!("binPATH: {:?}", &binPATH);
-
     if cfg!(unix){
-        Command::new("bash").arg(&binPATH).arg("doctor").spawn().expect("failed to run flutter doctor command");
+        Command::new("bash").arg(&binPATH).arg("doctor").output().expect("failed to run flutter doctor command");
     } else {
         Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").arg("-Wait").output().expect("failed to run flutter command");
     }
