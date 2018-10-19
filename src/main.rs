@@ -1324,9 +1324,6 @@ fn main() {
 
         //run_doctor();
 
-        let sleepTIME = time::Duration::from_secs(60);
-        thread::sleep(sleepTIME);
-
     } else {
         panic!("you must accept to continue !>");
     }
