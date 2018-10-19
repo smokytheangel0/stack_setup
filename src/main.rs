@@ -991,6 +991,66 @@ fn git_install_complete() -> String {
     }
 }
 
+fn android_install_complete() -> String {
+        let androidFOLDER = {
+            if cfg!(target_os = "windows"){
+                let path = dirs::home_dir().unwrap();
+                let mut androidFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+
+                //might use path prefix to make this drive agnostic
+                androidFOLDER += "\\AppData\\Local\\Android";
+                androidFOLDER
+            } else if cfg!(target_os = "macos") {
+                let path = dirs::home_dir().unwrap();
+                let mut androidFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+
+                androidFOLDER += "/Library/Android";
+                androidFOLDER
+
+            }else {
+                let path = dirs::home_dir().unwrap();
+                let mut androidFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                androidFOLDER += "/Android";
+                androidFOLDER
+            }
+        };
+        let programFOLDERS = fs::read_dir(&androidFOLDER).expect("No android app folder found");
+        for folderNAME in programFOLDERS {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+            if cfg!(target_os = "windows"){
+                if folderNAME.contains(&"Sdk"[..]) {
+                    return "True".to_string()
+                } else {
+                    continue
+                }
+            } else if cfg!(target_os = "macos") {
+                if folderNAME.contains(&"Sdk"[..]) {
+                    return "True".to_string()
+                } else {
+                    continue
+                }
+            } else {
+                if folderNAME.contains(&"Sdk"[..]) {
+                    return "True".to_string()
+                } else {
+                    continue
+                }
+            }
+
+        }
+        return "False".to_string()
+}
+
 fn setup_xcode() -> String {
     //ask user if they have apple ID
     //prompt user to open mac store or open from here
@@ -1120,123 +1180,154 @@ fn main() {
 
         downloadMAP.insert(downloadNAME.to_string(), answerBOX);
     }
-    //needs to give instructions to user before the crazy tab storm
-    let now = time::Instant::now();
-    let promptTIME = time::Duration::from_secs(150);
+    
 
-    'download: loop {
-        for downloadNAME in downloadMAP.clone().keys() {
-            if downloadMAP[downloadNAME] == "None" {
+    if cfg!(target_os = "windows") {
+        println!("This is where we go over a few things first\nif you are using Edge browser, you must accept each download as it comes up\notherw the downloads should begin automatically\nplease check back with this terminal periodically to see if there are instructions that precede the next step");
+    } else if cfg!(target_os = "macos") {
+        println!("This is where we go over a few things first\nthis process may seem too fast as it opens a tab in your browser to download the items, \nthe android download you will have to select from the webpage, so keep an eye out for instructions in this terminal");
+    } else if cfg!(target_os = "linux") {
+        println!("This is where we go over a few things first\nif you are using Firefox browser, you must close the browser window \nafter each download has completed in order to start the next one\nplease check back with this terminal periodically to see if there are instructions that precede the next step");
+    }
 
-                if downloadNAME == "android" {
-                    println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
-                } else if downloadNAME == "git" && cfg!(target_os = "linux") {
-                    //skip git on linux
-                    continue                
-                }else {
-                    println!("starting {} download now!\n", downloadNAME);
-                }
+    println!("are you ready to start ?>");
+    print!("y/N !> ");
+    let mut input = String::new();
+    let answerBOX = std::io::stdin().read_line(&mut input).expect("could not read the input #>").to_string();
 
-                start_downloads(&downloadNAME);
-                
-                println!("waiting for browser to download...\n");
+    if answerBOX.to_lowercase().contains("y") {
+        let now = time::Instant::now();
+        let promptTIME = time::Duration::from_secs(150);
 
-                //this whole thing could do with some cleanup
-                if downloadNAME == "android" {
-                    let sleepTIME = time::Duration::from_secs(30);
-                    thread::sleep(sleepTIME);
-                } else if downloadNAME == "git" && !cfg!(target_os = "linux") {
-                    let sleepTIME = time::Duration::from_secs(20);
-                    thread::sleep(sleepTIME);
-                } else {
-                    let sleepTIME = time::Duration::from_secs(5);
-                    thread::sleep(sleepTIME);
-                }
-                
-            } else {
-                //if the key's value is True (already complete), skip
-                continue
-            }
-        }
-
-        for downloadNAME in downloadMAP.clone().keys() {
-            if downloadNAME == "git" && cfg!(target_os = "linux") {
-                //skip git on linux
-                downloadMAP.insert(downloadNAME.to_string(), "True".to_string());
-                continue
-
-            } else  {
-                let sleepTIME = time::Duration::from_secs(1);
-                thread::sleep(sleepTIME);
-
-                let answerBOX = download_complete(&downloadNAME, &_testPATH);
-                downloadMAP.insert(downloadNAME.to_string(), answerBOX);
-            }
-        }
-
-        let mut completeNUM = 0;
-        for downloadNAME in downloadMAP.clone().keys() {
-            if downloadMAP[downloadNAME] == "True" {
-                completeNUM += 1;
-            } else {
-                continue;
-            }
-        }
-
-        if completeNUM == downloadMAP.keys().len() {
-            println!("\n\nall the downloads are complete!\n");
-            break 'download;
-
-        } else if now.elapsed() > promptTIME {
+        'download: loop {
             for downloadNAME in downloadMAP.clone().keys() {
                 if downloadMAP[downloadNAME] == "None" {
-                    println!("the {} download has not started despite multiple attempts\n", downloadNAME.to_string())  
+
+                    if downloadNAME == "android" {
+                        println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
+                    } else if downloadNAME == "git" && cfg!(target_os = "linux") {
+                        //skip git on linux
+                        continue                
+                    }else {
+                        println!("starting {} download now!\n", downloadNAME);
+                    }
+
+                    start_downloads(&downloadNAME);
+                    
+                    println!("waiting for browser to download...\n");
+
+                    //this whole thing could do with some cleanup
+                    if downloadNAME == "android" {
+                        let sleepTIME = time::Duration::from_secs(30);
+                        thread::sleep(sleepTIME);
+                    } else if downloadNAME == "git" && !cfg!(target_os = "linux") {
+                        let sleepTIME = time::Duration::from_secs(20);
+                        thread::sleep(sleepTIME);
+                    } else {
+                        let sleepTIME = time::Duration::from_secs(5);
+                        thread::sleep(sleepTIME);
+                    }
+                    
+                } else {
+                    //if the key's value is True (already complete), skip
+                    continue
+                }
+            }
+
+            for downloadNAME in downloadMAP.clone().keys() {
+                if downloadNAME == "git" && cfg!(target_os = "linux") {
+                    //skip git on linux
+                    downloadMAP.insert(downloadNAME.to_string(), "True".to_string());
+                    continue
+
+                } else  {
+                    let sleepTIME = time::Duration::from_secs(1);
+                    thread::sleep(sleepTIME);
+
+                    let answerBOX = download_complete(&downloadNAME, &_testPATH);
+                    downloadMAP.insert(downloadNAME.to_string(), answerBOX);
+                }
+            }
+
+            let mut completeNUM = 0;
+            for downloadNAME in downloadMAP.clone().keys() {
+                if downloadMAP[downloadNAME] == "True" {
+                    completeNUM += 1;
+                } else {
+                    continue;
+                }
+            }
+
+            if completeNUM == downloadMAP.keys().len() {
+                println!("\n\nAll the downloads are complete !>\n");
+                break 'download;
+
+            } else if now.elapsed() > promptTIME {
+                for downloadNAME in downloadMAP.clone().keys() {
+                    if downloadMAP[downloadNAME] == "None" {
+                        println!("The {} download has not started despite multiple attempts !>\n", downloadNAME.to_string())  
+                    }
                 }
             }
         }
-    }
 
-    if cfg!(target_os = "linux"){
-        extract_studio();
-    }
+        if cfg!(target_os = "linux"){
+            extract_studio();
+        }
 
-    for downloadNAME in downloadMAP.clone().keys() {
-        install_downloads(&downloadNAME);
-    }
+        for downloadNAME in downloadMAP.clone().keys() {
+            install_downloads(&downloadNAME);
+        }
 
-    //we have to run android studio once after installing to install the sdk
-    //need to make a func to see if the sdk is installed before running this,
-    //as android studio has a run after install option, which could also have been triggered
-    if cfg!(target_os = "windows"){
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath")
-                    .arg("'C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe'")
-                    .spawn().expect("could not start android studio at the absolute path");
-    }
+        if &android_install_complete() == "False" {
+            if cfg!(target_os = "windows"){
+                Command::new("powershell.exe").arg("Start-Process").arg("-FilePath")
+                            .arg("'C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe'")
+                            .spawn().expect("could not start android studio at the absolute path #>");
 
-    while git_install_complete() == "False"{
-        let sleepTIME = time::Duration::from_secs(20);
+            } else if cfg!(target_os = "macos") {
+                Command::new("open").arg("'/Applications/Android Studio.app'")
+                            .output().expect("could not start android studio at the absolute path #>");
+
+            } else {
+                let path = dirs::home_dir().unwrap();
+                let mut sdkPATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                sdkPATH += "/Desktop/SDKs//android-studio/bin/studio.sh";
+                Command::new("bash").arg(&sdkPATH).output().expect("could not start android studio at the absolute path #>");
+            }
+        }
+
+        while git_install_complete() == "False"{
+            let sleepTIME = time::Duration::from_secs(20);
+            thread::sleep(sleepTIME);
+        }
+
+        let cloneMAP: IndexMap<String, String> = [
+            ("flutter".to_string(), "False".to_string()),
+            ("co_demo1".to_string(),  "False".to_string()),
+        ].iter().cloned().collect();
+
+        for downloadNAME in cloneMAP.clone().keys() {
+            clone_repo(&downloadNAME);
+        }
+
+        set_path();
+
+        run_doctor();
+
+        //show_licences();
+
+        //run_doctor();
+
+        let sleepTIME = time::Duration::from_secs(60);
         thread::sleep(sleepTIME);
+
+    } else {
+        panic!("you must accept to continue !>");
     }
 
-    let cloneMAP: IndexMap<String, String> = [
-        ("flutter".to_string(), "False".to_string()),
-        ("co_demo1".to_string(),  "False".to_string()),
-    ].iter().cloned().collect();
-
-    for downloadNAME in cloneMAP.clone().keys() {
-        clone_repo(&downloadNAME);
-    }
-
-    set_path();
-
-    run_doctor();
-
-    show_licences();
-
-    run_doctor();
-
-    let sleepTIME = time::Duration::from_secs(60);
-    thread::sleep(sleepTIME);
 }
 
 //the tests all fail properly on mac
@@ -1392,6 +1483,71 @@ mod tests {
 
         }
         panic!("the android studio installation was not found");
+    }
+
+    #[test]
+    fn is_android_sdk_installed() {
+        let androidFOLDER = {
+            if cfg!(target_os = "windows"){
+                let path = dirs::home_dir().unwrap();
+                let mut androidFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+
+                //might use path prefix to make this drive agnostic
+                androidFOLDER += "\\AppData\\Local\\Android";
+                androidFOLDER
+            } else if cfg!(target_os = "macos") {
+                let path = dirs::home_dir().unwrap();
+                let mut androidFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+
+                androidFOLDER += "/Library/Android";
+                androidFOLDER
+
+            }else {
+                let path = dirs::home_dir().unwrap();
+                let mut androidFOLDER = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+                androidFOLDER += "/Android";
+                androidFOLDER
+            }
+        };
+        let programFOLDERS = fs::read_dir(&androidFOLDER).expect("No android app folder found");
+        for folderNAME in programFOLDERS {
+            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
+                                            .file_name()
+                                            .into_string()
+                                            .expect("the post string result which sets folderNAME has broken")
+                                            .to_owned();
+            if cfg!(target_os = "windows"){
+                if folderNAME.contains(&"Sdk"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            } else if cfg!(target_os = "macos") {
+                if folderNAME.contains(&"Sdk"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            } else {
+                if folderNAME.contains(&"Sdk"[..]) {
+                    assert_eq!(true, true);
+                    return
+                } else {
+                    continue
+                }
+            }
+
+        }
+        panic!("the android studio installation was not found");
+
     }
 
     #[test]
