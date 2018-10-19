@@ -1187,14 +1187,15 @@ fn main() {
     } else if cfg!(target_os = "macos") {
         println!("This is where we go over a few things first\nthis process may seem too fast as it opens a tab in your browser to download the items, \nthe android download you will have to select from the webpage, so keep an eye out for instructions in this terminal");
     } else if cfg!(target_os = "linux") {
-        println!("This is where we go over a few things first\nif you are using Firefox browser, you must close the browser window \nafter each download has completed in order to start the next one\nplease check back with this terminal periodically to see if there are instructions that precede the next step");
+        println!("This is where we go over a few things first\nif you are using Firefox browser, you must close the browser window \nafter each download has completed in order to start the next one\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step");
     }
 
     println!("are you ready to start ?>");
     print!("y/N !> ");
+    io::stdout().flush().ok().expect("Could not flush stdout");
     let mut input = String::new();
     let answerBOX = std::io::stdin().read_line(&mut input).expect("could not read the input #>").to_string();
-
+    println!("{:?}", &answerBOX);
     if answerBOX.to_lowercase().contains("y") {
         let now = time::Instant::now();
         let promptTIME = time::Duration::from_secs(150);
