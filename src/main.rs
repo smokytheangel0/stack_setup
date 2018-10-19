@@ -1159,7 +1159,7 @@ fn main() {
     if cfg!(target_os = "windows") {
         println!("This is where we go over a few things first\nif you are using Edge browser,\n you must accept each download as it comes up\notherw the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>\n\nsecond, please close the VSCode window if it opens..>");
     } else if cfg!(target_os = "macos") {
-        println!("This is where we go over a few things first\nthis process may seem too fast as it opens \na tab in your browser to download the items, \nthe android download you will have to select from the webpage, \nso keep an eye out for instructions in this terminal");
+        println!("This is where we go over a few things first\nthis process may seem too fast as it opens \na few tabs in your browser to download the items, \nthe android download you will have to select from the webpage, \nso keep an eye out for instructions in this terminal");
     } else if cfg!(target_os = "linux") {
         println!("This is where we go over a few things first\nif you are using Firefox browser, you must close the browser window \nafter each download has completed in order to start the next one\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step");
     }
@@ -1263,7 +1263,7 @@ fn main() {
 
             } else if cfg!(target_os = "macos") {
                 Command::new("open").arg("'/Applications/Android Studio.app'")
-                            .output().expect("could not start android studio at the absolute path #>");
+                            .spawn().expect("could not start android studio at the absolute path #>");
 
             } else {
                 let path = dirs::home_dir().unwrap();
@@ -1291,16 +1291,10 @@ fn main() {
 
         set_path();
 
-        run_doctor();
-
-        //show_licences();
-
-        //run_doctor();
-
+        println!("install complete, please close this terminal and open a new one ..>\nthen type `flutter doctor --android-licenses` ")
     } else {
         panic!("you must accept to continue !>");
     }
-    println!("please press [ENTER] to finish ..>");
 
 }
 
