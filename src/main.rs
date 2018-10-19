@@ -415,7 +415,7 @@ fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
 
     let alternateGIT: &str = {
         if cfg!(target_os = "windows") {
-            if downloadNAME == "git".to_string() {
+            if downloadNAME == "git" {
                 "Git"
             } else {
                 "None"
@@ -427,13 +427,13 @@ fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
 
     let alternateCODE: &str = {
         if cfg!(target_os = "linux") {
-            if downloadNAME == "VSCode".to_string() {
+            if downloadNAME == "VSCode" {
                 "code_"
             } else {
                 "None"
             }
         } else if cfg!(target_os = "macos") {
-            if downloadNAME == "VSCode".to_string() {
+            if downloadNAME == "VSCode" {
                 "Visual Studio Code"
             } else {
                 "None"
@@ -499,7 +499,7 @@ fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
             "None".to_string()
         };
     
-        if found == "None".to_string() {
+        if found == "None" {
             continue
         } else {
             break
@@ -539,7 +539,7 @@ fn extract_studio() {
     };
     
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
-    let mut filePATH: String = ".None".to_string();
+    let mut filePATH = ".None".to_string();
     for fileNAME in filesInDownloads {
         let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
                                         .file_name()
@@ -557,7 +557,7 @@ fn extract_studio() {
     }
     
     let len = filePATH.len();
-    if filePATH[len-3..] == "zip".to_string() {
+    if &filePATH[len-3..] == "zip" {
         let workingPATH: String = {            
             let path = dirs::home_dir().unwrap();
             let mut workingPATH = path.to_str()
@@ -629,7 +629,7 @@ fn install_downloads(downloadNAME: &str) {
 
     let alternateGIT: &str = {
         if cfg!(target_os = "windows") {
-            if downloadNAME == "git".to_string() {
+            if downloadNAME == "git" {
                 "Git"
             } else {
                 ".None"
@@ -641,13 +641,13 @@ fn install_downloads(downloadNAME: &str) {
 
     let alternateCODE: &str = {
         if cfg!(target_os = "linux") {
-            if downloadNAME == "VSCode".to_string() {
+            if downloadNAME == "VSCode" {
                 "code_"
             } else {
                 ".None"
             }
         } else if cfg!(target_os = "macos") {
-            if downloadNAME == "VSCode".to_string() {
+            if downloadNAME == "VSCode" {
                 "Visual Studio Code"
             } else {
                 ".None"
@@ -684,8 +684,8 @@ fn install_downloads(downloadNAME: &str) {
     }
 
     let len = filePATH.len();
-    if filePATH[len-4..len-1] == "exe".to_string() ||
-       filePATH[len-3..len] == "deb".to_string() 
+    if &filePATH[len-4..len-1] == "exe" ||
+       &filePATH[len-3..len] == "deb" 
     {
         if cfg!(target_os = "linux") {
             Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("lib32stdc++6").arg("git").output().expect("failed to install libgconf-2-4 and git");
@@ -695,12 +695,12 @@ fn install_downloads(downloadNAME: &str) {
         }
     }
 
-    else if filePATH[len-3..len] == "dmg".to_string() ||
-        filePATH[len-3..len] == "app".to_string() {        
+    else if &filePATH[len-3..len] == "dmg" ||
+        &filePATH[len-3..len] == "app" {        
         let mut volumePATH = ".None".to_string();
         let mut appPATH = ".None".to_string();
 
-        if filePATH[len-3..len] == "dmg".to_string() {
+        if &filePATH[len-3..len] == "dmg" {
             let mountCMD = ["hdiutil", "mount"];
             Command::new(&mountCMD[0])
                 .arg(&mountCMD[1]).arg(&filePATH)
@@ -738,7 +738,7 @@ fn install_downloads(downloadNAME: &str) {
                 }
             }
         }
-        if filePATH[len-3..len] == "app".to_string() {
+        if &filePATH[len-3..len] == "app" {
             appPATH = filePATH.clone();
         }
 
@@ -753,7 +753,7 @@ fn install_downloads(downloadNAME: &str) {
                             .output().expect("failed to execute copy cmd");
         }
 
-        if volumePATH != ".None".to_string() {
+        if volumePATH != ".None" {
             let unmountCMD = ["hdiutil", "unmount"];
             Command::new(&unmountCMD[0])
                 .arg(&unmountCMD[1]).arg(&volumePATH)
@@ -796,7 +796,7 @@ fn clone_repo(downloadNAME: &str) {
     println!("cloning: {}", &downloadNAME);
     
     let clonePATH = {
-        if downloadNAME == "flutter".to_owned(){
+        if downloadNAME == "flutter" {
             if cfg!(target_os = "windows"){
                 let path = dirs::home_dir().unwrap();
                 let mut clonePATH = path.to_str()
@@ -832,7 +832,7 @@ fn clone_repo(downloadNAME: &str) {
         }
     };
 
-    if downloadNAME == "flutter".to_string() {
+    if downloadNAME == "flutter" {
         fs::create_dir_all(&clonePATH).expect("failed to create SDK dir");
         env::set_current_dir(&clonePATH).expect("failed to set SDK dir as cwd");
 
@@ -845,7 +845,7 @@ fn clone_repo(downloadNAME: &str) {
         }
         return
 
-    } else if downloadNAME == "co_demo1".to_string() {
+    } else if downloadNAME == "co_demo1" {
         fs::create_dir_all(&clonePATH).expect("failed to create Code dir");
         env::set_current_dir(&clonePATH).expect("failed to set Code dir as cwd");
 
@@ -981,7 +981,7 @@ fn git_install_complete() -> String {
                                             .into_string()
                                             .expect("the post string result which sets folderNAME has broken")
                                             .to_owned();
-                if folderNAME == &"git"[..] {
+                if folderNAME == "git" {
                     return "True".to_owned()
                 } else {
                     continue
@@ -1108,11 +1108,11 @@ fn main() {
         ("android".to_string(),  "None".to_string())    
     ].iter().cloned().collect();
 
-    let _testPATH: String = "None".to_string();
+    let _testPATH = "None".to_string();
     for downloadNAME in downloadMAP.clone().keys() {
         let answerBOX = download_complete(&downloadNAME, &_testPATH);
 
-        if answerBOX == "True".to_string() {
+        if answerBOX == "True" {
             println!("{} is already complete!\n", downloadNAME)
         } else {
             println!("{} has not yet been completed\n", downloadNAME)
@@ -1126,11 +1126,11 @@ fn main() {
 
     'download: loop {
         for downloadNAME in downloadMAP.clone().keys() {
-            if downloadMAP[downloadNAME] == "None".to_string() {
+            if downloadMAP[downloadNAME] == "None" {
 
-                if downloadNAME == &"android".to_string() {
+                if downloadNAME == "android" {
                     println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
-                } else if downloadNAME.to_owned() == "git" && cfg!(target_os = "linux") {
+                } else if downloadNAME == "git" && cfg!(target_os = "linux") {
                     //skip git on linux
                     continue                
                 }else {
@@ -1142,10 +1142,10 @@ fn main() {
                 println!("waiting for browser to download...\n");
 
                 //this whole thing could do with some cleanup
-                if downloadNAME.to_owned() == "android".to_string() {
+                if downloadNAME == "android" {
                     let sleepTIME = time::Duration::from_secs(30);
                     thread::sleep(sleepTIME);
-                } else if downloadNAME.to_owned() == "git".to_string() && !cfg!(target_os = "linux") {
+                } else if downloadNAME == "git" && !cfg!(target_os = "linux") {
                     let sleepTIME = time::Duration::from_secs(20);
                     thread::sleep(sleepTIME);
                 } else {
@@ -1160,7 +1160,7 @@ fn main() {
         }
 
         for downloadNAME in downloadMAP.clone().keys() {
-            if downloadNAME.to_owned() == "git" && cfg!(target_os = "linux") {
+            if downloadNAME == "git" && cfg!(target_os = "linux") {
                 //skip git on linux
                 downloadMAP.insert(downloadNAME.to_string(), "True".to_string());
                 continue
@@ -1176,7 +1176,7 @@ fn main() {
 
         let mut completeNUM = 0;
         for downloadNAME in downloadMAP.clone().keys() {
-            if downloadMAP[downloadNAME] == "True".to_string() {
+            if downloadMAP[downloadNAME] == "True" {
                 completeNUM += 1;
             } else {
                 continue;
@@ -1189,7 +1189,7 @@ fn main() {
 
         } else if now.elapsed() > promptTIME {
             for downloadNAME in downloadMAP.clone().keys() {
-                if downloadMAP[downloadNAME] == "None".to_string() {
+                if downloadMAP[downloadNAME] == "None" {
                     println!("the {} download has not started despite multiple attempts\n", downloadNAME.to_string())  
                 }
             }
