@@ -1022,35 +1022,11 @@ fn android_install_complete() -> String {
             }
         };
 
-        let programFOLDERS = fs::read_dir(&androidFOLDER).unwrap_or(return "False".to_string());
-        for folderNAME in programFOLDERS {
-            let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
-                                            .file_name()
-                                            .into_string()
-                                            .expect("the post string result which sets folderNAME has broken")
-                                            .to_owned();
-            if cfg!(target_os = "windows"){
-                if folderNAME.contains(&"Sdk"[..]) {
-                    return "True".to_string()
-                } else {
-                    continue
-                }
-            } else if cfg!(target_os = "macos") {
-                if folderNAME.contains(&"Sdk"[..]) {
-                    return "True".to_string()
-                } else {
-                    continue
-                }
-            } else {
-                if folderNAME.contains(&"Sdk"[..]) {
-                    return "True".to_string()
-                } else {
-                    continue
-                }
-            }
-
+        let folderRESULT = fs::read_dir(&androidFOLDER);
+        match folderRESULT {
+            Ok(_val) => return "True".to_string(),
+            Err(_err) => return "False".to_string()
         }
-        return "False".to_string()
 }
 
 fn setup_xcode() -> String {
@@ -1185,7 +1161,7 @@ fn main() {
     
 
     if cfg!(target_os = "windows") {
-        println!("This is where we go over a few things first\nif you are using Edge browser\n, you must accept each download as it comes up\notherw the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>/n/nsecond, please close the VSCode window if it opens..>");
+        println!("This is where we go over a few things first\nif you are using Edge browser\n, you must accept each download as it comes up\notherw the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>\n\nsecond, please close the VSCode window if it opens..>");
     } else if cfg!(target_os = "macos") {
         println!("This is where we go over a few things first\nthis process may seem too fast as it opens a tab in your browser to download the items, \nthe android download you will have to select from the webpage, so keep an eye out for instructions in this terminal");
     } else if cfg!(target_os = "linux") {
@@ -1263,7 +1239,7 @@ fn main() {
             }
 
             if completeNUM == downloadMAP.keys().len() {
-                println!("\n\nAll the downloads are complete !>\n");
+                println!("\nAll the downloads are complete !>\n");
                 break 'download;
 
             } else if now.elapsed() > promptTIME {
