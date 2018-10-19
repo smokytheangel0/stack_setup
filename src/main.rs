@@ -606,7 +606,14 @@ fn extract_studio() {
 }
 
 fn install_downloads(downloadNAME: &str) {
-    println!("starting the {} installer !>", &downloadNAME);
+    let printBOX = {
+        if cfg!(target_os = "mac os") {
+            "Copying".to_string()
+        } else {
+            "Starting".to_string()
+        }
+    };
+    println!("{} the {} installer !>", &printBOX, &downloadNAME);
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = dirs::home_dir().unwrap();
@@ -865,7 +872,7 @@ fn clone_repo(downloadNAME: &str) {
 }
 
 fn set_path() {
-    println!("setting path!");
+    println!("setting path !>");
     let homePATH = {
         if cfg!(unix){
             let path = dirs::home_dir().unwrap();
@@ -902,7 +909,6 @@ fn set_path() {
         writeln!(fileBOX, "export PATH=$ANDROID_HOME/tools:$PATH").expect("failed to write unix tools path");
         writeln!(fileBOX, "export PATH=$ANDROID_HOME/platform-tools:$PATH").expect("failed to write unix platform tools path");
         Command::new("sudo").arg(".").arg(&homePATH).output().expect("failed to refresh bash_profile");
-        println!("{:?}", &homePATH);
     }
 
     #[cfg(windows)]
@@ -939,22 +945,13 @@ fn set_path() {
         }
         let androidPATH = format!("{}\\AppData\\Local\\Android\\Sdk;", &homePATH);
 
-        let output = Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
-        println!("{}", String::from_utf8_lossy(&output.stdout));
-        println!("{}", String::from_utf8_lossy(&output.stderr));
+        Command::new("powershell.exe").arg("setx").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
 
-        let output = Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
-        println!("{}", String::from_utf8_lossy(&output.stdout));
-        println!("{}", String::from_utf8_lossy(&output.stderr));
+        Command::new("powershell.exe").arg("set").arg("ANDROID_HOME").arg(&androidPATH).output().expect("failed to make android_home var");
 
-        println!("path to be set: {:?}", &outPATH);
-        let output = Command::new("powershell.exe").arg("setx").arg("Path").arg(&outPATH).output().expect("failed to set path");
-        println!("{}", String::from_utf8_lossy(&output.stdout));
-        println!("{}", String::from_utf8_lossy(&output.stderr)); 
+        Command::new("powershell.exe").arg("setx").arg("Path").arg(&outPATH).output().expect("failed to set path");
 
-        let output = Command::new("powershell.exe").arg("set").arg("Path").arg(&outPATH).output().expect("failed to set path");
-        println!("{}", String::from_utf8_lossy(&output.stdout));
-        println!("{}", String::from_utf8_lossy(&output.stderr));        
+        Command::new("powershell.exe").arg("set").arg("Path").arg(&outPATH).output().expect("failed to set path");
     }
 }
 
@@ -1072,6 +1069,7 @@ fn show_licences() {
 }
 
 fn run_doctor() {
+    println!("starting flutter for the first time !>");
     let binPATH = {
         if cfg!(target_os = "windows"){
             let path = dirs::home_dir().unwrap();
@@ -1096,7 +1094,7 @@ fn run_doctor() {
     if cfg!(unix){
         Command::new("bash").arg(&binPATH).arg("doctor").spawn().expect("failed to run flutter doctor command");
     } else {
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").spawn().expect("failed to run flutter command");
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").arg("-Wait").output().expect("failed to run flutter command");
     }
 }
 
@@ -1161,9 +1159,9 @@ fn main() {
     
 
     if cfg!(target_os = "windows") {
-        println!("This is where we go over a few things first\nif you are using Edge browser\n, you must accept each download as it comes up\notherw the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>\n\nsecond, please close the VSCode window if it opens..>");
+        println!("This is where we go over a few things first\nif you are using Edge browser,\n you must accept each download as it comes up\notherw the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>\n\nsecond, please close the VSCode window if it opens..>");
     } else if cfg!(target_os = "macos") {
-        println!("This is where we go over a few things first\nthis process may seem too fast as it opens a tab in your browser to download the items, \nthe android download you will have to select from the webpage, so keep an eye out for instructions in this terminal");
+        println!("This is where we go over a few things first\nthis process may seem too fast as it opens \na tab in your browser to download the items, \nthe android download you will have to select from the webpage, \nso keep an eye out for instructions in this terminal");
     } else if cfg!(target_os = "linux") {
         println!("This is where we go over a few things first\nif you are using Firefox browser, you must close the browser window \nafter each download has completed in order to start the next one\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step");
     }
@@ -1262,8 +1260,8 @@ fn main() {
         if &android_install_complete() == "False" {
             if cfg!(target_os = "windows"){
                 Command::new("powershell.exe").arg("Start-Process").arg("-FilePath")
-                            .arg("'C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe'")
-                            .spawn().expect("could not start android studio at the absolute path #>");
+                            .arg("'C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe'").arg("-Wait")
+                            .output().expect("could not start android studio at the absolute path #>");
 
             } else if cfg!(target_os = "macos") {
                 Command::new("open").arg("'/Applications/Android Studio.app'")
@@ -1304,6 +1302,7 @@ fn main() {
     } else {
         panic!("you must accept to continue !>");
     }
+    println!("please press [ENTER] to finish ..>");
 
 }
 
