@@ -380,7 +380,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 /// 
 //#endregion
 fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
-    println!("checking to see if the {} is complete", &downloadNAME);
+    println!("checking to see if the {} is complete ?>", &downloadNAME);
     let outBOX: String = "None".to_string();
 
     let downloadsPATH: String = {
@@ -514,7 +514,7 @@ fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
 }
 
 fn extract_studio() {
-    println!("extracting android studio");
+    println!("extracting android studio !>");
 
     let downloadNAME = "android".to_string();
 
@@ -606,7 +606,7 @@ fn extract_studio() {
 }
 
 fn install_downloads(downloadNAME: &str) {
-    println!("starting the {} installer", &downloadNAME);
+    println!("starting the {} installer !>", &downloadNAME);
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = dirs::home_dir().unwrap();
@@ -793,7 +793,7 @@ fn install_downloads(downloadNAME: &str) {
 }
 
 fn clone_repo(downloadNAME: &str) {
-    println!("cloning: {}", &downloadNAME);
+    println!("cloning {} !>", &downloadNAME);
     
     let clonePATH = {
         if downloadNAME == "flutter" {
@@ -962,6 +962,7 @@ fn git_install_complete() -> String {
     #[cfg(windows)]
     {
             //this works in win
+            println!("\n");
             let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
             let environment = hklm.open_subkey("SOFTWARE\\GitForWindows");
             match environment {
@@ -972,8 +973,8 @@ fn git_install_complete() -> String {
 
     #[cfg(unix)]
     {
+        println!("\n");
         let gitFOLDER = "/usr/bin/".to_owned();
-        println!("searching {}", &gitFOLDER);
         let programFOLDERS = fs::read_dir(&gitFOLDER).expect("No git app folder found");
         for folderNAME in programFOLDERS {
             let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
@@ -1191,12 +1192,12 @@ fn main() {
     }
 
     println!("\nare you ready to start ?>");
-    print!("y/N !> ");
+    print!("y/N ?> ");
     io::stdout().flush().ok().expect("Could not flush stdout");
     let mut inBOX = String::new();
     std::io::stdin().read_line(&mut inBOX).expect("could not read the inBOX #>");
     println!("\n");
-    
+
     if inBOX.to_lowercase().contains("y") {
         let now = time::Instant::now();
         let promptTIME = time::Duration::from_secs(150);
@@ -1684,7 +1685,6 @@ mod tests {
         #[cfg(unix)]
         {
             let gitFOLDER = "/usr/bin/".to_owned();
-            println!("searching {}", &gitFOLDER);
             let programFOLDERS = fs::read_dir(&gitFOLDER).expect("No git app folder found");
             for folderNAME in programFOLDERS {
                 let folderNAME: String = folderNAME.expect("the pre string result which sets folderNAME has broken")
