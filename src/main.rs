@@ -917,7 +917,6 @@ fn set_path() {
         let hklm = RegKey::predef(HKEY_CURRENT_USER);
         let environment = hklm.open_subkey("Environment").expect("could not open Environment key for flutter");
         let oldPATH: String = environment.get_value("Path").expect("could not open Path value for flutter");
-        println!("oldPATH is: \n{}", &oldPATH);
 
         let mut cleanPATH: Vec<String> = vec![]; 
         let mut outPATH = "".to_string();
@@ -1262,7 +1261,7 @@ fn main() {
                             .output().expect("could not start android studio at the absolute path #>");
 
             } else if cfg!(target_os = "macos") {
-                Command::new("open").arg("'/Applications/Android Studio.app'")
+                Command::new("open").arg("-a").arg("'Android Studio'")
                             .spawn().expect("could not start android studio at the absolute path #>");
 
             } else {
