@@ -923,7 +923,6 @@ fn set_path() {
         if oldPATH.contains("%USERPROFILE%") {
             let pathVEC: Vec<&str> = oldPATH.split(";").collect();
             for path in &pathVEC {
-                println!("{}", &path);
                 let path = path.to_owned();
                 let optBOX = path.rfind("%");
                 let mut endINDEX: usize = 0;
@@ -1156,7 +1155,7 @@ fn main() {
     
 
     if cfg!(target_os = "windows") {
-        println!("This is where we go over a few things first\nif you are using Edge browser,\n you must accept each download as it comes up\notherw the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>\n\nsecond, please close the VSCode window if it opens..>");
+        println!("This is where we go over a few things first\nif you are using Edge browser,\n you must accept each download as it comes up\notherwise the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>\n\nsecond, please close the VSCode window if it opens..>");
     } else if cfg!(target_os = "macos") {
         println!("This is where we go over a few things first\nthis process may seem too fast as it opens \na few tabs in your browser to download the items, \nthe android download you will have to select from the webpage, \nso keep an eye out for instructions in this terminal");
     } else if cfg!(target_os = "linux") {
