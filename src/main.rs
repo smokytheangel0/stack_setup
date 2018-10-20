@@ -62,6 +62,11 @@
 /// RE: crdownload 
 /// add a bit in which remembers the name of any previous crdownloads and blacklists them
 /// 
+/// RE: branching reduction
+/// replace download folder branches with a single dirs::download_dir
+/// 
+/// 
+/// 
 
 //so far ~1127 lines of function code
 // ~139 lines in main
@@ -614,6 +619,7 @@ fn install_downloads(downloadNAME: &str) {
         }
     };
     println!("{} the {} installer !>", &printBOX, &downloadNAME);
+
     let downloadsPATH: String = {
         if cfg!(windows){
             let path = dirs::home_dir().unwrap();
@@ -956,14 +962,14 @@ fn set_path() {
 fn git_install_complete() -> String {
     #[cfg(windows)]
     {
-            //this works in win
-            println!("\n");
-            let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-            let environment = hklm.open_subkey("SOFTWARE\\GitForWindows");
-            match environment {
-                Result::Ok(val) => return "True".to_string(),
-                Result::Err(err) => return "False".to_string()
-            }
+        //this works in win
+        println!("\n");
+        let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+        let environment = hklm.open_subkey("SOFTWARE\\GitForWindows");
+        match environment {
+            Result::Ok(val) => return "True".to_string(),
+            Result::Err(err) => return "False".to_string()
+        }
     }
 
     #[cfg(unix)]
@@ -988,40 +994,40 @@ fn git_install_complete() -> String {
 }
 
 fn android_install_complete() -> String {
-        let androidFOLDER = {
-            if cfg!(target_os = "windows"){
-                let path = dirs::home_dir().unwrap();
-                let mut androidFOLDER = path.to_str()
-                                    .unwrap()
-                                    .to_owned();
+    let androidFOLDER = {
+        if cfg!(target_os = "windows"){
+            let path = dirs::home_dir().unwrap();
+            let mut androidFOLDER = path.to_str()
+                                .unwrap()
+                                .to_owned();
 
-                //might use path prefix to make this drive agnostic
-                androidFOLDER += "\\AppData\\Local\\Android";
-                androidFOLDER
-            } else if cfg!(target_os = "macos") {
-                let path = dirs::home_dir().unwrap();
-                let mut androidFOLDER = path.to_str()
-                                    .unwrap()
-                                    .to_owned();
+            //might use path prefix to make this drive agnostic
+            androidFOLDER += "\\AppData\\Local\\Android";
+            androidFOLDER
+        } else if cfg!(target_os = "macos") {
+            let path = dirs::home_dir().unwrap();
+            let mut androidFOLDER = path.to_str()
+                                .unwrap()
+                                .to_owned();
 
-                androidFOLDER += "/Library/Android";
-                androidFOLDER
+            androidFOLDER += "/Library/Android";
+            androidFOLDER
 
-            }else {
-                let path = dirs::home_dir().unwrap();
-                let mut androidFOLDER = path.to_str()
-                                    .unwrap()
-                                    .to_owned();
-                androidFOLDER += "/Android";
-                androidFOLDER
-            }
-        };
-
-        let folderRESULT = fs::read_dir(&androidFOLDER);
-        match folderRESULT {
-            Ok(_val) => return "True".to_string(),
-            Err(_err) => return "False".to_string()
+        }else {
+            let path = dirs::home_dir().unwrap();
+            let mut androidFOLDER = path.to_str()
+                                .unwrap()
+                                .to_owned();
+            androidFOLDER += "/Android";
+            androidFOLDER
         }
+    };
+
+    let folderRESULT = fs::read_dir(&androidFOLDER);
+    match folderRESULT {
+        Ok(_val) => return "True".to_string(),
+        Err(_err) => return "False".to_string()
+    }
 }
 
 fn setup_xcode() -> String {
@@ -1105,15 +1111,25 @@ enum DownloadStatus {
     Complete
 }
 
+struct DownloadItem {
+    name: String,
+    DownloadStatus: DownloadStatus,
+    url: String,
+    winBIN: String,
+    unixBIN: String,
+    winPATH: String,
+    macPATH: String,
+    linPATH: String
+}
 
 // Copyright 2012-2017 The Rust Project Developers. See the COPYRIGHT
-// fileBOX at the top-level directory of this distribution and at
+// file at the top-level directory of this distribution and at
 // http://rust-lang.org/COPYRIGHT.
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
-// option. This fileBOX may not be copied, modified, or distributed
+// option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
 macro_rules! cfg_if {
@@ -1129,6 +1145,9 @@ macro_rules! cfg_if {
         }
     }
 }
+
+//ENDLICENCE
+//START MODIFIED APACHE LICENCE DEFINED AT TOP OF PAGE
 
 fn main() {
     check_dirs();
