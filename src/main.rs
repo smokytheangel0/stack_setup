@@ -1281,10 +1281,10 @@ fn main() {
 
             } else if cfg!(target_os = "macos") {
                 //this runs sporadically or too late
-                let sleepTIME = time::Duration::from_secs(5);
-                thread::sleep(sleepTIME);
+                //let sleepTIME = time::Duration::from_secs(5);
+                //thread::sleep(sleepTIME);
 
-                Command::new("open").arg("-a").arg("'Android Studio'")
+                Command::new("open").arg("-a").arg("Android\ Studio")
                             .spawn().expect("could not start android studio at the absolute path #>");
 
             } else {
