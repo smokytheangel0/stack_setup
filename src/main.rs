@@ -1308,7 +1308,7 @@ fn main() {
 
         set_path();
 
-        println!("install complete, please close this terminal and open a new one ..>\nthen type `flutter doctor --android-licenses` ")
+        println!("install complete, please close this terminal and open a new one ..>\nthen type `flutter doctor --android-licenses` ..>");
     } else {
         panic!("you must accept to continue !>");
     }
