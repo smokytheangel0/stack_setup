@@ -904,7 +904,7 @@ fn set_path() {
                             .append(true)
                             .open(&homePATH) {
                                 Ok(val) => val,
-                                Err(err) => OpenOptions::new().write(true).create_new(true).open(&homePATH).expect("could not create new bash_profile")
+                                Err(_) => OpenOptions::new().write(true).create_new(true).open(&homePATH).expect("could not create new bash_profile")
                             };
 
         if cfg!(target_os = "linux"){
@@ -915,7 +915,7 @@ fn set_path() {
         writeln!(fileBOX, "export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH").expect("failed to write unix flutter path");
         writeln!(fileBOX, "export PATH=$ANDROID_HOME/tools:$PATH").expect("failed to write unix tools path");
         writeln!(fileBOX, "export PATH=$ANDROID_HOME/platform-tools:$PATH").expect("failed to write unix platform tools path");
-        Command::new("sudo").arg(".").arg(&homePATH).output().expect("failed to refresh bash_profile");
+        Command::new("sudo").arg(".").arg(&homePATH).spawn().expect("failed to refresh bash_profile");
     }
 
     #[cfg(windows)]
@@ -1274,6 +1274,7 @@ fn main() {
         }
 
         if &android_install_complete() == "False" {
+            println!("starting the android SDK installer !>");
             if cfg!(target_os = "windows"){
                 Command::new("powershell.exe").arg("Start-Process").arg("-FilePath")
                             .arg("'C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe'").arg("-Wait")
