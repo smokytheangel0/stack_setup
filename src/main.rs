@@ -611,6 +611,7 @@ fn extract_studio() {
 }
 
 fn install_downloads(downloadNAME: &str) {
+    //this part is not simple, should be and use enums and possibly allow config of the else at the bottom for weird ones like android
     let printBOX = {
         if cfg!(target_os = "mac os") {
             "Copying".to_string()
@@ -1279,6 +1280,10 @@ fn main() {
                             .output().expect("could not start android studio at the absolute path #>");
 
             } else if cfg!(target_os = "macos") {
+                //this runs sporadically or too late
+                let sleepTIME = time::Duration::from_secs(5);
+                thread::sleep(sleepTIME);
+
                 Command::new("open").arg("-a").arg("'Android Studio'")
                             .spawn().expect("could not start android studio at the absolute path #>");
 
@@ -1307,7 +1312,7 @@ fn main() {
         }
 
         set_path();
-
+        //linux needs source before running doctor and after restart...
         println!("install complete, please close this terminal and open a new one ..>\nthen type `flutter doctor --android-licenses` ..>");
     } else {
         panic!("you must accept to continue !>");
