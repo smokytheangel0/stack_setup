@@ -881,12 +881,19 @@ fn clone_repo(downloadNAME: &str) {
 fn set_path() {
     println!("setting path !>");
     let homePATH = {
-        if cfg!(unix){
+        if cfg!(target_os = "macos"){
             let path = dirs::home_dir().unwrap();
             let mut homePATH = path.to_str()
                                         .unwrap()
                                         .to_owned();
             homePATH += "/.bash_profile";
+            homePATH
+        } else if cfg!(target_os = "linux") {
+            let path = dirs::home_dir().unwrap();
+            let mut homePATH = path.to_str()
+                                    .unwrap()
+                                    .to_owned();
+            homePATH += "/.bashrc";
             homePATH
         } else {
             let path = dirs::home_dir().unwrap();
