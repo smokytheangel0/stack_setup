@@ -922,7 +922,7 @@ fn set_path() {
         writeln!(fileBOX, "export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH").expect("failed to write unix flutter path");
         writeln!(fileBOX, "export PATH=$ANDROID_HOME/tools:$PATH").expect("failed to write unix tools path");
         writeln!(fileBOX, "export PATH=$ANDROID_HOME/platform-tools:$PATH").expect("failed to write unix platform tools path");
-        let cmdPATH = format!("sudo source {}", &homePATH);
+        let cmdPATH = format!("source {}", &homePATH);
         println!("{:?}", &cmdPATH);
         Command::new(&cmdPATH).spawn().expect("failed to refresh bash_profile");
     }
