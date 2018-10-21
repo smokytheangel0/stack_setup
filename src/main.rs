@@ -915,7 +915,7 @@ fn set_path() {
         writeln!(fileBOX, "export PATH=$HOME/Desktop/SDKs/flutter/bin:$PATH").expect("failed to write unix flutter path");
         writeln!(fileBOX, "export PATH=$ANDROID_HOME/tools:$PATH").expect("failed to write unix tools path");
         writeln!(fileBOX, "export PATH=$ANDROID_HOME/platform-tools:$PATH").expect("failed to write unix platform tools path");
-        Command::new("sudo").arg("bash").arg(".").arg(&homePATH).spawn().expect("failed to refresh bash_profile");
+        Command::new("sudo").arg("bash").arg("source").arg(&homePATH).spawn().expect("failed to refresh bash_profile");
     }
 
     #[cfg(windows)]
@@ -1179,7 +1179,7 @@ fn main() {
     } else if cfg!(target_os = "macos") {
         println!("This is where we go over a few things first\nthis process may seem too fast as it opens \na few tabs in your browser to download the items, \nthe android download you will have to select from the webpage, \nso keep an eye out for instructions in this terminal");
     } else if cfg!(target_os = "linux") {
-        println!("This is where we go over a few things first\nif you are using Firefox browser, you must close the browser window \nafter each download has completed in order to start the next one\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step");
+        println!("This is where we go over a few things first\nif you are using Firefox browser, you must close the browser window \nafter each download has completed in order to start the next one\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>");
     }
 
     println!("\nare you ready to start ?>");
