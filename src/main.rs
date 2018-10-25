@@ -1051,69 +1051,6 @@ fn setup_xcode() -> String {
     errorBOX
 }
 
-fn show_licences() {
-    //show android licences
-    //if mac show xcode licence
-
-    //this and the run doctor functionality should be enclosed in a sh and ps1 script
-    //this is because the paths no matter what we try, seem to never get refreshed properly
-    let binPATH = {
-        if cfg!(target_os = "windows"){
-            let path = dirs::home_dir().unwrap();
-            let mut binPATH = path.to_str()
-                                .unwrap()
-                                .to_owned();
-            binPATH += "'\\Desktop\\SDKs\\flutter\\bin\\flutter.bat'";
-            binPATH
-        } else {
-            let path = dirs::home_dir().unwrap();
-            let mut binPATH = path.to_str()
-                                .unwrap()
-                                .to_owned();
-            binPATH += "/Desktop/SDKs/flutter/bin/flutter";
-            binPATH
-        }
-    };
-
-    if cfg!(unix){
-        Command::new("bash").arg(&binPATH).arg("doctor --android-licenses").spawn().expect("failed to run flutter doctor license command");
-    } else {
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor --android-licenses'").spawn().expect("failed to run flutter doctor license command");
-    }
-}
-
-fn run_doctor() {
-    println!("starting flutter for the first time !>");
-    let binPATH = {
-        if cfg!(target_os = "windows"){
-            let path = dirs::home_dir().unwrap();
-            let mut binPATH = path.to_str()
-                                .unwrap()
-                                .to_owned();
-            binPATH += "\\Desktop\\SDKs\\flutter\\bin\\flutter.bat";
-            binPATH = format!("'{}'", &binPATH);
-            binPATH
-        } else {
-            let path = dirs::home_dir().unwrap();
-            let mut binPATH = path.to_str()
-                                .unwrap()
-                                .to_owned();
-            binPATH += "/Desktop/SDKs/flutter/bin/flutter";
-            binPATH
-        }
-    };
-
-    if cfg!(unix){
-        Command::new("bash").arg(&binPATH).arg("doctor").output().expect("failed to run flutter doctor command");
-    } else {
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&binPATH).arg("'doctor'").arg("-Wait").output().expect("failed to run flutter command");
-    }
-}
-
-fn background_test() -> String {
-    let errorBOX = String::from("");
-    errorBOX
-}
 
 enum DownloadStatus {
     NotStarted,
@@ -1125,6 +1062,7 @@ struct DownloadItem {
     name: String,
     DownloadStatus: DownloadStatus,
     url: String,
+    waitTIME: time::Duration,
     winBIN: String,
     unixBIN: String,
     winPATH: String,
@@ -1160,8 +1098,6 @@ macro_rules! cfg_if {
 //START MODIFIED APACHE LICENCE DEFINED AT TOP OF PAGE
 
 fn main() {
-    check_dirs();
-
     let mut downloadMAP: IndexMap<String, String> = [
         ("StarUML".to_string(),  "None".to_string()),
         ("git".to_string(),      "None".to_string()),
@@ -1194,11 +1130,11 @@ fn main() {
     println!("\nare you ready to start ?>");
     print!("y/N ?> ");
     io::stdout().flush().ok().expect("Could not flush stdout");
-    let mut inBOX = String::new();
-    std::io::stdin().read_line(&mut inBOX).expect("could not read the inBOX #>");
+    let mut inBOX0 = String::new();
+    std::io::stdin().read_line(&mut inBOX0).expect("could not read the inBOX #>");
     println!("\n");
 
-    if inBOX.to_lowercase().contains("y") {
+    if inBOX0.to_lowercase().contains("y") {
         let now = time::Instant::now();
         let promptTIME = time::Duration::from_secs(150);
 
@@ -1324,6 +1260,8 @@ fn main() {
         set_path();
         //linux needs source before running doctor and after restart...
         println!("install complete, please close this terminal and open a new one ..>\nthen type `flutter doctor --android-licenses` ..>");
+        let mut inBOX1 = String::new();
+        std::io::stdin().read_line(&mut inBOX1).expect("could not read the inBOX #>");
     } else {
         panic!("you must accept to continue !>");
     }
