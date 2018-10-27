@@ -9,6 +9,7 @@ indexmap = "1.0.1"
 zip = "0.4.2"
 fs_extra = "1.1.0"
 dirs = "1.0.4"
+rand = "0.5.5"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.5"

@@ -65,7 +65,8 @@
 /// RE: branching reduction
 /// replace download folder branches with a single dirs::download_dir
 /// 
-/// 
+/// RE: Versioning
+/// After implementing the struct, add logic to update version string in struct upon startup
 /// 
 
 //so far ~1127 lines of function code
@@ -76,7 +77,9 @@ extern crate indexmap;
 use indexmap::IndexMap;
 extern crate zip;
 extern crate dirs;
+extern crate rand;
 
+use rand::{thread_rng, Rng};
 use std::fs;
 use std::io;
 use std::env;
@@ -281,6 +284,32 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     
 }
 
+fn gather_unconfirmed() -> Vec<String> {
+    let mut outVEC: Vec<String> = vec![];
+
+    let pathBUFFER = dirs::download_dir().unwrap();
+    let downloadsPATH: &str = pathBUFFER.to_str().unwrap();
+
+    let filesInDownloads: ReadDir = {
+        fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke")
+    };
+
+    for fileNAME in filesInDownloads {
+        let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
+                                        .file_name()
+                                        .into_string()
+                                        .expect("the post string result which sets fileNAME has broken")
+                                        .to_owned();
+
+        if fileNAME.contains("Unconfirmed") {
+            let fileNAME = fileNAME.clone();
+            outVEC.push(fileNAME);
+        }
+
+    }
+    outVEC
+
+}
 //#region py_is_complete
 ///this is what the [download_complete] function is in python
 ///```python
@@ -384,7 +413,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 /// ```
 /// 
 //#endregion
-fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
+fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<String>) -> String {
     println!("checking to see if the {} is complete ?>", &downloadNAME);
     let outBOX: String = "None".to_string();
 
@@ -451,7 +480,7 @@ fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
     let mut unconfirmed: i16 = 0;
     //how many unwraps can one rapper stack if
     //one rapper could stack unwraps delicately
-    for fileNAME in filesInDownloads {
+    'search: for fileNAME in filesInDownloads {
         let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
                                         .file_name()
                                         .into_string()
@@ -460,6 +489,13 @@ fn download_complete(downloadNAME: &str, testPATH: &str) -> String {
                                     
         //to ignore previous crdownloads, flag the first run, if any are found, keep its number
         //then add a branch inside unconfirmed branch that ignores that number and only returns true from a new number
+        for previousDL in unconfirmedLIST.clone() {
+            if fileNAME.contains(&previousDL){
+                continue 'search
+            } else {
+                continue
+            }
+        }
 
         let found: String = {
             if fileNAME.contains(&downloadNAME) || 
@@ -1053,9 +1089,9 @@ fn setup_xcode() -> String {
 
 
 enum DownloadStatus {
-    NotStarted,
-    InProgress,
-    Complete
+    NotStarted, // None
+    InProgress, // False
+    Complete    // True
 }
 
 struct DownloadItem {
@@ -1098,6 +1134,7 @@ macro_rules! cfg_if {
 //START MODIFIED APACHE LICENCE DEFINED AT TOP OF PAGE
 
 fn main() {
+    let unconfirmedLIST = gather_unconfirmed();
     let mut downloadMAP: IndexMap<String, String> = [
         ("StarUML".to_string(),  "None".to_string()),
         ("git".to_string(),      "None".to_string()),
@@ -1107,7 +1144,7 @@ fn main() {
 
     let _testPATH = "None".to_string();
     for downloadNAME in downloadMAP.clone().keys() {
-        let answerBOX = download_complete(&downloadNAME, &_testPATH);
+        let answerBOX = download_complete(&downloadNAME, &_testPATH, &unconfirmedLIST);
 
         if answerBOX == "True" {
             println!("{} is already complete !>\n", downloadNAME)
@@ -1183,7 +1220,7 @@ fn main() {
                     let sleepTIME = time::Duration::from_secs(1);
                     thread::sleep(sleepTIME);
 
-                    let answerBOX = download_complete(&downloadNAME, &_testPATH);
+                    let answerBOX = download_complete(&downloadNAME, &_testPATH, &unconfirmedLIST);
                     downloadMAP.insert(downloadNAME.to_string(), answerBOX);
                 }
             }
@@ -1297,6 +1334,25 @@ mod tests {
         panic!("xCode installation not found");
     }
 
+    #[test]
+    fn unconfirmed_download(){
+        let pathBUFFER = dirs::download_dir().unwrap();
+        let mut unconfirmedPATH = pathBUFFER.to_str().unwrap().to_owned();
+        
+        let mut range = thread_rng();
+        let randomNUM = range.gen_range(0, 1000000).to_string();
+        
+        let randomNAME = "Unconfirmed ".to_string()+&randomNUM+&".crdownload".to_string();
+        unconfirmedPATH += &randomNAME;
+
+        OpenOptions::new().write(true).create_new(true).open(&unconfirmedPATH).expect("could not create new unconfirmed download");
+
+        let unconfirmedLIST = gather_unconfirmed();
+        assert_eq!(unconfirmedLIST, [randomNAME]);
+
+        //might be good to do some teardown here but it is not necessary
+ 
+    }
     /*
     might need to have this piggyback off flutter doctor
     #[test]
@@ -1887,7 +1943,8 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = download_complete(&downloadNAME, &testPATH);
+            let unconfirmedLIST = gather_unconfirmed();
+            let outBOX = download_complete(&downloadNAME, &testPATH, &unconfirmedLIST);
             testLIST.push(outBOX);
         }
         
@@ -1932,7 +1989,8 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = download_complete(&downloadNAME, &testPATH);
+            let unconfirmedLIST = gather_unconfirmed();
+            let outBOX = download_complete(&downloadNAME, &testPATH, &unconfirmedLIST);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -1974,7 +2032,8 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = download_complete(&downloadNAME, &testPATH);
+            let unconfirmedLIST = gather_unconfirmed();
+            let outBOX = download_complete(&downloadNAME, &testPATH, &unconfirmedLIST);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -2017,7 +2076,8 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = download_complete(&downloadNAME, &testPATH);
+            let unconfirmedLIST = gather_unconfirmed();
+            let outBOX = download_complete(&downloadNAME, &testPATH, &unconfirmedLIST);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -2060,7 +2120,8 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = download_complete(&downloadNAME, &testPATH);
+            let unconfirmedLIST = gather_unconfirmed();
+            let outBOX = download_complete(&downloadNAME, &testPATH, &unconfirmedLIST);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -2104,7 +2165,8 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = download_complete(&downloadNAME, &testPATH);
+            let unconfirmedLIST = gather_unconfirmed();
+            let outBOX = download_complete(&downloadNAME, &testPATH, &unconfirmedLIST);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -2148,7 +2210,8 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = download_complete(&downloadNAME, &testPATH);
+            let unconfirmedLIST = gather_unconfirmed();
+            let outBOX = download_complete(&downloadNAME, &testPATH, &unconfirmedLIST);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -2192,7 +2255,8 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = download_complete(&downloadNAME, &testPATH);
+            let unconfirmedLIST = gather_unconfirmed();
+            let outBOX = download_complete(&downloadNAME, &testPATH, &unconfirmedLIST);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
@@ -2236,7 +2300,8 @@ mod tests {
         for index in 0..fileLIST.len() {
             //this returns an option to unwrap
             let downloadNAME = fileLIST.get(index).unwrap().to_string();
-            let outBOX = download_complete(&downloadNAME, &testPATH);
+            let unconfirmedLIST = gather_unconfirmed();
+            let outBOX = download_complete(&downloadNAME, &testPATH, &unconfirmedLIST);
             testLIST.push(outBOX);
         }
         assert_eq!(testLIST[0], "True");
