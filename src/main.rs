@@ -561,18 +561,18 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
 
 fn focus_terminal() {
     if cfg!(target_os = "linux"){
-        Command::new("xdotool").arg("search").arg("--name").arg("windowraise").output().expect("unable to raise terminal");
+        Command::new("xdotool").arg("search").arg("--name").arg("terminal").arg("windowraise").output().expect("unable to raise terminal");
     } else if cfg!(target_os = "windows") {
         Command::new("
-            Add-Type @'
+            Add-Type @\"
                 using System;
                 using System.Runtime.InteropServices;
                 public class SFW {
-                    [DllImport('user32.dll')]
+                    [DllImport(\"user32.dll\")]
                     [return: MarshalAs(UnmanagedType.Bool)]
                     public static extern bool SetForegroundWindow(IntPtr hWnd);
                 }
-            '@
+            \"@
             $h = (Get-Process cmd).MainWindowHandle
             [SFW]::SetForegroundWindow($h)
         ").output().expect("failed to add foregoundwindow type");
