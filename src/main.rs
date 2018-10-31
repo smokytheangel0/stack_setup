@@ -569,13 +569,13 @@ fn focus_terminal() {
             let mut inBOX1 = String::new();
 
            match Command::new("powershell -ExecutionPolicy ByPass -File focus_terminal.ps1").spawn() {
-               Ok(_) => return,
+               Ok(val) => inBOX1 = "".to_string(),
                Err(_) => std::io::stdin().read_line(&mut inBOX1).expect("could not read the inBOX #>")
            }
         } else {
             let mut cmdSTRING = "".to_string();
             let pathBUFFER = dirs::download_dir().unwrap();
-            let mut scriptPATH: &str = pathBUFFER.to_str().unwrap().to_owned();
+            let mut scriptPATH: = pathBUFFER.to_str().unwrap().to_owned();
             scriptPATH += "\\src_bin_win\\"
 
             match fs::read_dir(&downloadsPATH) {
