@@ -1192,16 +1192,12 @@ fn main() {
                     
                     println!("waiting for browser to download...\n");
 
-                    //this whole thing could do with some cleanup
-                    if downloadNAME == "android" {
-                        let sleepTIME = time::Duration::from_secs(30);
+                    //this should wait on the download to start
+                    let mut answerBOX = "None".to_string();
+                    while answerBOX == "None" {
+                        let sleepTIME = time::Duration::from_secs(1);
                         thread::sleep(sleepTIME);
-                    } else if downloadNAME == "git" && !cfg!(target_os = "linux") {
-                        let sleepTIME = time::Duration::from_secs(20);
-                        thread::sleep(sleepTIME);
-                    } else {
-                        let sleepTIME = time::Duration::from_secs(5);
-                        thread::sleep(sleepTIME);
+                        answerBOX = download_complete(&downloadNAME, &_testPATH, &unconfirmedLIST);
                     }
                     
                 } else {
