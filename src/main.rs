@@ -563,7 +563,9 @@ fn focus_terminal() {
     if cfg!(target_os = "linux"){
         Command::new("xdotool").arg("search").arg("--name").arg("terminal").arg("windowraise").output().expect("unable to raise terminal");
     } else if cfg!(target_os = "windows") {
-        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("focus_terminal.ps1").output().expect("failed to raise terminal");
+        //if debug build, filepath is relative
+        //if release build, filepath is ~/Downloads/src_bin_win/focus_terminal.ps1
+        Command::new("powershell").arg("-ExecutionPolicy").arg("ByPass").arg("-File").arg("focus_terminal.ps1").output().expect("failed to raise terminal");
     } else if cfg!(target_os = "macos") {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }
