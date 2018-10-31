@@ -565,7 +565,28 @@ fn focus_terminal() {
     } else if cfg!(target_os = "windows") {
         //if debug build, filepath is relative
         //if release build, filepath is ~/Downloads/src_bin_win/focus_terminal.ps1
-        Command::new("powershell -ExecutionPolicy ByPass -File focus_terminal.ps1").output().expect("failed to raise terminal");
+        if cfg!(debug_assertions){
+            let mut inBOX1 = String::new();
+
+           match Command::new("powershell -ExecutionPolicy ByPass -File focus_terminal.ps1").spawn() {
+               Ok(_) => return,
+               Err(_) => std::io::stdin().read_line(&mut inBOX1).expect("could not read the inBOX #>")
+           }
+        } else {
+            let mut cmdSTRING = "".to_string();
+            let pathBUFFER = dirs::download_dir().unwrap();
+            let mut scriptPATH: &str = pathBUFFER.to_str().unwrap().to_owned();
+            scriptPATH += "\\src_bin_win\\"
+
+            match fs::read_dir(&downloadsPATH) {
+                Ok(_) => cmdSTRING = format!("powershell -ExecutionPolicy ByPass -File {}focus_terminal.ps1", scriptPATH),
+                Err(_) => cmdSTRING = format!("powershell -ExecutionPolicy ByPass -File {}\\focus_terminal.ps1", pathBUFFER.to_str().unwrap().to_owned())
+            }
+
+            Command::new(&cmdSTRING).output().expect("failed to raise terminal");
+
+
+        }
     } else if cfg!(target_os = "macos") {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }
