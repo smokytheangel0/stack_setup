@@ -140,6 +140,12 @@ fn check_dirs() -> i8 {
     outBOX
 }
 
+fn install_window_manager() {
+    if cfg!(target_os = "linux") {
+        Command::new("sudo").arg("apt").arg("install").arg("xdotool").output().expect("failed to install xdotool");
+    }
+}
+
 //#region py_start_downloads
 ///the [start_downloads] function probably looks like this
 /// ```python
@@ -550,6 +556,16 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
         return outBOX    
     } else {
         return "False".to_string();
+    }
+}
+
+fn focus_terminal() {
+    if cfg!(target_os = "linux"){
+        Command::new("xdotool").arg("search").arg("--name").arg("windowraise").output().expect("unable to raise terminal");
+    } else if cfg!(target_os = "windows") {
+        Command::new("Set-ForegroundWindow (Get-Process cmd).MainWindowHandle").output().expect("unable to raise terminal");
+    } else if cfg!(target_os = "macos") {
+        Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }
 }
 
@@ -1146,9 +1162,9 @@ fn main() {
         let answerBOX = download_complete(&downloadNAME, &_testPATH, &unconfirmedLIST);
 
         if answerBOX == "True" {
-            println!("{} is already complete !>\n", downloadNAME)
+            println!("{} is already downloaded !>\n", downloadNAME)
         } else {
-            println!("{} has not yet been completed !>\n", downloadNAME)
+            println!("{} has not already been downloaded !>\n", downloadNAME)
         }
 
         downloadMAP.insert(downloadNAME.to_string(), answerBOX);
@@ -1156,11 +1172,11 @@ fn main() {
     
 
     if cfg!(target_os = "windows") {
-        println!("This is where we go over a few things first\nif you are using Edge browser,\n you must accept each download as it comes up\notherwise the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>\n\nsecond, please close the VSCode window if it opens..>");
+        println!("This is where we go over a few things first\nif you are using Edge browser,\n you must save each download as it comes up\notherwise the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>\n\nsecond, please close the VSCode window if it opens..>");
     } else if cfg!(target_os = "macos") {
         println!("This is where we go over a few things first\nthis process may seem too fast as it opens \na few tabs in your browser to download the items, \nthe android download you will have to select from the webpage, \nso keep an eye out for instructions in this terminal");
     } else if cfg!(target_os = "linux") {
-        println!("This is where we go over a few things first\nif you are using Firefox browser, you must close the browser window \nafter each download has completed in order to start the next one\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>");
+        println!("This is where we go over a few things first\nif you are using Firefox browser, please save each file instead of opening it\n please close the browser window after each download has completed in order to start the next one\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>");
     }
 
     println!("\nare you ready to start ?>");
@@ -1171,7 +1187,7 @@ fn main() {
     println!("\n");
 
     if inBOX0.to_lowercase().contains("y") {
-        let now = time::Instant::now();
+        let start = time::Instant::now();
         let promptTIME = time::Duration::from_secs(150);
 
         'download: loop {
@@ -1179,7 +1195,7 @@ fn main() {
                 if downloadMAP[downloadNAME] == "None" {
 
                     if downloadNAME == "android" {
-                        //bring to front here
+                        focus_terminal();
                         println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
                     } else if downloadNAME == "git-" && cfg!(target_os = "linux") {
                         //skip git on linux
@@ -1199,7 +1215,10 @@ fn main() {
                         thread::sleep(sleepTIME);
                         answerBOX = download_complete(&downloadNAME, &_testPATH, &unconfirmedLIST);
 
-                        //if elapsed exceeds prompt time bring to front here
+                        let elapsedTIME = time::Instant::now() - then;
+                        if elapsedTIME > promptTIME {
+                            focus_terminal();
+                        }
                     }
                     
                 } else {
