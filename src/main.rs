@@ -188,10 +188,10 @@ fn check_dirs() -> i8 {
 ///    elif downloadNAME is "VSCode":
 ///         vsURL = "https://code.visualstudio.com/docs/?dv=" + vsVersion
 ///         webbrowser.open(vsURL)
-///     elif downloadNAME is "git" and targetOS is not "Linux":
+///     elif downloadNAME is "git-" and targetOS is not "Linux":
 ///         webbrowser.open(gitURL)
-///     elif downloadNAME is "git" and targetOS is "Linux":
-///         returnBOX = subprocess.call(["sudo", "apt", "install", "git"])
+///     elif downloadNAME is "git-" and targetOS is "Linux":
+///         returnBOX = subprocess.call(["sudo", "apt", "install", "git-"])
 ///         if returnBOX is 0:
 ///             testLIST[4] = "anything else"
 ///        else:
@@ -267,7 +267,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
                     .expect("there was an error opening the vs Code web page in your browser");
         return testLIST;
 
-    } else if downloadNAME == "git" && !cfg!(target_os = "linux") {
+    } else if downloadNAME == "git-" && !cfg!(target_os = "linux") {
         webbrowser::open(gitURL)
                     .expect("there was an error opening git in your browser");
         return testLIST;
@@ -351,8 +351,8 @@ fn gather_unconfirmed() -> Vec<String> {
 ///         filesInDownloads = os.listdir(downloadsPATH)
 ///
 ///     if targetOS is "Windows":
-///         if downloadNAME is "git":
-///             alternateGIT = "Git"
+///         if downloadNAME is "git-":
+///             alternateGIT = "Git-"
 ///         else:
 ///             alternateGIT = "None"
 ///     else:
@@ -448,8 +448,8 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
 
     let alternateGIT: &str = {
         if cfg!(target_os = "windows") {
-            if downloadNAME == "git" {
-                "Git"
+            if downloadNAME == "git-" {
+                "Git-"
             } else {
                 "None"
             }
@@ -678,8 +678,8 @@ fn install_downloads(downloadNAME: &str) {
 
     let alternateGIT: &str = {
         if cfg!(target_os = "windows") {
-            if downloadNAME == "git" {
-                "Git"
+            if downloadNAME == "git-" {
+                "Git-"
             } else {
                 ".None"
             }
@@ -737,7 +737,7 @@ fn install_downloads(downloadNAME: &str) {
        &filePATH[len-3..len] == "deb" 
     {
         if cfg!(target_os = "linux") {
-            Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("lib32stdc++6").arg("git").output().expect("failed to install libgconf-2-4 and git");
+            Command::new("sudo").arg("apt").arg("-y").arg("install").arg("libgconf-2-4").arg("lib32stdc++6").arg("git-").output().expect("failed to install libgconf-2-4 and git");
             Command::new("sudo").arg("dpkg").arg("-i").arg(&filePATH).output().expect("failed to install vscode");
         }else if cfg!(target_os = "windows") {
             Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg(&filePATH).arg("-Wait").output().expect("failed to open exe");
@@ -791,7 +791,7 @@ fn install_downloads(downloadNAME: &str) {
             appPATH = filePATH.clone();
         }
 
-        if !downloadNAME.contains(&"git"[..]) {
+        if !downloadNAME.contains(&"git-"[..]) {
 
             let copyCMD = ["sudo", "cp", "-R"];
             Command::new(&copyCMD[0])
@@ -886,7 +886,7 @@ fn clone_repo(downloadNAME: &str) {
         env::set_current_dir(&clonePATH).expect("failed to set SDK dir as cwd");
 
         if cfg!(unix){
-            Command::new("git").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
+            Command::new("git-").arg("clone").arg("https://github.com/flutter/flutter.git").output().expect("failed to clone flutter repo");
         } else {
             let output = Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("'C:\\Program Files\\Git\\bin\\git.exe'").arg("'clone https://github.com/flutter/flutter.git'").arg("-Wait").output().expect("failed to clone flutter repo");
             println!("{}", String::from_utf8_lossy(&output.stdout));
@@ -899,7 +899,7 @@ fn clone_repo(downloadNAME: &str) {
         env::set_current_dir(&clonePATH).expect("failed to set Code dir as cwd");
 
         if cfg!(unix){
-            Command::new("git").arg("clone").arg("https://github.com/smokytheangel0/co_demo1.git").output().expect("failed to clone co_demo1 repo");
+            Command::new("git-").arg("clone").arg("https://github.com/smokytheangel0/co_demo1.git").output().expect("failed to clone co_demo1 repo");
         } else {
             let output = Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("'C:\\Program Files\\Git\\bin\\git.exe'").arg("'clone https://github.com/smokytheangel0/co_demo1.git'").arg("-Wait").output().expect("failed to clone co_demo1 repo");
             println!("{}", String::from_utf8_lossy(&output.stdout));
@@ -1028,7 +1028,7 @@ fn git_install_complete() -> String {
                                             .into_string()
                                             .expect("the post string result which sets folderNAME has broken")
                                             .to_owned();
-                if folderNAME == "git" {
+                if folderNAME == "git-" {
                     return "True".to_owned()
                 } else {
                     continue
@@ -1136,7 +1136,7 @@ fn main() {
     let unconfirmedLIST = gather_unconfirmed();
     let mut downloadMAP: IndexMap<String, String> = [
         ("StarUML".to_string(),  "None".to_string()),
-        ("git".to_string(),      "None".to_string()),
+        ("git-".to_string(),      "None".to_string()),
         ("VSCode".to_string(),   "None".to_string()),
         ("android".to_string(),  "None".to_string())    
     ].iter().cloned().collect();
@@ -1179,8 +1179,9 @@ fn main() {
                 if downloadMAP[downloadNAME] == "None" {
 
                     if downloadNAME == "android" {
+                        //bring to front here
                         println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
-                    } else if downloadNAME == "git" && cfg!(target_os = "linux") {
+                    } else if downloadNAME == "git-" && cfg!(target_os = "linux") {
                         //skip git on linux
                         continue                
                     }else {
@@ -1197,6 +1198,8 @@ fn main() {
                         let sleepTIME = time::Duration::from_secs(1);
                         thread::sleep(sleepTIME);
                         answerBOX = download_complete(&downloadNAME, &_testPATH, &unconfirmedLIST);
+
+                        //if elapsed exceeds prompt time bring to front here
                     }
                     
                 } else {
@@ -1206,7 +1209,7 @@ fn main() {
             }
 
             for downloadNAME in downloadMAP.clone().keys() {
-                if downloadNAME == "git" && cfg!(target_os = "linux") {
+                if downloadNAME == "git-" && cfg!(target_os = "linux") {
                     //skip git on linux
                     downloadMAP.insert(downloadNAME.to_string(), "True".to_string());
                     continue
@@ -1670,7 +1673,7 @@ mod tests {
                                                 .into_string()
                                                 .expect("the post string result which sets folderNAME has broken")
                                                 .to_owned();
-                    if folderNAME == &"git"[..] {
+                    if folderNAME == &"git-"[..] {
                         assert!(true);
                         return
                     } else {
@@ -1905,7 +1908,7 @@ mod tests {
         //cannot find all_True directory
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
-            "git".to_string(),
+            "git-".to_string(),
             "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
@@ -1950,7 +1953,7 @@ mod tests {
         //test passes on mac
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
-            "git".to_string(),
+            "git-".to_string(),
             "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
@@ -1994,7 +1997,7 @@ mod tests {
         //test passes on mac
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
-            "git".to_string(),
+            "git-".to_string(),
             "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
@@ -2038,7 +2041,7 @@ mod tests {
         //test passes on win
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
-            "git".to_string(),
+            "git-".to_string(),
             "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
@@ -2082,7 +2085,7 @@ mod tests {
         //test passes on mac and win
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
-            "git".to_string(),
+            "git-".to_string(),
             "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
@@ -2127,7 +2130,7 @@ mod tests {
         //cannot find opera directory
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
-            "git".to_string(),
+            "git-".to_string(),
             "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
@@ -2172,7 +2175,7 @@ mod tests {
         //test passes on mac and win
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
-            "git".to_string(),
+            "git-".to_string(),
             "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
@@ -2217,7 +2220,7 @@ mod tests {
         //test passes on win
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
-            "git".to_string(),
+            "git-".to_string(),
             "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
@@ -2262,7 +2265,7 @@ mod tests {
         //test passes on win
         let fileLIST: Vec<String> = vec!(
             "StarUML".to_string(),
-            "git".to_string(),
+            "git-".to_string(),
             "co_demo1".to_string(), 
             "flutter".to_string(),
             "VSCode".to_string(),
@@ -2304,7 +2307,7 @@ mod tests {
     #[ignore]
     fn start_downloads_linux_apt(){
         if cfg!(target_os = "linux"){
-            let downloadNAME = "git".to_string();
+            let downloadNAME = "git-".to_string();
             assert_eq!(start_downloads(&downloadNAME)[3], "None");
 
         }
