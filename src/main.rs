@@ -1235,6 +1235,7 @@ fn main() {
             if completeNUM == downloadMAP.keys().len() {
                 println!("\nAll the downloads are complete !>\n");
                 break 'download;
+            }
         }
 
         if cfg!(target_os = "linux"){
