@@ -565,7 +565,7 @@ fn focus_terminal() {
     } else if cfg!(target_os = "windows") {
         //if debug build, filepath is relative
         //if release build, filepath is ~/Downloads/src_bin_win/focus_terminal.ps1
-        Command::new("powershell").arg("-ExecutionPolicy").arg("ByPass").arg("-File").arg("focus_terminal.ps1").output().expect("failed to raise terminal");
+        Command::new("powershell -ExecutionPolicy ByPass -File focus_terminal.ps1").output().expect("failed to raise terminal");
     } else if cfg!(target_os = "macos") {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }
