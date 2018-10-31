@@ -1209,7 +1209,6 @@ fn main() {
                 if downloadMAP[downloadNAME] == "None" {
 
                     if downloadNAME == "android" {
-                        focus_terminal();
                         println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
                     } else if downloadNAME == "git-" && cfg!(target_os = "linux") {
                         //skip git on linux
@@ -1219,8 +1218,11 @@ fn main() {
                     }
 
                     start_downloads(&downloadNAME);
-                    
-                    println!("waiting for the {} download to start, please save if asked...\n", &downloadNAME);
+                    if downloadNAME == "android" {
+                        focus_terminal();
+                    } else {
+                        println!("waiting for the {} download to start, please save if asked...\n", &downloadNAME);
+                    }
 
                     //this should wait on the download to start
                     let mut answerBOX = "None".to_string();
