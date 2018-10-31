@@ -414,7 +414,6 @@ fn gather_unconfirmed() -> Vec<String> {
 /// 
 //#endregion
 fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<String>) -> String {
-    println!("checking to see if the {} is complete ?>", &downloadNAME);
     let outBOX: String = "None".to_string();
 
     let downloadsPATH: String = {
@@ -1190,7 +1189,7 @@ fn main() {
 
                     start_downloads(&downloadNAME);
                     
-                    println!("waiting for browser to download...\n");
+                    println!("waiting for the {} download to start, please save if asked...\n", &downloadNAME);
 
                     //this should wait on the download to start
                     let mut answerBOX = "None".to_string();
@@ -1233,14 +1232,6 @@ fn main() {
             if completeNUM == downloadMAP.keys().len() {
                 println!("\nAll the downloads are complete !>\n");
                 break 'download;
-
-            } else if now.elapsed() > promptTIME {
-                for downloadNAME in downloadMAP.clone().keys() {
-                    if downloadMAP[downloadNAME] == "None" {
-                        println!("The {} download has not started despite multiple attempts !>\n", downloadNAME.to_string())  
-                    }
-                }
-            }
         }
 
         if cfg!(target_os = "linux"){
