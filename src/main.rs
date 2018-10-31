@@ -577,7 +577,6 @@ fn focus_terminal() {
             [SFW]::SetForegroundWindow($h)
         ").output().expect("failed to add foregoundwindow type");
 
-        Command::new("[SFW]")
     } else if cfg!(target_os = "macos") {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }
