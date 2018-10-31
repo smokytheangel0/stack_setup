@@ -1149,6 +1149,7 @@ macro_rules! cfg_if {
 //START MODIFIED APACHE LICENCE DEFINED AT TOP OF PAGE
 
 fn main() {
+    install_window_manager();
     let unconfirmedLIST = gather_unconfirmed();
     let mut downloadMAP: IndexMap<String, String> = [
         ("StarUML".to_string(),  "None".to_string()),
@@ -1215,14 +1216,14 @@ fn main() {
                         thread::sleep(sleepTIME);
                         answerBOX = download_complete(&downloadNAME, &_testPATH, &unconfirmedLIST);
 
-                        let elapsedTIME = time::Instant::now() - then;
+                        let elapsedTIME = time::Instant::now() - start;
                         if elapsedTIME > promptTIME {
                             focus_terminal();
                         }
                     }
                     
                 } else {
-                    //if the key's value is True (already complete), skip
+                    //if the download key's value is True (already complete), skip
                     continue
                 }
             }
