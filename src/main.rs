@@ -563,20 +563,7 @@ fn focus_terminal() {
     if cfg!(target_os = "linux"){
         Command::new("xdotool").arg("search").arg("--name").arg("terminal").arg("windowraise").output().expect("unable to raise terminal");
     } else if cfg!(target_os = "windows") {
-        Command::new("
-            Add-Type @\"
-                using System;
-                using System.Runtime.InteropServices;
-                public class SFW {
-                    [DllImport(\"user32.dll\")]
-                    [return: MarshalAs(UnmanagedType.Bool)]
-                    public static extern bool SetForegroundWindow(IntPtr hWnd);
-                }
-            \"@
-            $h = (Get-Process cmd).MainWindowHandle
-            [SFW]::SetForegroundWindow($h)
-        ").output().expect("failed to add foregoundwindow type");
-
+        Command::new("powershell.exe").arg("Start-Process").arg("-FilePath").arg("focus_terminal.ps1").output().expect("failed to raise terminal");
     } else if cfg!(target_os = "macos") {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }
@@ -1218,11 +1205,11 @@ fn main() {
                     }
 
                     start_downloads(&downloadNAME);
+
                     if downloadNAME == "android" {
                         focus_terminal();
-                    } else {
-                        println!("waiting for the {} download to start, please save if asked...\n", &downloadNAME);
                     }
+                    println!("waiting for the {} download to start, please save if asked...\n", &downloadNAME);
 
                     //this should wait on the download to start
                     let mut answerBOX = "None".to_string();
