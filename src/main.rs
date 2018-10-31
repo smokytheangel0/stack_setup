@@ -232,7 +232,7 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
 //version specific will break on update (current as of 2OCT)
             "https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/Git-2.19.0-64-bit.exe"
         } else if cfg!(target_os = "macos") {
-            "https://sourceforge.net/projects/git-osx-installer/folders/git-2.19.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
+            "https://sourceforge.net/projects/git-osx-installer"
         } else {
             "git browser install currently only supports Mac OS and Windows 10"
         }
