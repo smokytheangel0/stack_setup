@@ -558,7 +558,7 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
         return "False".to_string();
     }
 }
-/*
+
 fn focus_terminal() {
     if cfg!(target_os = "linux"){
         Command::new("xdotool").arg("search").arg("--name").arg("terminal").arg("windowraise").output().expect("unable to raise terminal");
@@ -566,32 +566,15 @@ fn focus_terminal() {
         //if debug build, filepath is relative
         //if release build, filepath is ~/Downloads/src_bin_win/focus_terminal.ps1
         if cfg!(debug_assertions){
-            let mut inBOX1 = String::new();
-
-           match Command::new("powershell -ExecutionPolicy ByPass -File focus_terminal.ps1").spawn() {
-               Ok(val) => inBOX1 = "".to_string(),
-               Err(_) => std::io::stdin().read_line(&mut inBOX1).expect("could not read the inBOX #>")
-           }
+            Command::new("powershell -ExecutionPolicy ByPass -File focus_terminal_debug.ps1").spawn().expect("failed to focus terminal");
         } else {
-            let mut cmdSTRING = "".to_string();
-            let pathBUFFER = dirs::download_dir().unwrap();
-            let mut scriptPATH: = pathBUFFER.to_str().unwrap().to_owned();
-            scriptPATH += "\\src_bin_win\\"
-
-            match fs::read_dir(&downloadsPATH) {
-                Ok(_) => cmdSTRING = format!("powershell -ExecutionPolicy ByPass -File {}focus_terminal.ps1", scriptPATH),
-                Err(_) => cmdSTRING = format!("powershell -ExecutionPolicy ByPass -File {}\\focus_terminal.ps1", pathBUFFER.to_str().unwrap().to_owned())
-            }
-
-            Command::new(&cmdSTRING).output().expect("failed to raise terminal");
-
-
+            Command::new("powershell -ExecutionPolicy ByPass -File focus_terminal_release.ps1").output().expect("failed to focus terminal");
         }
     } else if cfg!(target_os = "macos") {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }
 }
-*/
+
 
 fn extract_studio() {
     println!("extracting android studio !>");
@@ -1220,7 +1203,8 @@ fn main() {
                 if downloadMAP[downloadNAME] == "None" {
 
                     if downloadNAME == "android" {
-                        println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n")
+                        println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n");
+                        focus_terminal();
                     } else if downloadNAME == "git-" && cfg!(target_os = "linux") {
                         //skip git on linux
                         continue                
@@ -1230,11 +1214,6 @@ fn main() {
 
                     start_downloads(&downloadNAME);
 
-                    /*
-                    if downloadNAME == "android" {
-                        focus_terminal();
-                    }
-                    */
                     println!("waiting for the {} download to start, please save if asked...\n", &downloadNAME);
 
                     //this should wait on the download to start
@@ -1244,12 +1223,10 @@ fn main() {
                         thread::sleep(sleepTIME);
                         answerBOX = download_complete(&downloadNAME, &_testPATH, &unconfirmedLIST);
 
-                        /*
                         let elapsedTIME = time::Instant::now() - start;
                         if elapsedTIME > promptTIME {
                             focus_terminal();
                         }
-                        */
                     }
                     
                 } else {
