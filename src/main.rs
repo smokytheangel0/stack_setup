@@ -558,7 +558,7 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
         return "False".to_string();
     }
 }
-
+/*
 fn focus_terminal() {
     if cfg!(target_os = "linux"){
         Command::new("xdotool").arg("search").arg("--name").arg("terminal").arg("windowraise").output().expect("unable to raise terminal");
@@ -591,6 +591,7 @@ fn focus_terminal() {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }
 }
+*/
 
 fn extract_studio() {
     println!("extracting android studio !>");
@@ -1229,9 +1230,11 @@ fn main() {
 
                     start_downloads(&downloadNAME);
 
+                    /*
                     if downloadNAME == "android" {
                         focus_terminal();
                     }
+                    */
                     println!("waiting for the {} download to start, please save if asked...\n", &downloadNAME);
 
                     //this should wait on the download to start
@@ -1241,10 +1244,12 @@ fn main() {
                         thread::sleep(sleepTIME);
                         answerBOX = download_complete(&downloadNAME, &_testPATH, &unconfirmedLIST);
 
+                        /*
                         let elapsedTIME = time::Instant::now() - start;
                         if elapsedTIME > promptTIME {
                             focus_terminal();
                         }
+                        */
                     }
                     
                 } else {
