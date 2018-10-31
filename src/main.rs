@@ -563,7 +563,21 @@ fn focus_terminal() {
     if cfg!(target_os = "linux"){
         Command::new("xdotool").arg("search").arg("--name").arg("windowraise").output().expect("unable to raise terminal");
     } else if cfg!(target_os = "windows") {
-        Command::new("Set-ForegroundWindow (Get-Process cmd).MainWindowHandle").output().expect("unable to raise terminal");
+        Command::new("
+            Add-Type @'
+                using System;
+                using System.Runtime.InteropServices;
+                public class SFW {
+                    [DllImport('user32.dll')]
+                    [return: MarshalAs(UnmanagedType.Bool)]
+                    public static extern bool SetForegroundWindow(IntPtr hWnd);
+                }
+            '@
+            $h = (Get-Process cmd).MainWindowHandle
+            [SFW]::SetForegroundWindow($h)
+        ").output().expect("failed to add foregoundwindow type");
+
+        Command::new("[SFW]")
     } else if cfg!(target_os = "macos") {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }
