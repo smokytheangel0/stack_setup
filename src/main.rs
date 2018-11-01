@@ -571,7 +571,7 @@ fn focus_terminal() {
             let path = env::current_dir().unwrap();
             println!("The current directory is {}", path.display());
 
-            Command::new("powershell").arg("-ExecutionPolicy").arg("ByPass").arg("-File").arg("focus_terminal_release.ps1").output().expect("failed to focus terminal");
+            Command::new("powershell").arg("-ExecutionPolicy").arg("ByPass").arg("-File").arg("focus_terminal.ps1").spawn().expect("failed to focus terminal");
         }
     } else if cfg!(target_os = "macos") {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");

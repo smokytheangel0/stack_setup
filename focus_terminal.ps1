@@ -9,5 +9,4 @@ Add-Type @"
 "@
 
 
-$h =  (get-process powershell).MainWindowHandle
-[SFW]::SetForegroundWindow($h)
+[SFW]::SetForegroundWindow($pid)
