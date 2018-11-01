@@ -566,11 +566,12 @@ fn focus_terminal() {
         //if debug build, filepath is relative
         //if release build, filepath is ~/Downloads/src_bin_win/focus_terminal.ps1
         if cfg!(debug_assertions){
+            return
+        } else {
             let path = env::current_dir().unwrap();
             println!("The current directory is {}", path.display());
-            Command::new("powershell -ExecutionPolicy ByPass -File focus_terminal_debug.ps1").spawn().expect("failed to focus terminal");
-        } else {
-            Command::new("powershell -ExecutionPolicy ByPass -File focus_terminal_release.ps1").output().expect("failed to focus terminal");
+
+            Command::new("powershell").arg("-ExecutionPolicy").arg("ByPass").arg("-File").arg("focus_terminal_release.ps1").output().expect("failed to focus terminal");
         }
     } else if cfg!(target_os = "macos") {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");

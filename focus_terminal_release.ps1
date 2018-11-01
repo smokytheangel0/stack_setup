@@ -9,5 +9,5 @@ Add-Type @"
 "@
 
 
-$h =  (get-process cmd).MainWindowHandle
+$h =  (get-process powershell).MainWindowHandle
 [SFW]::SetForegroundWindow($h)
