@@ -4,9 +4,9 @@ Add-Type @"
   public class SFW {
      [DllImport("user32.dll")]
      [return: MarshalAs(UnmanagedType.Bool)]
-     public static extern bool SetForegroundWindow(IntPtr hWnd);
+     public static extern bool SetActiveWindow(IntPtr hWnd);
   }
 "@
 
 
-[SFW]::SetForegroundWindow($pid)
+[SFW]::SetActiveWindow($pid)
