@@ -1198,7 +1198,9 @@ fn main() {
 
                     if downloadNAME == "android" {
                         println!("\nplease start the android-studio download \n if you are a windows user:\n select the blue link that ends with '.exe'\n\nif you are a mac user:\n select the blue link that ends with '.dmg'\n\nif you are an Ubuntu user:\n select the blue link that ends in 'linux.zip'\n");
-                        focus_terminal();
+                        if cfg!(target_os = "macos") {
+                            focus_terminal();
+                        }
                     } else if downloadNAME == "git-" && cfg!(target_os = "linux") {
                         //skip git on linux
                         continue                
@@ -1207,6 +1209,10 @@ fn main() {
                     }
 
                     start_downloads(&downloadNAME);
+
+                    if !cfg!(target_os = "macos") {
+                        focus_terminal();
+                    }
 
                     println!("waiting for the {} download to start, please save if asked...\n", &downloadNAME);
 
