@@ -1210,7 +1210,7 @@ fn main() {
 
                     start_downloads(&downloadNAME);
 
-                    if !cfg!(target_os = "macos") {
+                    if !cfg!(target_os = "macos") && downloadNAME == "android" {
                         focus_terminal();
                     }
 
