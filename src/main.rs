@@ -561,7 +561,7 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
 
 fn focus_terminal() {
     if cfg!(target_os = "linux"){
-        Command::new("xdotool").arg("search").arg("--name").arg("terminal").arg("windowraise").spawn().expect("unable to raise terminal");
+        Command::new("xdotool").arg("search").arg("--name").arg("*terminal*").arg("windowraise").spawn().expect("unable to raise terminal");
     } else if cfg!(target_os = "windows") {
         if cfg!(debug_assertions){
             Command::new("powershell").arg("-ExecutionPolicy").arg("ByPass").arg("-File").arg("focus_terminal_debug.ps1").spawn().expect("failed to focus terminal");
