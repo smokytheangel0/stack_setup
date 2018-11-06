@@ -262,15 +262,23 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     if downloadNAME == "StarUML" {
         let umlURL: String = format!("http://staruml.io/download/releases/{}", umlVersion);
         let umlURL: &str = &umlURL[..];
-        webbrowser::open(&umlURL)
-                    .expect("there was an error opening the star uml webpage in your browser");
+        if cfg!(target_os = "linux") {
+            Command::new("xdg-open").arg(&umlURL).spawn().expect("failed to open with xdg");
+        } else {
+            webbrowser::open(&umlURL)
+                        .expect("there was an error opening the star uml webpage in your browser");
+        }
         return testLIST;
 
     } else if downloadNAME == "VSCode" {
         let vsURL: String = format!("https://code.visualstudio.com/docs/?dv={}", vsVersion); 
         let vsURL: &str = &vsURL[..];
-        webbrowser::open(&vsURL)
-                    .expect("there was an error opening the vs Code web page in your browser");
+        if cfg!(target_os = "linux") {
+            Command::new("xdg-open").arg(&vsURL).spawn().expect("failed to open with xdg");
+        } else {
+            webbrowser::open(&vsURL)
+                        .expect("there was an error opening the vs Code web page in your browser");
+        }
         return testLIST;
 
     } else if downloadNAME == "git-" && !cfg!(target_os = "linux") {
@@ -279,8 +287,12 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
         return testLIST;
 
     } else if downloadNAME == "android" {
-        webbrowser::open("https://developer.android.com/studio/#downloads")
-                    .expect("there was an error opening the android studio web page in your browser");
+        if cfg!(target_os = "linux") {
+            Command::new("xdg-open").arg("https://developer.android.com/studio/#downloads").spawn().expect("failed to open with xdg");
+        } else {
+            webbrowser::open("https://developer.android.com/studio/#downloads")
+                        .expect("there was an error opening the android studio web page in your browser");
+        }
         return testLIST;
 
     } else {
