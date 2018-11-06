@@ -563,7 +563,11 @@ fn focus_terminal() {
     if cfg!(target_os = "linux"){
         Command::new("xdotool").arg("search").arg("--name").arg("terminal").arg("windowraise").spawn().expect("unable to raise terminal");
     } else if cfg!(target_os = "windows") {
-            Command::new("powershell").arg("-ExecutionPolicy").arg("ByPass").arg("-File").arg("focus_terminal.ps1").spawn().expect("failed to focus terminal");
+        if cfg!(debug_assertions){
+            Command::new("powershell").arg("-ExecutionPolicy").arg("ByPass").arg("-File").arg("focus_terminal_debug.ps1").spawn().expect("failed to focus terminal");
+        } else {
+            Command::new("powershell").arg("-ExecutionPolicy").arg("ByPass").arg("-File").arg("focus_terminal_release.ps1").spawn().expect("failed to focus terminal");   
+        }
     } else if cfg!(target_os = "macos") {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }

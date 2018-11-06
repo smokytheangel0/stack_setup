@@ -9,8 +9,11 @@ Add-Type @"
 "@
 $count = 0
 do {
-  $windowHandle = (get-process -name powershell)[$count].MainWindowHandle
+  $windowHandle = (get-process -name cmd)[$count].MainWindowHandle
   $count = $count + 1
 } while ($windowHandle -eq 0 -or !$windowHandle)
 echo $windowHandle
-[SFW]::SetForegroundWindow($windowHandle)
+$out = 0
+do {
+  $out = [SFW]::SetForegroundWindow($windowHandle)
+} while (!$out)
