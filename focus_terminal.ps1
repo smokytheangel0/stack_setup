@@ -7,6 +7,10 @@ Add-Type @"
      public static extern bool SetActiveWindow(IntPtr hWnd);
   }
 "@
-
-
-[SFW]::SetActiveWindow($pid)
+$count = 0
+do {
+  $windowHandle = (get-process -name powershell)[$count].MainWindowHandle
+  $count = $count + 1
+} while ($windowHandle -eq 0 -or !$windowHandle)
+echo $windowHandle
+[SFW]::SetActiveWindow($windowHandle)
