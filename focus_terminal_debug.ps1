@@ -12,7 +12,7 @@ do {
   $windowHandle = (get-process -name powershell)[$count].MainWindowHandle
   $count = $count + 1
 } while ($windowHandle -eq 0 -or !$windowHandle)
-echo $windowHandle
+
 $out = 0
 do {
   $out = [SFW]::SetForegroundWindow($windowHandle)

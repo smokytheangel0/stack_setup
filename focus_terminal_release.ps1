@@ -9,10 +9,10 @@ Add-Type @"
 "@
 $count = 0
 do {
-  $windowHandle = (get-process -name cmd)[$count].MainWindowHandle
+  $windowHandle = (get-process -name setup)[$count].MainWindowHandle
   $count = $count + 1
 } while ($windowHandle -eq 0 -or !$windowHandle)
-echo $windowHandle
+
 $out = 0
 do {
   $out = [SFW]::SetForegroundWindow($windowHandle)
