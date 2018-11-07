@@ -1224,18 +1224,24 @@ fn main() {
 
                     start_downloads(&downloadNAME);
 
-                    if downloadNAME == "android" {
-                        focus_terminal();
-                    }
 
                     println!("waiting for the {} download to start, please save if asked...\n", &downloadNAME);
 
                     //this should wait on the download to start
                     let mut answerBOX = "None".to_string();
                     while answerBOX == "None" {
-                        let sleepTIME = time::Duration::from_secs(1);
+                        let sleepTIME = time::Duration::from_secs(5);
                         thread::sleep(sleepTIME);
                         answerBOX = download_complete(&downloadNAME, &_testPATH, &unconfirmedLIST);
+
+                        if answerBOX == "None" {
+                            if downloadNAME == "android" || (cfg!(target_os = "macos") && downloadNAME == "git") {
+                                let sleepTIME = time::Duration::from_secs(5);
+                                thread::sleep(sleepTIME);
+                                focus_terminal();
+                            }
+
+                        }
 
                         let elapsedTIME = time::Instant::now() - start;
                         if elapsedTIME > promptTIME {
