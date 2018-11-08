@@ -142,7 +142,7 @@ fn check_dirs() -> i8 {
 
 fn install_window_manager() {
     if cfg!(target_os = "linux") {
-        Command::new("sudo").arg("apt").arg("install").arg("xdotool").output().expect("failed to install xdotool");
+        Command::new("sudo").arg("apt").arg("install").arg("xdotool").status().expect("failed to install xdotool");
     }
 }
 
