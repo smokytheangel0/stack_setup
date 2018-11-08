@@ -11,10 +11,18 @@ $count = 0
 do {
   $windowHandle = (get-process -name powershell)[$count].MainWindowHandle
   $count = $count + 1
+  $len = (get-process -name powershell).Length
+  if ($count -gt $len) {
+    Write-Output "there were $len processes associated with powershell"
+    break
+  } else {
+    continue
+  }
 } while ($windowHandle -eq 0 -or !$windowHandle)
 
 $out = 0
 do {
   $out = [SFW]::SetForegroundWindow($windowHandle)
+  Write-Output "SetForegroundWindow returned $out"
   Start-Sleep -s 1
 } while (!$out)
