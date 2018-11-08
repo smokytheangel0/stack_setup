@@ -16,4 +16,5 @@ do {
 $out = 0
 do {
   $out = [SFW]::SetForegroundWindow($windowHandle)
+  Start-Sleep -s 1
 } while (!$out)

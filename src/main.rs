@@ -576,6 +576,8 @@ fn focus_terminal() {
         Command::new("xdotool").arg("search").arg("--name").arg("~\\/Downloads").arg("windowraise").spawn().expect("unable to raise terminal");
         println!("{:?}", "~\\/Downloads" );
     } else if cfg!(target_os = "windows") {
+        //this script may run in the background and not quit, whenever the bug that causes
+        //the window not to focus happens
         if cfg!(debug_assertions){
             Command::new("powershell").arg("-ExecutionPolicy").arg("ByPass").arg("-File").arg("focus_terminal_debug.ps1").spawn().expect("failed to focus terminal");
         } else {
@@ -1254,6 +1256,8 @@ fn main() {
                     continue
                 }
             }
+
+            println!("waiting for the android download to complete !>");
 
             for downloadNAME in downloadMAP.clone().keys() {
                 if downloadNAME == "git-" && cfg!(target_os = "linux") {
