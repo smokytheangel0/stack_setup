@@ -594,25 +594,8 @@ fn extract_studio() {
 
     let downloadNAME = "android".to_string();
 
-    let downloadsPATH: String = {
-        if cfg!(windows){
-            let path = dirs::home_dir().unwrap();
-            let mut downloadsPATH = path.to_str()
-                                        .unwrap()
-                                        .to_owned();
-            downloadsPATH += "\\Downloads\\";
-            downloadsPATH
-        }else if cfg!(unix){
-            let path = dirs::home_dir().unwrap();
-            let mut downloadsPATH = path.to_str()
-                                        .unwrap()
-                                        .to_owned();
-            downloadsPATH += "/Downloads/";
-            downloadsPATH
-        } else {
-            "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
-        }
-    };
+    let pathBUFFER = dirs::download_dir().unwrap();
+    let downloadsPATH: &str = pathBUFFER.to_str().unwrap();
     
     let filesInDownloads = fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke");
     let mut filePATH = ".None".to_string();
