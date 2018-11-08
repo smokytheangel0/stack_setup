@@ -8,17 +8,22 @@ Add-Type @"
   }
 "@
 $count = 0
-do {
-  $windowHandle = (get-process -name setup)[$count].MainWindowHandle
-  $count = $count + 1
-  $len = (get-process -name setup).Length
-  if ($count -gt $len) {
-    Write-Output "there were $len processes associated with setup"
-    break
-  } else {
-    continue
-  }
-} while ($windowHandle -eq 0 -or !$windowHandle)
+$len = (get-process -name setup).Length
+if ($len -gt 1) {
+  do {
+    $windowHandle = (get-process -name setup)[$count].MainWindowHandle
+    $count = $count + 1
+    if ($count -gt $len) {
+      Write-Output "there were $len processes associated with setup"
+      break
+    } else {
+      continue
+    }
+  } while ($windowHandle -eq 0 -or !$windowHandle)  
+} else {
+  $windowHandle = (get-process -name setup).MainWindowHandle
+  "there was only one process associated with setup"
+}
 
 $out = 0
 do {
