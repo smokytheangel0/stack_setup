@@ -96,121 +96,41 @@ use std::io::prelude::*;
 #[cfg(windows)]
     use winreg::enums::*;
 
-
-
-//#region py_check_dirs
-///the [check_dirs] function looks like this
-/// in python:
-/// ```python
-/// [replace all 'is not' with '!=']
-/// [replace all 'is' with '==']
-/// import os
-/// import sys
-/// #outBOX is int
-/// def check_dirs():
-///     outBOX = 0
-///     pathBOX = os.getcwd()
-/// 
-///     if "Downloads" not in pathBOX:
-///         outBOX += 1
-///         print("This program you've just run does not appear to be in the Downloads folder, please try running it again with it in the Downloads folder")
-///         return outBOX
-/// ```
-/// 
-//#endregion
-fn check_dirs() -> i8 {
-    let mut outBOX = 0;
-
-    let pathBuffer = env::current_dir().expect("the result from current_dir which sets the pathBuffer has broken");
-    //this returns an option to unwrap
-    let pathBOX = pathBuffer.to_str().unwrap();
-
-    let errorBOX = String::from("This program you've just run does not appear to be in the Downloads folder, \nplease try running it again with it in the Downloads folder\n");
-    
-    if pathBOX.contains("Downloads") == false {
-        if cfg!(test){
-            outBOX += 1;
-        } else {
-            //this does not correctly see that we are in
-            //dl folder on mac when we put the binary in there
-            //panic!(errorBOX)
-            println!("{}", errorBOX);
-        }
-    }
-    outBOX
-}
-
+/*
 fn install_window_manager() {
     if cfg!(target_os = "linux") {
         Command::new("sudo").arg("apt").arg("install").arg("xdotool").status().expect("failed to install xdotool");
     }
 }
+*/
 
-//#region py_start_downloads
-///the [start_downloads] function probably looks like this
-/// ```python
-/// [replace all 'is not' with '!=']
-/// [replace all 'is' with '==']
-/// import platform
-/// import webbrowser
-/// import subprocess
-/// #outBOX is vec[4] Strings
-/// def start_downloads(downloadNAME):
-///     targetOS = platform.uname()[0]
-///     testLIST = [
-///         "None",
-///         "None",
-///         "None",
-///         "None",
-///         "None"
-///     ]
-///
-///     if targetOS is "Windows":
-///         vsVersion = "win32"
-///         gitURL = "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
-///         umlVersion = "StarUML%20Setup%203.0.2.exe"
-///     elif targetOS is "Darwin":
-///         vsVersion = "osx"
-///         gitURL = "https://sourceforge.net/projects/git-osx-installer/folders/git-2.18.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect"
-///         umlVersion = "StarUML-3.0.2.dmg"
-///     elif targetOS is "Linux":
-///         vsVersion = "linux64_deb"
-///         gitURL = "git browser install currently only supports Mac OS and Windows 10"
-///         umlVersion = "StarUML-3.0.2-x86_64.AppImage"
-///     else:
-///         vsVersion = "we currently only support Mac OS, Windows 10, and Ubuntu"
-///         umlVersion = "we currently only support Mac OS, Windows 10, and Ubuntu"
-///     testLIST[0] = vsVersion
-///     testLIST[1] = gitURL
-///     testLIST[2] = umlVersion
-///
-///     if downloadNAME is "StarUML":
-///         umlURL = "http://staruml.io/download/releases/" + umlVersion
-///         webbrowser.open(umlURL)
-///     elif downloadNAME is "co_demo1":
-///         webbrowser.open("https://github.com/smokytheangel0/co_demo1/archive/master.zip")
-///     elif downloadNAME is "flutter":
-///         webbrowser.open("https://github.com/flutter/flutter/archive/master.zip")
-///    elif downloadNAME is "VSCode":
-///         vsURL = "https://code.visualstudio.com/docs/?dv=" + vsVersion
-///         webbrowser.open(vsURL)
-///     elif downloadNAME is "git-" and targetOS is not "Linux":
-///         webbrowser.open(gitURL)
-///     elif downloadNAME is "git-" and targetOS is "Linux":
-///         returnBOX = subprocess.call(["sudo", "apt", "install", "git-"])
-///         if returnBOX is 0:
-///             testLIST[4] = "anything else"
-///        else:
-///             testLIST[4] = "E: Failed"
-///     elif downloadNAME is "android":
-///         webbrowser.open("https://developer.android.com/studio/#downloads")
-///
-///     else:
-///         testLIST[3] = "the switch branches have all been avoided !!!"
-///     return testLIST
-///```
-/// 
-//#endregion
+fn gather_unconfirmed() -> Vec<String> {
+    let mut outVEC: Vec<String> = vec![];
+
+    let pathBUFFER = dirs::download_dir().unwrap();
+    let downloadsPATH: &str = pathBUFFER.to_str().unwrap();
+
+    let filesInDownloads: ReadDir = {
+        fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke")
+    };
+
+    for fileNAME in filesInDownloads {
+        let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
+                                        .file_name()
+                                        .into_string()
+                                        .expect("the post string result which sets fileNAME has broken")
+                                        .to_owned();
+
+        if fileNAME.contains("Unconfirmed") {
+            let fileNAME = fileNAME.clone();
+            outVEC.push(fileNAME);
+        }
+
+    }
+    outVEC
+
+}
+
 fn start_downloads(downloadNAME: &str) -> Vec<String> { 
     let mut testLIST = vec![
         "None".to_string(),
@@ -302,157 +222,10 @@ fn start_downloads(downloadNAME: &str) -> Vec<String> {
     
 }
 
-fn gather_unconfirmed() -> Vec<String> {
-    let mut outVEC: Vec<String> = vec![];
-
-    let pathBUFFER = dirs::download_dir().unwrap();
-    let downloadsPATH: &str = pathBUFFER.to_str().unwrap();
-
-    let filesInDownloads: ReadDir = {
-        fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke")
-    };
-
-    for fileNAME in filesInDownloads {
-        let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
-                                        .file_name()
-                                        .into_string()
-                                        .expect("the post string result which sets fileNAME has broken")
-                                        .to_owned();
-
-        if fileNAME.contains("Unconfirmed") {
-            let fileNAME = fileNAME.clone();
-            outVEC.push(fileNAME);
-        }
-
-    }
-    outVEC
-
-}
-//#region py_is_complete
-///this is what the [download_complete] function is in python
-///```python
-/// [replace all 'is not' with '!=']
-/// [replace all 'is' with '==']
-/// import os
-/// import platform
-/// from pathlib import Path
-/// TEST_FLAG = False
-/// #outBOX is String
-/// def download_complete(downloadNAME, &testPATH):
-///     targetOS = platform.uname()[0]
-///     outBOX = "None"
-///
-///     if targetOS is "Windows":
-///         downloadsPATH = str(Path.home())
-///         downloadsPATH += "\\Downloads\\"
-///         testPATH = str(Path.home())
-///         if testPATH is 5:
-///             testPATH += "\\Desktop\\share\\test_data\\all_True\\"
-///         else:
-///             testPATH += "\\Desktop\\share\\test_data\\two_None\\"
-///
-///     elif targetOS in ("Darwin", "Linux"):
-///         downloadsPATH = str(Path.home())
-///         downloadsPATH += "/Downloads/"
-///         testPATH = str(Path.home())
-///         if testPATH in 5:
-///             testPATH += "/Desktop/share/test_data/all_True/"
-///         else:
-///             testPATH += "/Desktop/share/test_data/two_None/"
-///
-///     else:
-///         downloadsPATH = "we currently only support Windows 10, Ubuntu and Mac OS"
-///
-///     if TEST_FLAG is True:
-///         filesInDowloads = os.listdir(&testPATH)
-///     else:
-///         filesInDownloads = os.listdir(downloadsPATH)
-///
-///     if targetOS is "Windows":
-///         if downloadNAME is "git-":
-///             alternateGIT = "Git-"
-///         else:
-///             alternateGIT = "None"
-///     else:
-///         alternateGIT = "None"
-///    
-///     if targetOS is "Linux":
-///         if downloadNAME is "VSCode":
-///             alternateCODE = "code_"
-///         else:
-///             alternateCODE = "None"
-///     else if targetOS is "Darwin":
-///         if downloadNAME is "VSCode":
-///             alternateCODE = "Visual Studio Code"
-///         else:
-///             alternateCODE = "None"
-///     else:
-///         alternateCODE = "None"
-///
-///     unconfirmed = 0
-///     for fileNAME in filesInDownloads:
-///         if downloadNAME in fileNAME 
-///             or "Unconfirmed" in fileNAME 
-///             or str(alternateGIT) in fileNAME 
-///             or str(alternateCODE) in fileNAME:
-/// 
-///             if ".part" in fileNAME:
-///                 return False
-///             elif ".partial" in fileNAME:
-///                 return False
-///             elif ".download" in fileNAME:
-///                 return False
-///             elif ".~" in fileNAME:
-///                 unconfirmed += 1
-///                 continue
-///             elif ".crdownload" in fileNAME:
-///                 unconfirmed += 1
-///                 continue
-///             else:
-///                 filePATH = downloadsPATH + fileNAME
-///                 metaDATA = os.stat(filePATH)
-///                 if metaDATA.st_size is not 0:
-///                     return True
-///                 else:
-///                     return False
-///        
-///         else:
-///             found = "None"
-///        
-///         if found is "None":
-///             continue
-///         else:
-///             break
-///
-///     if unconfirmed in 0:
-///         return outBOX
-///     else:
-///         return False
-/// ```
-/// 
-//#endregion
 fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<String>) -> String {
     let outBOX: String = "None".to_string();
 
-    let downloadsPATH: String = {
-        if cfg!(windows){
-            let path = dirs::home_dir().unwrap();
-            let mut downloadsPATH = path.to_str()
-                                        .unwrap()
-                                        .to_owned();
-            downloadsPATH += "\\Downloads\\";
-            downloadsPATH
-        }else if cfg!(unix){
-            let path = dirs::home_dir().unwrap();
-            let mut downloadsPATH = path.to_str()
-                                        .unwrap()
-                                        .to_owned();
-            downloadsPATH += "/Downloads/";
-            downloadsPATH
-        } else {
-            "we currently only support Windows 10, Ubuntu and Mac OS".to_string()
-        }
-    }; 
+    let downloadsPATH = dirs::download_dir().expect("failed to unwrap path");
     
     let filesInDownloads: ReadDir = {
         if cfg!(test) {
@@ -460,7 +233,7 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
             //one_False_opera and all_True
             fs::read_dir(&testPATH).expect("the read_dir that sets filesInDownloads broke")
         } else {
-            fs::read_dir(&downloadsPATH).expect("the read_dir that sets filesInDownloads broke")
+            fs::read_dir(&downloadsPATH.as_path()).expect("the read_dir that sets filesInDownloads broke")
         }
     };
 
@@ -495,8 +268,6 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
     };
 
     let mut unconfirmed: i16 = 0;
-    //how many unwraps can one rapper stack if
-    //one rapper could stack unwraps delicately
     'search: for fileNAME in filesInDownloads {
         let fileNAME: String = fileNAME.expect("the pre string result which sets fileNAME has broken")
                                         .file_name()
@@ -504,8 +275,6 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
                                         .expect("the post string result which sets fileNAME has broken")
                                         .to_owned();
                                     
-        //to ignore previous crdownloads, flag the first run, if any are found, keep its number
-        //then add a branch inside unconfirmed branch that ignores that number and only returns true from a new number
         for previousDL in unconfirmedLIST.clone() {
             if fileNAME.contains(&previousDL){
                 continue 'search
@@ -540,7 +309,7 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
                             let filePATH: String = format!("{}{}", &testPATH, &fileNAME);
                             fs::metadata(filePATH).expect("the filesize metadata failed to set during test run")
                         } else {
-                            let filePATH: String = format!("{}{}", &downloadsPATH, &fileNAME);
+                            let filePATH: String = format!("{}{}", &downloadsPATH.to_str().unwrap(), &fileNAME);
                             fs::metadata(filePATH).expect("the filesize metadata failed to set during build run")
                         }
                     };
@@ -571,6 +340,7 @@ fn download_complete(downloadNAME: &str, testPATH: &str, unconfirmedLIST: &Vec<S
     }
 }
 
+/*
 fn focus_terminal() {
     if cfg!(target_os = "linux"){
         Command::new("xdotool").arg("search").arg("--name").arg("~\\/Downloads").arg("windowraise").spawn().expect("unable to raise terminal");
@@ -587,7 +357,7 @@ fn focus_terminal() {
         Command::new("open").arg("-a").arg("Terminal").output().expect("unable to raise terminal");
     }
 }
-
+*/
 
 fn extract_studio() {
     println!("extracting android studio !>");
@@ -1152,7 +922,7 @@ macro_rules! cfg_if {
 //START MODIFIED APACHE LICENCE DEFINED AT TOP OF PAGE
 
 fn main() {
-    install_window_manager();
+    //install_window_manager();
     let unconfirmedLIST = gather_unconfirmed();
     let mut downloadMAP: IndexMap<String, String> = [
         ("StarUML".to_string(),  "None".to_string()),
@@ -1223,14 +993,14 @@ fn main() {
                             if downloadNAME == "android" || (cfg!(target_os = "macos") && downloadNAME == "git") {
                                 let sleepTIME = time::Duration::from_secs(5);
                                 thread::sleep(sleepTIME);
-                                focus_terminal();
+                                //focus_terminal();
                             }
 
                         }
 
                         let elapsedTIME = time::Instant::now() - start;
                         if elapsedTIME > promptTIME {
-                            focus_terminal();
+                            //focus_terminal();
                         }
                     }
                     
