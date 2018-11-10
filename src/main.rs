@@ -15,14 +15,7 @@
 //could be
     /*at the top-level directory of this distribution*/
 
-
-//using snake_case for boxes as well as functions
-//contradicts our attempted python and dart practice
-#![allow(non_snake_case)]
-//this fails on UpperHALF case,
-//otherwise it is a good warning
-#![allow(non_camel_case_types)]
-
+#![allow(bad_style)]
 
 ///TODO
 /// cargo install cargo-deb
@@ -69,9 +62,6 @@
 /// After implementing the struct, add logic to update version string in struct upon startup
 /// 
 
-//so far ~1127 lines of function code
-// ~139 lines in main
-//and ~923 lines of test code
 extern crate webbrowser;
 extern crate indexmap;
 use indexmap::IndexMap;
@@ -79,14 +69,12 @@ extern crate zip;
 extern crate dirs;
 extern crate rand;
 
-use rand::{thread_rng, Rng};
 use std::fs;
 use std::io;
 use std::env;
 use std::fs::ReadDir;
 use std::{thread, time};
 use std::process::Command;
-use std::fs::OpenOptions;
 use std::io::prelude::*;
 
 #[cfg(windows)]
@@ -864,17 +852,6 @@ fn android_install_complete() -> bool {
     }
 }
 
-fn setup_xcode() -> String {
-    //ask user if they have apple ID
-    //prompt user to open mac store or open from here
-    //spin check xcode or other determining location to
-    //see if its done and remind like android if not done
-
-    //MUST HAVE LATEST MACOS FOR XCODE
-    let errorBOX = String::from("");
-    errorBOX
-}
-
 
 enum DownloadStatus {
     NotStarted, // None
@@ -893,33 +870,6 @@ struct DownloadItem {
     macPATH: String,
     linPATH: String
 }
-
-// Copyright 2012-2017 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
-// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
-
-macro_rules! cfg_if {
-    ($(
-        if #[cfg($($meta:meta),*)] { $($it:item)* }
-    ) else * else {
-        $($it2:item)*
-    }) => {
-        __cfg_if_items! {
-            () ;
-            $( ( ($($meta),*) ($($it)*) ), )*
-            ( () ($($it2)*) ),
-        }
-    }
-}
-
-//ENDLICENCE
-//START MODIFIED APACHE LICENCE DEFINED AT TOP OF PAGE
 
 fn main() {
     //install_window_manager();
@@ -942,8 +892,7 @@ fn main() {
         }
 
         downloadMAP.insert(downloadNAME.to_string(), answerBOX);
-    }
-    
+    }    
 
     if cfg!(target_os = "windows") {
         println!("This is where we go over a few things first\nif you are using Edge browser,\n you must save each download as it comes up\notherwise the downloads should begin automatically\nplease check back with this terminal periodically \nto see if there are instructions that precede the next step\n\nfirst you need to close starUML as soon as it opens, ..>\nor we will wait for it to close ..>\n\nsecond, please close the VSCode window if it opens..>");
@@ -1131,6 +1080,8 @@ mod tests {
 
     #[test]
     fn unconfirmed_download(){
+        use rand::{thread_rng, Rng};
+
         let downloadPATH = dirs::download_dir().expect("failed to unwrap path");
         env::set_current_dir(&downloadPATH.as_path()).expect("failed to set current dir to downloads dir");
         
