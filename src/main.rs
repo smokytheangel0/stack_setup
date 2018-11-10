@@ -793,7 +793,7 @@ fn set_path() {
     }
 }
 
-fn git_install_complete() -> String {
+fn git_install_complete() -> bool {
     #[cfg(windows)]
     {
         //this works in win
@@ -801,8 +801,8 @@ fn git_install_complete() -> String {
         let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
         let environment = hklm.open_subkey("SOFTWARE\\GitForWindows");
         match environment {
-            Result::Ok(val) => return "True".to_string(),
-            Result::Err(err) => return "False".to_string()
+            Result::Ok(val) => return true,
+            Result::Err(err) => return false
         }
     }
 
@@ -818,16 +818,16 @@ fn git_install_complete() -> String {
                                             .expect("the post string result which sets folderNAME has broken")
                                             .to_owned();
                 if folderNAME == "git-" {
-                    return "True".to_owned()
+                    return true
                 } else {
                     continue
                 }
         }
-        return "False".to_owned()
+        return false
     }
 }
 
-fn android_install_complete() -> String {
+fn android_install_complete() -> bool {
     let androidFOLDER = {
         if cfg!(target_os = "windows"){
             let path = dirs::home_dir().unwrap();
@@ -859,8 +859,8 @@ fn android_install_complete() -> String {
 
     let folderRESULT = fs::read_dir(&androidFOLDER);
     match folderRESULT {
-        Ok(_val) => return "True".to_string(),
-        Err(_err) => return "False".to_string()
+        Ok(_val) => return true,
+        Err(_err) => return false
     }
 }
 
@@ -1050,7 +1050,7 @@ fn main() {
             install_downloads(&downloadNAME);
         }
 
-        if &android_install_complete() == "False" {
+        if !android_install_complete() {
             println!("starting the android SDK installer !>");
             if cfg!(target_os = "windows"){
                 Command::new("powershell.exe").arg("Start-Process").arg("-FilePath")
@@ -1075,7 +1075,7 @@ fn main() {
             }
         }
 
-        while git_install_complete() == "False"{
+        while !git_install_complete() {
             let sleepTIME = time::Duration::from_secs(20);
             thread::sleep(sleepTIME);
         }
